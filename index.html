@@ -1,0 +1,100 @@
+<html>
+<head>
+<title>Convert a picture to Lego</title>
+
+<script src="palette-lego2016.js"></script>
+<script src="palette-lego2016grays.js"></script>
+<script src="palette-peeron.js"></script>
+<script src="palette-mono.js"></script>
+<script src="palette-3bitcolor.js"></script>
+<script src="palette-2bitgray.js"></script>
+<script src="palette-4bitcolormac.js"></script>
+<script src="legodither.js"></script>
+<link rel="stylesheet" type="text/css" href="legodither.css">
+
+</head>
+<body>
+
+    <form>
+        <input type="file" accept="image/*" id="inputImg" onchange="loadFile(event, 'original')">
+        <!-- Adapted from https://stackoverflow.com/questions/4459379/preview-an-image-before-it-is-uploaded -->
+        <script>
+            var maxWidth = 500;
+            var loadFile = function(event, targetID) {
+                var original = document.getElementById(targetID);
+                original.src = URL.createObjectURL(event.target.files[0]);
+                original.onload = function() {
+                    URL.revokeObjectURL(original.src); // free memory
+
+                    let canvas = document.getElementById("originalCanvas");
+
+                    let width = (this.width < maxWidth ? this.width : maxWidth);
+                    let height = this.height * (width / this.width);
+
+                    canvas.setAttribute("width", width);
+                    canvas.setAttribute("height", height);
+                    context = canvas.getContext('2d');
+                    context.drawImage(original, 0, 0, this.width, this.height, 0, 0, width, height);
+
+                    drawLego();
+                }
+            };
+        </script>
+        <label for="scaleInput">Scale factor:</label>
+        <input type="number" id="scaleInput" min="1" max="64" value="2" onchange="drawLego()">
+            
+        <label for="paletteSelect">Palette:</label>
+        <select id="paletteSelect" onchange="drawLego()">
+            <option value="lego2016">LEGO 2016 palette</option>
+            <option value="lego2016grays">LEGO 2016 palette (grays only)</option>
+            <option value="peeron">LEGO palette (Peeron)</option>
+            <option value="mono">Black + White</option>
+            <option value="3bitcolor">8 colors</option>
+            <option value="2bitgray">4 grays</option>
+            <option value="4bitcolormac">16 colors (Mac Palette)</option>
+        </select>
+
+        <label for="sharpInput">Sharpen factor:</label>
+        <input type="number" id="sharpenInput" min="0" max="32" value="2" onchange="drawLego()">
+    </form>
+    <div class="container">
+        <div class="imgholder">
+            <p>Original image</p>
+            <p>Size in bricks: <span id="origWidthBricks"></span> wide x 
+                <span id="origHeightBricks"></span> high (<span id="origTotalBricks"></span> total)</p>
+            <p>Size in mm: <span id="origWidthMM"></span> x 
+                <span id="origHeightMM"></span></p>
+            <p>Size in inches: <span id="origWidthInch"></span>" wide x 
+                <span id="origHeightInch"></span>" high</p>
+    
+            <img id="original" src="#" style="display: none">
+            <canvas id="originalCanvas"></canvas>
+        </div>
+
+        <!-- -->
+        <div class="imgholder scratch">
+            <p>Transformed image</p>    
+            <canvas id="transformedCanvas"></canvas>
+        </div>
+        <!-- -->
+
+        <div class="imgholder">
+            <p>Transformed image w/ LEGO palette</p>
+            <p>Size in bricks: <span id="legoWidthBricks"></span> wide x 
+                <span id="legoHeightBricks"></span> high (<span id="legoTotalBricks"></span> total)</p>
+            <p>Size in mm: <span id="legoWidthMM"></span>mm wide x 
+                <span id="legoHeightMM"></span>mm high</p>
+            <p>Size in inches: <span id="legoWidthInch"></span>" wide x 
+                <span id="legoHeightInch"></span>" high</p>
+    
+            <canvas id="legoCanvas"></canvas>
+        </div>
+
+        <div class="scratch">
+            <p>Scratch</p>
+            <canvas id="scratchCanvas"></canvas>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+.container {
+    display: flex;
+}
+
+.imgcontainer {
+    flex: 33%;
+}
+
+.scratch {
+    display: none;
+}
