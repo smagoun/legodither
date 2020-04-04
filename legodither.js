@@ -72,6 +72,12 @@ function drawLego() {
     let scaleFactor = parseInt(document.getElementById("scaleInput").value);
     //let sharpenFactor = Number(document.getElementById("sharpenInput").value);
 
+    let inputLevelsShadow = parseInt(document.getElementById("inputLevelsShadowInput").value);
+    let inputLevelsMidpoint = parseInt(document.getElementById("inputLevelsMidpointInput").value);
+    let inputLevelsHighlight = parseInt(document.getElementById("inputLevelsHighlightInput").value);
+    let outputLevelsShadow = parseInt(document.getElementById("outputLevelsShadowInput").value);
+    let outputLevelsHighlight = parseInt(document.getElementById("outputLevelsHighlightInput").value);
+
     let p = document.getElementById("paletteSelect");
     let paletteName = p.options[p.selectedIndex].value;
     let palette = getPalette(paletteName);
@@ -80,6 +86,11 @@ function drawLego() {
 
     derez(transformedCanvas, scratchCanvas, scaleFactor);
     //renderScaled(scratchCanvas, transformedCanvas, scaleFactor);
+
+    // TODO: Should probably split the level adjustment into 2. Adjust input levels
+    // before applying destructive transformations (convolutions, scaling), and
+    // apply output levels on rendering
+    adjustLevels(scratchCanvas, inputLevelsShadow, inputLevelsMidpoint, inputLevelsHighlight, outputLevelsShadow, outputLevelsHighlight);
 
     if (palette != null) {
         decolor(scratchCanvas, palette);
@@ -447,6 +458,84 @@ function convolve(srcCanvas, destCanvas) {
     }
     destContext.putImageData(destImgData, 0, 0);
 }
+
+
+/**
+ * Adjust shadow/highlight levels for a pixel
+ * 
+ * TODO: Add midpoint adjustment
+ * TODO: Do this in HSL colorspace instead of RGB, to avoid changing colors
+ * TODO: Split this so that output levels are handled separately, later in the pipeline
+ * 
+ * ALgorithms from https://stackoverflow.com/questions/39510072/algorithm-for-adjustment-of-image-levels
+ * 
+ * @param {*} pixel 
+ * @param {*} inShadow 
+ * @param {*} inHighlight 
+ * @param {*} outShadow 
+ * @param {*} outHighlight 
+ */
+function adjustLevel(pixel, inShadow = 0, inMidpoint = 128, inHighlight = 255, outShadow = 0, outHighlight = 255) {
+    // Calculate gamma
+    let gamma = 1.0;
+    let midNormal = inMidpoint / 255;
+    if (inMidpoint < 128) {
+        midNormal = midNormal * 2;
+        gamma = 1 + (9 * ( 1 - midNormal));
+        gamma = Math.min(gamma, 9.99);
+    } else if (inMidpoint > 128) {
+        midNormal = (midNormal * 2 ) - 1;
+        gamma = 1 - midNormal;
+        gamma = Math.max(gamma, 0.01);
+    }
+    let gammaCorr = 1 / gamma;
+    
+    // Input levels
+    let newR = clamp(255 * ((pixel[0] - inShadow) / (inHighlight - inShadow)));
+    let newG = clamp(255 * ((pixel[1] - inShadow) / (inHighlight - inShadow)));
+    let newB = clamp(255 * ((pixel[2] - inShadow) / (inHighlight - inShadow)));
+    // Input midtone
+    newR = clamp(255 * ((newR / 255) ** gammaCorr));
+    newG = clamp(255 * ((newG / 255) ** gammaCorr));
+    newB = clamp(255 * ((newB / 255) ** gammaCorr));
+
+    // Output levels
+    newR = (newR / 255) * (outHighlight - outShadow) + outShadow;
+    newG = (newG / 255) * (outHighlight - outShadow) + outShadow;
+    newB = (newB / 255) * (outHighlight - outShadow) + outShadow;
+
+    return [newR, newG, newB, pixel[3]];    // Ignore alpha for now
+}
+
+/**
+ * Adjust shadow/highlight levels for the image
+ * 
+ * TODO: Do this in HSL colorspace instead of RGB, to avoid changing colors
+ * TODO: Split this so that output levels are handled separately, later in the pipeline
+ * 
+ * @param {*} canvas 
+ * @param {*} inShadow 
+ * @param {*} inMidpoint 
+ * @param {*} inHighlight 
+ * @param {*} outShadow 
+ * @param {*} outHighlight 
+ */
+function adjustLevels(canvas, inShadow, inMidpoint, inHighlight, outShadow, outHighlight) {
+    let context = canvas.getContext("2d");
+    let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+    let data = imgData.data;
+
+    let lineStride = imgData.width * pixelStride;
+    for (let j = 0; j < imgData.height; j++) {
+        for (let i = 0; i < imgData.width; i++) {
+            let pixel = getPixel(data, lineStride, pixelStride, i, j);
+            let newPixel = adjustLevel(pixel, inShadow, inMidpoint, inHighlight, outShadow, outHighlight);
+           setPixel(data, lineStride, pixelStride, i, j, newPixel);
+        }
+    }
+    context.putImageData(imgData, 0, 0);
+}
+
 
 
 /**
