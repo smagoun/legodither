@@ -19,13 +19,17 @@ const brickWidth = 8;
 const pixelStride = 4;
 
 /**
- * Return the palette associated with the given palette name
+ * Return the palette associated with the given palette name. Returns
+ * 'null' for the special-case native palette.
  * 
  * @param {*} paletteName 
  */
 function getPalette(paletteName) {
     let palette;
     switch (paletteName) {
+        case "native":
+            palette = null;
+            break;
         case "lego2016":
             palette = PaletteLEGO2016.getPalette();
             break;
@@ -77,7 +81,9 @@ function drawLego() {
     derez(transformedCanvas, scratchCanvas, scaleFactor);
     //renderScaled(scratchCanvas, transformedCanvas, scaleFactor);
 
-    decolor(scratchCanvas, palette);
+    if (palette != null) {
+        decolor(scratchCanvas, palette);
+    }
     renderScaled(scratchCanvas, outputCanvas, scaleFactor);
 
     renderStats(srcCanvas.width, srcCanvas.height, 'orig');
