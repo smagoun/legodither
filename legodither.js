@@ -463,7 +463,6 @@ function convolve(srcCanvas, destCanvas) {
 /**
  * Adjust shadow/highlight levels for a pixel
  * 
- * TODO: Add midpoint adjustment
  * TODO: Do this in HSL colorspace instead of RGB, to avoid changing colors
  * TODO: Split this so that output levels are handled separately, later in the pipeline
  * 
