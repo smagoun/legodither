@@ -36,6 +36,7 @@
                     context = canvas.getContext('2d');
                     context.drawImage(original, 0, 0, this.width, this.height, 0, 0, width, height);
 
+                    updateKernel();
                     drawLego();
                 }
             };
@@ -60,21 +61,26 @@
 -->
         <div id="convolutionKernelContainer">
             <label for="convolution0">Convolution kernel:</label>
+            <select id="convolutionSelect" onchange="updateKernel(); drawLego();">
+                <option value="identity" selected="true">Identity kernel</option>
+                <option value="lowpass">Low-pass</option>
+                <option value="highpass">High-pass</option>
+            </select>
             <table id="convolutionKernelTable">
                 <tr>
-                    <td><input type="text" id="convolution0" size="8"  value="1/9" onchange="drawLego()"></td>
-                    <td><input type="text" id="convolution1" size="8"  value="1/9" onchange="drawLego()"></td>
-                    <td><input type="text" id="convolution2" size="8"  value="1/9" onchange="drawLego()"></td>
+                    <td><input type="text" id="convolution0" size="8" onchange="drawLego()"></td>
+                    <td><input type="text" id="convolution1" size="8" onchange="drawLego()"></td>
+                    <td><input type="text" id="convolution2" size="8" onchange="drawLego()"></td>
                 </tr>
                 <tr>
-                    <td><input type="text" id="convolution3" size="8"  value="1/9" onchange="drawLego()"></td>
-                    <td><input type="text" id="convolution4" size="8"  value="1/9" onchange="drawLego()"></td>
-                    <td><input type="text" id="convolution5" size="8"  value="1/9" onchange="drawLego()"></td>
+                    <td><input type="text" id="convolution3" size="8" onchange="drawLego()"></td>
+                    <td><input type="text" id="convolution4" size="8" onchange="drawLego()"></td>
+                    <td><input type="text" id="convolution5" size="8" onchange="drawLego()"></td>
                 </tr>
                 <tr>
-                    <td><input type="text" id="convolution6" size="8"  value="1/9" onchange="drawLego()"></td>
-                    <td><input type="text" id="convolution7" size="8"  value="1/9" onchange="drawLego()"></td>
-                    <td><input type="text" id="convolution8" size="8"  value="1/9" onchange="drawLego()"></td>
+                    <td><input type="text" id="convolution6" size="8" onchange="drawLego()"></td>
+                    <td><input type="text" id="convolution7" size="8" onchange="drawLego()"></td>
+                    <td><input type="text" id="convolution8" size="8" onchange="drawLego()"></td>
                 </tr>
             </table>
         </div>

@@ -343,6 +343,38 @@ function setPixel(pixelData, lineStride, pixelStride, x, y, pixel) {
     pixelData[(y * lineStride) + (x * pixelStride) + 3] = clamp(pixel[3]);
 }
 
+
+function updateKernel() {
+    let p = document.getElementById("convolutionSelect");
+    let kernelName = p.options[p.selectedIndex].value;
+    let kernel = []
+    switch (kernelName) {
+        case "identity":
+            kernel = [0, 0, 0, 
+                      0, 1, 0,
+                      0, 0, 0];
+            break;
+        case "lowpass":
+            kernel = ["1/9", "1/9", "1/9", 
+                      "1/9", "1/9", "1/9",
+                      "1/9", "1/9", "1/9"];
+            break;
+        case "highpass":
+            kernel = ["-1/9", "-1/9", "-1/9", 
+                      "-1/9", "8/9+1", "-1/9",
+                      "-1/9", "-1/9", "-1/9"];
+            break;
+        default:
+            alert("Unknown convolution kernel " + kernelName);
+            break;
+    }
+    for (y = 0, i = 0; y < 3; y++) {
+        for (x = 0; x < 3; x++, i++) {
+            document.getElementById("convolution" + i).value = kernel[i];
+        }
+    }
+}
+
 /**
  * Creates the kernel for the convolution filter input from the form.
  * 
@@ -383,9 +415,15 @@ function convolve(srcCanvas, destCanvas) {
     let destData = destImgData.data;
 
     let lineStride = srcCanvas.width * pixelStride;
-    for (y = 1; y < srcCanvas.height - 1; y++) {
-        for (x = 1; x < srcCanvas.width - 1; x++) {
+    for (y = 0; y < srcCanvas.height; y++) {
+        for (x = 0; x < srcCanvas.width; x++) {
             origPixel = getPixel(srcData, lineStride, pixelStride, x, y);
+            // Don't apply convolutions to edge cases where the filter needs to look
+            // outside image boundaries
+            if (x == 0 || y == 0 || x == (srcCanvas.width-1) || y == (srcCanvas.height-1)) {
+                setPixel(destData, lineStride, pixelStride, x, y, origPixel);
+                continue;
+            }
             let r=0, g=0, b=0, a=0;
             for (ky = -1; ky < 2; ky++) {
                 for (kx = -1; kx < 2; kx++) {
