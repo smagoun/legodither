@@ -66,13 +66,13 @@ function drawLego() {
     let outputCanvas = document.getElementById("legoCanvas");
 
     let scaleFactor = parseInt(document.getElementById("scaleInput").value);
-    let sharpenFactor = parseInt(document.getElementById("sharpenInput").value);
+    //let sharpenFactor = Number(document.getElementById("sharpenInput").value);
 
     let p = document.getElementById("paletteSelect");
     let paletteName = p.options[p.selectedIndex].value;
     let palette = getPalette(paletteName);
 
-    sharpen(srcCanvas, transformedCanvas, sharpenFactor);
+    convolve(srcCanvas, transformedCanvas);
 
     derez(transformedCanvas, scratchCanvas, scaleFactor);
     //renderScaled(scratchCanvas, transformedCanvas, scaleFactor);
@@ -303,8 +303,25 @@ function getPixel(pixelData, lineStride, pixelStride, x, y) {
 }
 
 /**
+ * Utility function to clamp a value to an integer in the given range
+ * 
+ * @param {*} value 
+ * @param {*} min 
+ * @param {*} max 
+ */
+function clamp(value, min = 0, max = 255) {
+    if (value < min) {
+        return min;
+    } else if (value > max) { 
+        return max;
+    } else { 
+        return value;
+    }
+}
+
+/**
  * Sets the value of the pixel at the given location in the array of
- * RGBA pixel data
+ * RGBA pixel data. Clamps values to the range 0-255.
  * 
  * @param {*} pixelData 
  * @param {*} lineStride Number of array elements in a line
@@ -314,19 +331,41 @@ function getPixel(pixelData, lineStride, pixelStride, x, y) {
  * @param {*} pixel 4-element array of RGBA color data to write
  */
 function setPixel(pixelData, lineStride, pixelStride, x, y, pixel) {
-    pixelData[(y * lineStride) + (x * pixelStride)    ] = pixel[0];
-    pixelData[(y * lineStride) + (x * pixelStride) + 1] = pixel[1];
-    pixelData[(y * lineStride) + (x * pixelStride) + 2] = pixel[2];
-    pixelData[(y * lineStride) + (x * pixelStride) + 3] = pixel[3];
+    pixelData[(y * lineStride) + (x * pixelStride)    ] = clamp(pixel[0]);
+    pixelData[(y * lineStride) + (x * pixelStride) + 1] = clamp(pixel[1]);
+    pixelData[(y * lineStride) + (x * pixelStride) + 2] = clamp(pixel[2]);
+    pixelData[(y * lineStride) + (x * pixelStride) + 3] = clamp(pixel[3]);
 }
 
+/**
+ * Creates the kernel for the convolution filter input from the form.
+ * 
+ * Assumes (and returns) a 3x3 kernel.
+ */
+function getConvolutionKernel() {
+    let kernel = [];
+    let i = 0;
+    for (y = 0; y < 3; y++) {
+        let row = [];
+        for (x = 0; x < 3; x++, i++) {
+            // TODO: Security issue! Don't use eval()...
+            row.push(eval(document.getElementById("convolution" + i).value));
+        }
+        kernel.push(row);
+    }
+    return kernel;
+}
 
-function sharpen(srcCanvas, destCanvas, factor) {
-    let kernel = [
-        [1/9, 1/9, 1/9],
-        [1/9, 1/9, 1/9],
-        [1/9, 1/9, 1/9],
-    ];
+/**
+ * Apply a convolution kernel to the image, placing the output in the destination
+ * canvas.
+ * 
+ * @param {*} srcCanvas 
+ * @param {*} destCanvas 
+ */
+function convolve(srcCanvas, destCanvas) {
+    let kernel = getConvolutionKernel();
+
     let srcContext = srcCanvas.getContext("2d");
     let srcImgData = srcContext.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
     let srcData = srcImgData.data;
@@ -344,7 +383,6 @@ function sharpen(srcCanvas, destCanvas, factor) {
             let r=0, g=0, b=0, a=0;
             for (ky = -1; ky < 2; ky++) {
                 for (kx = -1; kx < 2; kx++) {
-                    //
                     pixel = getPixel(srcData, lineStride, pixelStride, (x+kx), (y+ky));
                     r += kernel[ky + 1][kx + 1] * pixel[0];
                     g += kernel[ky + 1][kx + 1] * pixel[1];
@@ -352,12 +390,14 @@ function sharpen(srcCanvas, destCanvas, factor) {
                     a += pixel[3];  // Ignore alpha for now
                 }
             }
+            newPixel = [r, g, b, a];
+            /* For unsharp mask...
             newPixel = [
                 origPixel[0] + ((origPixel[0] - r) * factor),
                 origPixel[1] + ((origPixel[1] - g) * factor),
                 origPixel[2] + ((origPixel[2] - b) * factor),
                 origPixel[3],   // Ignore alpha for now
-            ];
+            ];*/
             setPixel(destData, lineStride, pixelStride, x, y, newPixel);
         }
     }
