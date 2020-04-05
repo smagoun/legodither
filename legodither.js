@@ -18,6 +18,18 @@ const brickWidth = 8;
  */
 const pixelStride = 4;
 
+
+/**
+ * Reset the level adjustment sliders to their initial values
+ */
+function resetLevels() {
+    document.getElementById("inputLevelsShadowInput").value="0";
+    document.getElementById("inputLevelsMidpointInput").value="0.5";
+    document.getElementById("inputLevelsHighlightInput").value="1.0";
+    document.getElementById("outputLevelsShadowInput").value="0";
+    document.getElementById("outputLevelsHighlightInput").value="1.0";
+}
+
 /**
  * Return the palette associated with the given palette name. Returns
  * 'null' for the special-case native palette.
