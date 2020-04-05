@@ -60,6 +60,9 @@ function getPalette(paletteName) {
         case "2bitgray":
             palette = Palette2BitGray.getPalette();
             break;
+        case "4bitgray":
+            palette = Palette4BitGray.getPalette();
+            break;
         case "4bitcolormac":
             palette = Palette4BitColorMac.getPalette();
             break;
