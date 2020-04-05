@@ -72,11 +72,11 @@ function drawLego() {
     let scaleFactor = parseInt(document.getElementById("scaleInput").value);
     //let sharpenFactor = Number(document.getElementById("sharpenInput").value);
 
-    let inputLevelsShadow = parseInt(document.getElementById("inputLevelsShadowInput").value);
-    let inputLevelsMidpoint = parseInt(document.getElementById("inputLevelsMidpointInput").value);
-    let inputLevelsHighlight = parseInt(document.getElementById("inputLevelsHighlightInput").value);
-    let outputLevelsShadow = parseInt(document.getElementById("outputLevelsShadowInput").value);
-    let outputLevelsHighlight = parseInt(document.getElementById("outputLevelsHighlightInput").value);
+    let inputLevelsShadow = parseFloat(document.getElementById("inputLevelsShadowInput").value);
+    let inputLevelsMidpoint = parseFloat(document.getElementById("inputLevelsMidpointInput").value);
+    let inputLevelsHighlight = parseFloat(document.getElementById("inputLevelsHighlightInput").value);
+    let outputLevelsShadow = parseFloat(document.getElementById("outputLevelsShadowInput").value);
+    let outputLevelsHighlight = parseFloat(document.getElementById("outputLevelsHighlightInput").value);
 
     let p = document.getElementById("paletteSelect");
     let paletteName = p.options[p.selectedIndex].value;
@@ -463,53 +463,130 @@ function convolve(srcCanvas, destCanvas) {
 /**
  * Adjust shadow/highlight levels for a pixel
  * 
- * TODO: Do this in HSL colorspace instead of RGB, to avoid changing colors
  * TODO: Split this so that output levels are handled separately, later in the pipeline
  * 
  * ALgorithms from https://stackoverflow.com/questions/39510072/algorithm-for-adjustment-of-image-levels
  * 
- * @param {*} pixel 
+ * @param {*} pixel RGB pixel
  * @param {*} inShadow 
  * @param {*} inHighlight 
  * @param {*} outShadow 
  * @param {*} outHighlight 
  */
-function adjustLevel(pixel, inShadow = 0, inMidpoint = 128, inHighlight = 255, outShadow = 0, outHighlight = 255) {
+function adjustLevel(pixel, inShadow = 0.0, inMidpoint = 0.5, inHighlight = 1.0, outShadow = 0, outHighlight = 1.0) {
+    let hsl = rgb2hsl(pixel);
+    let lightness = hsl[2];
+
     // Calculate gamma
     let gamma = 1.0;
-    let midNormal = inMidpoint / 255;
-    if (inMidpoint < 128) {
+    let midNormal = inMidpoint;
+    if (inMidpoint < 0.5) {
         midNormal = midNormal * 2;
         gamma = 1 + (9 * ( 1 - midNormal));
         gamma = Math.min(gamma, 9.99);
-    } else if (inMidpoint > 128) {
+    } else if (inMidpoint > 0.5) {
         midNormal = (midNormal * 2 ) - 1;
         gamma = 1 - midNormal;
         gamma = Math.max(gamma, 0.01);
     }
     let gammaCorr = 1 / gamma;
-    
+
     // Input levels
-    let newR = clamp(255 * ((pixel[0] - inShadow) / (inHighlight - inShadow)));
-    let newG = clamp(255 * ((pixel[1] - inShadow) / (inHighlight - inShadow)));
-    let newB = clamp(255 * ((pixel[2] - inShadow) / (inHighlight - inShadow)));
-    // Input midtone
-    newR = clamp(255 * ((newR / 255) ** gammaCorr));
-    newG = clamp(255 * ((newG / 255) ** gammaCorr));
-    newB = clamp(255 * ((newB / 255) ** gammaCorr));
+    let newLight = ((lightness - inShadow) / (inHighlight - inShadow));
+    // Midpoint / gamma adjustment
+    newLight = newLight ** gammaCorr;
 
     // Output levels
-    newR = (newR / 255) * (outHighlight - outShadow) + outShadow;
-    newG = (newG / 255) * (outHighlight - outShadow) + outShadow;
-    newB = (newB / 255) * (outHighlight - outShadow) + outShadow;
-
-    return [newR, newG, newB, pixel[3]];    // Ignore alpha for now
+    newLight = newLight * (outHighlight - outShadow) + outShadow;
+    
+    let rgb = hsl2rgb([hsl[0], hsl[1], newLight]);
+    return [clamp(rgb[0]), clamp(rgb[1]), clamp(rgb[2]), pixel[3]];  // Ignore alpha for now
 }
+
+/**
+ * Returns hue (degrees in the range 0-360), saturation (range 0-1), and lightness 
+ * (range 0-1).
+ * 
+ * @param {*} pixel 
+ */
+function rgb2hsl(pixel) {
+    let r = pixel[0] / 255.0;
+    let g = pixel[1] / 255.0;
+    let b = pixel[2] / 255.0;
+
+    let xmax = Math.max(r, g, b);
+    let xmin = Math.min(r, g, b);
+
+    let lightness = (xmax + xmin) / 2;
+    let chroma = xmax - xmin;
+    let hue;
+    let sat;
+
+    if (chroma === 0) {
+        hue = 0;
+        sat = 0;
+    } else {
+        sat = chroma / (1 - Math.abs((2 * lightness) - 1));
+        switch (xmax) {
+            case r:
+                // The ternary at the end is to handle the case where hue is negative
+                hue = ((g - b) / chroma) + (g < b ? 6 : 0);
+                break;
+            case g:
+                hue = 2 + ((b - r ) / chroma);
+                break;
+            case b:
+                hue = 4 + ((r - g) / chroma);
+                break;
+            default:
+                alert("max isn't one of RGB!");
+        }
+        hue = hue * 60; // Convert to degrees
+    }
+    return [hue, sat, lightness];
+}
+
+/**
+ * Returns an RGB pixel from the given hue [0-360 degrees], saturation [0-1], and lightness [0-1].
+ * 
+ * @param {*} hsl 
+ */
+function hsl2rgb(hsl) {
+    let hue = hsl[0];
+    let sat = hsl[1];
+    let lightness = hsl[2];
+
+    let c = (1 - Math.abs((2 * lightness) - 1)) * sat;
+    let hh = hue / 60;
+    let x = c * (1 - Math.abs((hh % 2) - 1));
+    let rgb;
+    hc = Math.ceil(hh);
+    switch (hc) {
+        case 0:
+        case 1: rgb = [c, x, 0];   break;
+        case 2: rgb = [x, c, 0];   break;
+        case 3: rgb = [0, c, x];   break;
+        case 4: rgb = [0, x, c];   break;
+        case 5: rgb = [x, 0, c];   break;
+        case 6: rgb = [c, 0, x];   break;
+        default:
+            console.log("hc isn't expected: " + hc + ": " + hsl[0], + ", " + hsl[1] + ", " + hsl[2]);
+            rgb = [0, 0, 0];
+    }
+    let m = lightness - (c / 2);
+    // Add lightness
+    rgb = [
+        clamp(Math.round((rgb[0] + m) * 255)), 
+        clamp(Math.round((rgb[1] + m) * 255)), 
+        clamp(Math.round((rgb[2] + m) * 255))
+    ];
+    return rgb;
+}
+
 
 /**
  * Adjust shadow/highlight levels for the image
  * 
- * TODO: Do this in HSL colorspace instead of RGB, to avoid changing colors
  * TODO: Split this so that output levels are handled separately, later in the pipeline
  * 
  * @param {*} canvas 
