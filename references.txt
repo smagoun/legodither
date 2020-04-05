@@ -25,6 +25,9 @@ https://pdfs.semanticscholar.org/af31/5c75ce2da4379a68fee422c488bbdd18de87.pdf
 Auto-levels:
 https://discuss.fogcreek.com/joelonsoftware1/35964.html
 
+Adjusting levels:
+https://stackoverflow.com/questions/39510072/algorithm-for-adjustment-of-image-levels
+
 Color balancing:
 https://web.stanford.edu/~sujason/ColorBalancing/simplestcb.html
 

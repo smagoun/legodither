@@ -78,7 +78,7 @@ function getPalette(paletteName) {
 function drawLego() {
     let srcCanvas = document.getElementById("originalCanvas");
     let scratchCanvas = document.getElementById("scratchCanvas");
-    //let transformedCanvas = document.getElementById("transformedCanvas");
+    let transformedCanvas = document.getElementById("transformedCanvas");
     let outputCanvas = document.getElementById("legoCanvas");
 
     let scaleFactor = parseInt(document.getElementById("scaleInput").value);
@@ -96,13 +96,13 @@ function drawLego() {
 
     convolve(srcCanvas, transformedCanvas);
 
-    derez(transformedCanvas, scratchCanvas, scaleFactor);
-    //renderScaled(scratchCanvas, transformedCanvas, scaleFactor);
-
     // TODO: Should probably split the level adjustment into 2. Adjust input levels
     // before applying destructive transformations (convolutions, scaling), and
     // apply output levels on rendering
-    adjustLevels(scratchCanvas, inputLevelsShadow, inputLevelsMidpoint, inputLevelsHighlight, outputLevelsShadow, outputLevelsHighlight);
+    adjustLevels(transformedCanvas, inputLevelsShadow, inputLevelsMidpoint, inputLevelsHighlight, outputLevelsShadow, outputLevelsHighlight);
+
+    derez(transformedCanvas, scratchCanvas, scaleFactor);
+    //renderScaled(scratchCanvas, transformedCanvas, scaleFactor);
 
     if (palette != null) {
         decolor(scratchCanvas, palette);
@@ -513,6 +513,43 @@ function adjustLevel(pixel, inShadow = 0.0, inMidpoint = 0.5, inHighlight = 1.0,
     
     let rgb = hsl2rgb([hsl[0], hsl[1], newLight]);
     return [clamp(rgb[0]), clamp(rgb[1]), clamp(rgb[2]), pixel[3]];  // Ignore alpha for now
+}
+
+function autoLevels() {
+    let canvas = document.getElementById("originalCanvas");
+    let context = canvas.getContext("2d");
+    let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+    let data = imgData.data;
+
+    let lineStride = imgData.width * pixelStride;
+    let minL = 1.0;
+    let maxL = 0.0;
+    let medianL = 0.5;
+    let lValues = [];
+    for (let j = 0; j < imgData.height; j++) {
+        for (let i = 0; i < imgData.width; i++) {
+            let pixel = getPixel(data, lineStride, pixelStride, i, j);
+            hsl = rgb2hsl(pixel);
+            lValues.push(hsl[2]);
+        }
+    }
+    lValues.sort();
+    minL = lValues[0];
+    maxL = lValues[lValues.length - 1];
+    let mid = Math.floor(lValues.length / 2); 
+    if (lValues.length % 2 === 0) {
+        medianL = (lValues[mid - 1] + lValues[mid]) / 2.0;
+    } else {
+        medianL = lValues[mid];
+    }
+    console.log("setting levels: min: " + minL + ", midpoint: " + medianL + ", max: " + maxL);
+
+    document.getElementById("inputLevelsShadowInput").value=minL;
+    // TODO: Leave this off for now, not clear we're setting this appropriately.
+    //document.getElementById("inputLevelsMidpointInput").value=1 - medianL;
+    document.getElementById("inputLevelsHighlightInput").value=maxL;
+    document.getElementById("outputLevelsShadowInput").value="0";
+    document.getElementById("outputLevelsHighlightInput").value="1.0";
 }
 
 /**
