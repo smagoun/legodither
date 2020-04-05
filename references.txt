@@ -1,0 +1,38 @@
+
+Linear Filtering [includes the 'Zebra' example]
+https://www.cs.princeton.edu/courses/archive/fall08/cos429/lecture_linear_filters_edge_detection.pdf
+
+Sharpening:
+http://fourier.eng.hmc.edu/e161/lectures/gradient/node1.html
+https://northstar-www.dartmouth.edu/doc/idl/html_6.2/Sharpening_an_Image.html
+
+Resampling filters:
+http://www.imagemagick.org/Usage/filter/#filter
+
+
+Pixelated Image Abstraction paper (original) [the one with the 'obama]' example]:
+https://gfx.cs.princeton.edu/pubs/Gerstner_2012_PIA/Gerstner_2012_PIA_small.pdf
+
+Pixelated Image Abstraction paper (updated):
+http://research.cs.rutgers.edu/~timgerst/files/gerstner13.pdf
+Corresponding code:
+https://github.com/fHachenberg/pix
+http://research.cs.rutgers.edu/~timgerst/
+
+Improved Posterized Color Images:
+https://pdfs.semanticscholar.org/af31/5c75ce2da4379a68fee422c488bbdd18de87.pdf
+
+Auto-levels:
+https://discuss.fogcreek.com/joelonsoftware1/35964.html
+
+Color balancing:
+https://web.stanford.edu/~sujason/ColorBalancing/simplestcb.html
+
+RGB to HSL:
+https://stackoverflow.com/questions/39118528/rgb-to-hsl-conversion
+
+Unsharp Mask:
+https://en.wikipedia.org/wiki/Unsharp_masking
+
+Decolorize algorithm - contrast-enhancing color to grayscale conversion:
+https://pdfs.semanticscholar.org/2aa8/c902ff93391ea743da823dc05d0e0311c3f9.pdf
