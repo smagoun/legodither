@@ -74,6 +74,30 @@ function getPalette(paletteName) {
 
 
 /**
+ * Return a resizing filter function.
+ * 
+ * @param {*} type 
+ */
+function getResizingFilter(type) {
+    let func = derez;
+    switch (type) {
+        case "box":
+            func = derez;
+            break;
+        case "nearestNeighbor":
+            func = derezNearestNeighbor;
+            break;
+        case "bilinear":
+            func = derezBilinear;
+            break;
+        default:
+            alert("Unknown resizing filter " + type);
+    }
+    return func;
+}
+
+
+/**
  * Read the source image and draw a lego-ized version of it into the lego canvas.
  * 
  * Uses the 'transformed' and 'scratch' canvases as intermediate scratch space.
@@ -104,7 +128,13 @@ function drawLego() {
     // apply output levels on rendering
     adjustLevels(transformedCanvas, inputLevelsShadow, inputLevelsMidpoint, inputLevelsHighlight, outputLevelsShadow, outputLevelsHighlight);
 
-    derez(transformedCanvas, scratchCanvas, scaleFactor);
+    // Downsample the image using the selected algorithm
+    // TODO: What is the ideal blur before downsizing? Box filter already blurs;
+    // we need the blur for nearest-neighbor (and others?)
+    let r = document.getElementById("resizeSelect");
+    let resizeFilterName = r.options[r.selectedIndex].value;
+    let resize = getResizingFilter(resizeFilterName);
+    resize(transformedCanvas, scratchCanvas, scaleFactor);
     //renderScaled(scratchCanvas, transformedCanvas, scaleFactor);
 
     if (palette != null) {
@@ -138,6 +168,143 @@ function renderStats(bricksX, bricksY, outputPrefix) {
     document.getElementById(outputPrefix + 'HeightMM').textContent = bricksY * brickWidth;
     document.getElementById(outputPrefix + 'WidthInch').textContent = mmToIn(bricksX * brickWidth);
     document.getElementById(outputPrefix + 'HeightInch').textContent = mmToIn(bricksY * brickWidth);
+}
+
+/**
+ * Reduce the resolution of the source image and render it into the destination image
+ * using a bilinear interpolation algorithm.
+ * 
+ * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
+ */
+function derezBilinear(srcCanvas, destCanvas, scaleFactor = 2) {
+    let srcImg = getSrcImage(srcCanvas, scaleFactor);
+    let destImg = getDestImage(srcCanvas, destCanvas, scaleFactor);
+
+    destCanvas.setAttribute("width", destImg.width);
+    destCanvas.setAttribute("height", destImg.height);
+
+    let factor = 1 / scaleFactor;
+
+    for (let dy = 0; dy < destImg.height; dy++) {
+        nearestY = dy / factor;
+        nearestYInt = Math.floor(nearestY);
+        deltaY = nearestY - nearestYInt;
+        for (let dx = 0; dx < destImg.width; dx++) {
+            nearestX = dx / factor;
+            nearestXInt = Math.floor(nearestX);
+            deltaX = nearestX - nearestXInt;
+
+            // Weighted sum; order must match order of pixels in 'box'
+            let weights = [
+                (1 - deltaX) * (1 - deltaY),    // 0, 0
+                deltaX * (1 - deltaY),          // 1, 0
+                (1 - deltaX) * deltaY,          // 0, 1
+                deltaX * deltaY,                // 1, 1
+            ];
+            let box = [
+                srcImg.getPixel(nearestX, nearestY),
+                srcImg.getPixel(nearestX + 1, nearestY),
+                srcImg.getPixel(nearestX, nearestY + 1),
+                srcImg.getPixel(nearestX + 1, nearestY + 1),
+            ];
+
+            // Sum the weighted values of each pixel to find the output pixel
+            let outputPixel = [0, 0, 0, 0];
+            for (let i = 0; i < 3; i++) {
+                let weighted = box[i].map(x => x * weights[i]);
+                outputPixel[0] += weighted[0];
+                outputPixel[1] += weighted[1];
+                outputPixel[2] += weighted[2];
+                outputPixel[3] += weighted[3];
+            }
+            destImg.setPixel(dx, dy, outputPixel);
+        }
+    }
+    let destContext = destCanvas.getContext("2d");
+    destContext.putImageData(destImg.imageData, 0, 0);
+}
+
+
+/**
+ * Create a canvas that is scaled down from the source by an integer scaling factor,
+ * and return the corresponding ImageInfo. Clips the original canvas size if necessary
+ * to ensure the source dimensions are an integer multiple of the destination.
+ * 
+ * @param {*} srcCanvas 
+ * @param {*} destCanvas 
+ * @param {*} scaleFactor 
+ */
+function getDestImage(srcCanvas, destCanvas, scaleFactor) {
+    // Ensure that the dimensions of the original are evenly divisible by the dimensions
+    // of the scaled canvas. To do this, clip odd-sized images, ensuring that we discard 
+    // roughly an even amount of each edge if necessary
+    let clipWidth = srcCanvas.width - (srcCanvas.width % scaleFactor);
+    let clipHeight = srcCanvas.height - (srcCanvas.height % scaleFactor);
+
+    let scaledWidth = clipWidth / scaleFactor;
+    let scaledHeight = clipHeight / scaleFactor;
+
+    let destContext = destCanvas.getContext("2d");
+    let destImgData = destContext.getImageData(0, 0, scaledWidth, scaledHeight);
+    let dest = new ImageInfo(scaledWidth, scaledHeight, destImgData.width * pixelStride, 
+        pixelStride, destImgData)
+    return dest;
+}
+
+/**
+ * Create an ImageInfo from a canvas. Scales the image down by the given integer scale factor.
+ * Clips the image in the canvas if necessary to ensure its dimensions are an even multiple
+ * of the corresponding scaled-down image.
+ * 
+ * @param {*} canvas 
+ * @param {*} scaleFactor 
+ */
+function getSrcImage(canvas, scaleFactor) {
+    // Ensure that the dimensions of the original are evenly divisible by the dimensions
+    // of the scaled canvas. To do this, clip odd-sized images, ensuring that we discard 
+    // roughly an even amount of each edge if necessary
+    let clipWidth = canvas.width - (canvas.width % scaleFactor);
+    let clipHeight = canvas.height - (canvas.height % scaleFactor);
+    let offsetX = Math.floor((canvas.width - clipWidth) / 2);
+    let offsetY = Math.floor((canvas.height - clipHeight) / 2);
+
+    let context = canvas.getContext("2d");
+    let imgData = context.getImageData(offsetX, offsetY, clipWidth, clipHeight);
+    let ret = new ImageInfo(clipWidth, clipHeight, clipWidth * pixelStride, pixelStride, imgData);
+    return ret;
+}
+
+/**
+ * Reduce the resolution of the source image and render it into the destination image
+ * using a nearest-neighbor algorithm.
+ * 
+ * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
+ */
+function derezNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
+    let srcImg = getSrcImage(srcCanvas, scaleFactor);
+    let destImg = getDestImage(srcCanvas, destCanvas, scaleFactor);
+
+    destCanvas.setAttribute("width", destImg.width);
+    destCanvas.setAttribute("height", destImg.height);
+    
+    let factor = 1 / scaleFactor;
+
+    for (let dy = 0; dy < destImg.height; dy++) {
+        nearestY = Math.round(dy / factor);
+        if (nearestY >= srcImg.height) {   // Clamp source to edge of image
+            nearestY = srcImg.height - 1;
+        }
+        for (let dx = 0; dx < destImg.width; dx++) {
+            nearestX = Math.round(dx / factor);
+            if (nearestX >= srcImg.width) {    // Clamp to edge of image
+                nearestX = srcImg.width - 1;
+            }
+            nearestPixel = srcImg.getPixel(nearestX, nearestY);
+            destImg.setPixel(dx, dy, nearestPixel);
+        }
+    }
+    let destContext = destCanvas.getContext("2d");
+    destContext.putImageData(destImg.imageData, 0, 0);
 }
 
 /**

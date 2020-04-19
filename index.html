@@ -46,7 +46,14 @@
         </script>
         <label for="scaleInput">Scale factor:</label>
         <input type="number" id="scaleInput" min="1" max="64" value="2" onchange="drawLego()">
-            
+
+        <label for="resizeSelect">Resizing Filter:</label>
+        <select id="resizeSelect" onchange="drawLego()">
+            <option value="box" selected="true">Box filter</option>
+            <option value="nearestNeighbor">Nearest neighbor</option>
+            <option value="bilinear">Bilinear</option>
+        </select>
+
         <label for="paletteSelect">Palette:</label>
         <select id="paletteSelect" onchange="drawLego()">
             <option value="native">Native color (no quantization)</option>
