@@ -79,10 +79,10 @@ function getPalette(paletteName) {
  * @param {*} type 
  */
 function getResizingFilter(type) {
-    let func = derez;
+    let func = derezBox;
     switch (type) {
         case "box":
-            func = derez;
+            func = derezBox;
             break;
         case "nearestNeighbor":
             func = derezNearestNeighbor;
@@ -312,7 +312,7 @@ function derezNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
  * 
  * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
  */
-function derez(srcCanvas, destCanvas, scaleFactor = 2) {
+function derezBox(srcCanvas, destCanvas, scaleFactor = 2) {
     let srcImg = getSrcImage(srcCanvas, scaleFactor);
     let destImg = getDestImage(srcCanvas, destCanvas, scaleFactor);
 
