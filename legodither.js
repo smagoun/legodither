@@ -217,53 +217,30 @@ function renderScaled(srcCanvas, destCanvas, scaleFactor) {
     let scaledWidth = srcCanvas.width * scaleFactor;
     let scaledHeight = srcCanvas.height * scaleFactor;
 
-    let srcContext = srcCanvas.getContext("2d");
-    let srcImgData = srcContext.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
-    let srcData = srcImgData.data;
-
+    let srcImg = ImageInfo.fromCanvas(srcCanvas);
+    
     // Resize output canvas to avoid artifacts on the bottom + right edges if the
     // output image is smaller than the original canvas size
     destCanvas.setAttribute("width", scaledWidth);
     destCanvas.setAttribute("height", scaledHeight);
-    let destContext = destCanvas.getContext("2d");
-    let destImgData = destContext.getImageData(0, 0, scaledWidth, scaledHeight);
-    let destData = destImgData.data;
-
-    let srcLineStride = srcImgData.width * pixelStride;
-    let destLineStride = destImgData.width * pixelStride;
-
-    let sourceRowStart, srcColStart, destRowStart, destColStart = 0;
-    let r, g, b, a;
+    let destImg = ImageInfo.fromCanvas(destCanvas);
 
     // sj is row index of original; dj is row index of scaled image
-    for (let sj = 0, dj = 0; sj < srcCanvas.height; sj++, dj += scaleFactor) {
-        sourceRowStart = sj * srcLineStride;
-        destRowStart = dj * destLineStride;
-
+    for (let sj = 0, dj = 0; sj < srcImg.height; sj++, dj += scaleFactor) {
         // si is col index of original; di is col index of scaled image
-        for (let si = 0, di = 0; si < srcCanvas.width; si++, di += scaleFactor) {
-            srcColStart = si * pixelStride;
-            destColStart = di * pixelStride;
-
-            r = srcData[sourceRowStart + srcColStart    ];
-            g = srcData[sourceRowStart + srcColStart + 1];
-            b = srcData[sourceRowStart + srcColStart + 2];
-            a = srcData[sourceRowStart + srcColStart + 3];
+        for (let si = 0, di = 0; si < srcImg.width; si++, di += scaleFactor) {
+            let pixel = srcImg.getPixel(si, sj);
 
             // Draw the new value in each block of pixels
             for (let y = 0; y < scaleFactor; y++) {
-                let row = destRowStart + (y * destLineStride);
                 for (let x = 0; x < scaleFactor; x++) {
-                    let col = destColStart + (x * pixelStride);
-                    destData[row + col    ] = r;
-                    destData[row + col + 1] = g;
-                    destData[row + col + 2] = b;
-                    destData[row + col + 3] = a;
+                    destImg.setPixel(di + x, dj + y, pixel);
                 }
             }
         }
     }
-    destContext.putImageData(destImgData, 0, 0,);
+    let destContext = destCanvas.getContext("2d");
+    destContext.putImageData(destImg.imageData, 0, 0);
 }
 
 /**
@@ -430,30 +407,24 @@ function getConvolutionKernel() {
 function convolve(srcCanvas, destCanvas) {
     let kernel = getConvolutionKernel();
 
-    let srcContext = srcCanvas.getContext("2d");
-    let srcImgData = srcContext.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
-    let srcData = srcImgData.data;
-
+    let srcImg = ImageInfo.fromCanvas(srcCanvas);
     destCanvas.setAttribute("width", srcCanvas.width);
     destCanvas.setAttribute("height", srcCanvas.height);
-    let destContext = destCanvas.getContext("2d");
-    let destImgData = destContext.getImageData(0, 0, destCanvas.width, destCanvas.height);
-    let destData = destImgData.data;
+    let destImg = ImageInfo.fromCanvas(destCanvas);
 
-    let lineStride = srcCanvas.width * pixelStride;
     for (y = 0; y < srcCanvas.height; y++) {
         for (x = 0; x < srcCanvas.width; x++) {
-            origPixel = getPixel(srcData, lineStride, pixelStride, x, y);
+            origPixel = srcImg.getPixel(x, y);
             // Don't apply convolutions to edge cases where the filter needs to look
             // outside image boundaries
             if (x == 0 || y == 0 || x == (srcCanvas.width-1) || y == (srcCanvas.height-1)) {
-                setPixel(destData, lineStride, pixelStride, x, y, origPixel);
+                destImg.setPixel(x, y, origPixel);
                 continue;
             }
             let r=0, g=0, b=0, a=0;
             for (ky = -1; ky < 2; ky++) {
                 for (kx = -1; kx < 2; kx++) {
-                    pixel = getPixel(srcData, lineStride, pixelStride, (x+kx), (y+ky));
+                    pixel = srcImg.getPixel(x+kx, y+ky);
                     r += kernel[ky + 1][kx + 1] * pixel[0];
                     g += kernel[ky + 1][kx + 1] * pixel[1];
                     b += kernel[ky + 1][kx + 1] * pixel[2];
@@ -467,11 +438,12 @@ function convolve(srcCanvas, destCanvas) {
                 origPixel[1] + ((origPixel[1] - g) * factor),
                 origPixel[2] + ((origPixel[2] - b) * factor),
                 origPixel[3],   // Ignore alpha for now
-            ];*/
-            setPixel(destData, lineStride, pixelStride, x, y, newPixel);
+            ];
+            destImg.setPixel(x, y, newPixel);
         }
     }
-    destContext.putImageData(destImgData, 0, 0);
+    let destContext = destCanvas.getContext("2d");
+    destContext.putImageData(destImg.imageData, 0, 0);
 }
 
 
@@ -520,18 +492,15 @@ function adjustLevel(pixel, inShadow = 0.0, inMidpoint = 0.5, inHighlight = 1.0,
 
 function autoLevels() {
     let canvas = document.getElementById("originalCanvas");
-    let context = canvas.getContext("2d");
-    let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
-    let data = imgData.data;
+    let img = ImageInfo.fromCanvas(canvas);
 
-    let lineStride = imgData.width * pixelStride;
     let minL = 1.0;
     let maxL = 0.0;
     let medianL = 0.5;
     let lValues = [];
-    for (let j = 0; j < imgData.height; j++) {
-        for (let i = 0; i < imgData.width; i++) {
-            let pixel = getPixel(data, lineStride, pixelStride, i, j);
+    for (let j = 0; j < img.height; j++) {
+        for (let i = 0; i < img.width; i++) {
+            let pixel = img.getPixel(i, j);
             hsl = rgb2hsl(pixel);
             lValues.push(hsl[2]);
         }
@@ -649,21 +618,17 @@ function hsl2rgb(hsl) {
  * @param {*} outHighlight 
  */
 function adjustLevels(canvas, inShadow, inMidpoint, inHighlight, outShadow, outHighlight) {
-    let context = canvas.getContext("2d");
-    let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
-    let data = imgData.data;
-
-    let lineStride = imgData.width * pixelStride;
-    for (let j = 0; j < imgData.height; j++) {
-        for (let i = 0; i < imgData.width; i++) {
-            let pixel = getPixel(data, lineStride, pixelStride, i, j);
+    let img = ImageInfo.fromCanvas(canvas);
+    for (let j = 0; j < img.height; j++) {
+        for (let i = 0; i < img.width; i++) {
+            let pixel = img.getPixel(i, j);
             let newPixel = adjustLevel(pixel, inShadow, inMidpoint, inHighlight, outShadow, outHighlight);
-           setPixel(data, lineStride, pixelStride, i, j, newPixel);
+            img.setPixel(i, j, newPixel);
         }
     }
-    context.putImageData(imgData, 0, 0);
+    let context = canvas.getContext("2d");
+    context.putImageData(img.imageData, 0, 0);
 }
-
 
 
 /**
@@ -671,9 +636,7 @@ function adjustLevels(canvas, inShadow, inMidpoint, inHighlight, outShadow, outH
  * Floyd-Steinberg.
  */
 function decolor(canvas, palette) {
-    let context = canvas.getContext("2d");
-    let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
-    let data = imgData.data;
+    let img = ImageInfo.fromCanvas(canvas);
 
 /* 
 Implement Floyd-Steinberg dithering:
@@ -688,16 +651,15 @@ Implement Floyd-Steinberg dithering:
             pixel[x    ][y + 1] := pixel[x    ][y + 1] + quant_error × 5 / 16
             pixel[x + 1][y + 1] := pixel[x + 1][y + 1] + quant_error × 1 / 16
 */
-    let lineStride = imgData.width * pixelStride;
-    for (let j = 0; j < imgData.height; j++) {
-        for (let i = 0; i < imgData.width; i++) {
-            let pixel = getPixel(data, lineStride, pixelStride, i, j);
+    for (let j = 0; j < img.height; j++) {
+        for (let i = 0; i < img.width; i++) {
+            let pixel = img.getPixel(i, j);
 
             // Find the nearest color in the palette
             let nearest = findNearestColor(palette, pixel);
 
             // Draw the new value in each block of pixels
-           setPixel(data, lineStride, pixelStride, i, j, nearest);
+            img.setPixel(i, j, nearest);
             
             // Calculate quantization error
             let errR = pixel[0] - nearest[0];
@@ -706,45 +668,46 @@ Implement Floyd-Steinberg dithering:
             let errA = pixel[3] - nearest[3];
 
             /* pixel[x + 1][y    ] := pixel[x + 1][y    ] + quant_error × 7 / 16 */
-            if ((i+1) < imgData.width) {
-                let tmpPixel = getPixel(data, lineStride, pixelStride, i+1, j);
+            if ((i+1) < img.width) {
+                let tmpPixel = img.getPixel(i+1, j);
                 let tmpR = tmpPixel[0] + parseInt(errR * 7 / 16);
                 let tmpG = tmpPixel[1] + parseInt(errG * 7 / 16);
                 let tmpB = tmpPixel[2] + parseInt(errB * 7 / 16);
                 let tmpA = tmpPixel[3] + parseInt(errA * 7 / 16);
-                setPixel(data, lineStride, pixelStride, i+1, j, [tmpR, tmpG, tmpB, tmpA]);
+                img.setPixel(i+1, j, [tmpR, tmpG, tmpB, tmpA]);
             }
 
             /* pixel[x - 1][y + 1] := pixel[x - 1][y + 1] + quant_error × 3 / 16 */
-            if (((i-1) >= 0) && ((j+1) < imgData.height)) {
-                let tmpPixel = getPixel(data, lineStride, pixelStride, i-1, j+1);
+            if (((i-1) >= 0) && ((j+1) < img.height)) {
+                let tmpPixel = img.getPixel(i-1, j+1);
                 let tmpR = tmpPixel[0] + parseInt(errR * 3 / 16);
                 let tmpG = tmpPixel[1] + parseInt(errG * 3 / 16);
                 let tmpB = tmpPixel[2] + parseInt(errB * 3 / 16);
                 let tmpA = tmpPixel[3] + parseInt(errA * 3 / 16);
-                setPixel(data, lineStride, pixelStride, i-1, j+1, [tmpR, tmpG, tmpB, tmpA]);
+                img.setPixel(i-1, j+1, [tmpR, tmpG, tmpB, tmpA]);
             }
 
             /* pixel[x    ][y + 1] := pixel[x    ][y + 1] + quant_error × 5 / 16 */
-            if ((j+1) < imgData.height) {
-                let tmpPixel = getPixel(data, lineStride, pixelStride, i, j+1);
+            if ((j+1) < img.height) {
+                let tmpPixel = img.getPixel(i, j+1);
                 let tmpR = tmpPixel[0] + parseInt(errR * 5 / 16);
                 let tmpG = tmpPixel[1] + parseInt(errG * 5 / 16);
                 let tmpB = tmpPixel[2] + parseInt(errB * 5 / 16);
                 let tmpA = tmpPixel[3] + parseInt(errA * 5 / 16);
-                setPixel(data, lineStride, pixelStride, i, j+1, [tmpR, tmpG, tmpB, tmpA]);
+                img.setPixel(i, j+1, [tmpR, tmpG, tmpB, tmpA]);
             }
 
             /* pixel[x + 1][y + 1] := pixel[x + 1][y + 1] + quant_error × 1 / 16 */
-            if (((i+1) < imgData.width) && ((j+1) < imgData.height)) {
-                let tmpPixel = getPixel(data, lineStride, pixelStride, i+1, j+1);
+            if (((i+1) < img.width) && ((j+1) < img.height)) {
+                let tmpPixel = img.getPixel(i+1, j+1);
                 let tmpR = tmpPixel[0] + parseInt(errR * 1 / 16);
                 let tmpG = tmpPixel[1] + parseInt(errG * 1 / 16);
                 let tmpB = tmpPixel[2] + parseInt(errB * 1 / 16);
                 let tmpA = tmpPixel[3] + parseInt(errA * 1 / 16);
-                setPixel(data, lineStride, pixelStride, i+1, j+1, [tmpR, tmpG, tmpB, tmpA]);
+                img.setPixel(i+1, j+1, [tmpR, tmpG, tmpB, tmpA]);
             }
         }
     }
-    context.putImageData(imgData, 0, 0);
+    let context = canvas.getContext("2d");
+    context.putImageData(img.imageData, 0, 0);
 }
