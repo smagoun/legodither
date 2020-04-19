@@ -438,7 +438,7 @@ function convolve(srcCanvas, destCanvas) {
                 origPixel[1] + ((origPixel[1] - g) * factor),
                 origPixel[2] + ((origPixel[2] - b) * factor),
                 origPixel[3],   // Ignore alpha for now
-            ];
+            ];*/
             destImg.setPixel(x, y, newPixel);
         }
     }
