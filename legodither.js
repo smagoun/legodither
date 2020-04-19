@@ -108,7 +108,7 @@ function drawLego() {
     let transformedCanvas = document.getElementById("transformedCanvas");
     let outputCanvas = document.getElementById("legoCanvas");
 
-    let scaleFactor = parseInt(document.getElementById("scaleInput").value);
+    let scaleFactor = Number(document.getElementById("scaleInput").value);
     //let sharpenFactor = Number(document.getElementById("sharpenInput").value);
 
     let dithering = document.getElementById("ditheringInput").checked;
@@ -142,7 +142,7 @@ function drawLego() {
     if (palette != null) {
         decolor(scratchCanvas, palette, dithering);
     }
-    renderScaled(scratchCanvas, outputCanvas, scaleFactor);
+    renderScaled(scratchCanvas, outputCanvas, Math.round(scaleFactor));
 
     renderStats(srcCanvas.width, srcCanvas.height, 'orig');
 
@@ -204,20 +204,19 @@ function derezBilinear(srcCanvas, destCanvas, scaleFactor = 2) {
                 deltaX * deltaY,                // 1, 1
             ];
             let box = [
-                srcImg.getPixel(nearestX, nearestY),
-                srcImg.getPixel(nearestX + 1, nearestY),
-                srcImg.getPixel(nearestX, nearestY + 1),
-                srcImg.getPixel(nearestX + 1, nearestY + 1),
+                srcImg.getPixel(nearestXInt, nearestYInt),
+                srcImg.getPixel(nearestXInt + 1, nearestYInt),
+                srcImg.getPixel(nearestXInt, nearestYInt + 1),
+                srcImg.getPixel(nearestXInt + 1, nearestYInt + 1),
             ];
 
             // Sum the weighted values of each pixel to find the output pixel
-            let outputPixel = [0, 0, 0, 0];
-            for (let i = 0; i < 3; i++) {
+            let outputPixel = [0, 0, 0, 255];   // Ignore alpha for now
+            for (let i = 0; i <= 3; i++) {
                 let weighted = box[i].map(x => x * weights[i]);
                 outputPixel[0] += weighted[0];
                 outputPixel[1] += weighted[1];
                 outputPixel[2] += weighted[2];
-                outputPixel[3] += weighted[3];
             }
             destImg.setPixel(dx, dy, outputPixel);
         }
@@ -237,14 +236,22 @@ function derezBilinear(srcCanvas, destCanvas, scaleFactor = 2) {
  * @param {*} scaleFactor 
  */
 function getDestImage(srcCanvas, destCanvas, scaleFactor) {
-    // Ensure that the dimensions of the original are evenly divisible by the dimensions
-    // of the scaled canvas. To do this, clip odd-sized images, ensuring that we discard 
-    // roughly an even amount of each edge if necessary
-    let clipWidth = srcCanvas.width - (srcCanvas.width % scaleFactor);
-    let clipHeight = srcCanvas.height - (srcCanvas.height % scaleFactor);
+    let clipWidth = 0, clipHeight = 0;
+    // If scaleFactor is an int, ensure that the dimensions of the original are evenly divisible 
+    // by the dimensions of the scaled canvas. To do this, clip odd-sized images, ensuring that we 
+    // discard roughly an even amount of each edge if necessary. Backwards-compatibility for
+    // integer-only implementation.
+    if (Math.floor(scaleFactor) === scaleFactor) {
+        clipWidth = srcCanvas.width - (srcCanvas.width % scaleFactor);
+        clipHeight = srcCanvas.height - (srcCanvas.height % scaleFactor);
+    } else {
+        clipWidth = srcCanvas.width;
+        clipHeight = srcCanvas.height;
+    }
 
-    let scaledWidth = clipWidth / scaleFactor;
-    let scaledHeight = clipHeight / scaleFactor;
+    let scaledWidth = Math.floor(clipWidth / scaleFactor);
+    let scaledHeight = Math.floor(clipHeight / scaleFactor);
+    console.log("scaled output image: " + scaledWidth + "x" + scaledHeight);
 
     let destContext = destCanvas.getContext("2d");
     let destImgData = destContext.getImageData(0, 0, scaledWidth, scaledHeight);
@@ -262,13 +269,20 @@ function getDestImage(srcCanvas, destCanvas, scaleFactor) {
  * @param {*} scaleFactor 
  */
 function getSrcImage(canvas, scaleFactor) {
-    // Ensure that the dimensions of the original are evenly divisible by the dimensions
-    // of the scaled canvas. To do this, clip odd-sized images, ensuring that we discard 
-    // roughly an even amount of each edge if necessary
-    let clipWidth = canvas.width - (canvas.width % scaleFactor);
-    let clipHeight = canvas.height - (canvas.height % scaleFactor);
-    let offsetX = Math.floor((canvas.width - clipWidth) / 2);
-    let offsetY = Math.floor((canvas.height - clipHeight) / 2);
+    let offsetX = 0, offsetY = 0, clipWidth = 0, clipHeight = 0;
+    // If scaleFactor is an int, ensure that the dimensions of the original are evenly divisible 
+    // by the dimensions of the scaled canvas. To do this, clip odd-sized images, ensuring that we 
+    // discard roughly an even amount of each edge if necessary. Backwards-compatibility for
+    // integer-only implementation.
+    if (Math.floor(scaleFactor) === scaleFactor) {
+        clipWidth = canvas.width - (canvas.width % scaleFactor);
+        clipHeight = canvas.height - (canvas.height % scaleFactor);
+        offsetX = Math.floor((canvas.width - clipWidth) / 2);
+        offsetY = Math.floor((canvas.height - clipHeight) / 2);
+    } else {
+        clipWidth = canvas.width;
+        clipHeight = canvas.height;
+    }
 
     let context = canvas.getContext("2d");
     let imgData = context.getImageData(offsetX, offsetY, clipWidth, clipHeight);
@@ -356,7 +370,7 @@ function derezBox(srcCanvas, destCanvas, scaleFactor = 2) {
 }
 
 /**
- * Draw a scaled version of the source canvas into the destionation. Resizes the
+ * Draw a scaled-up version of the source canvas into the destination. Resizes the
  * destination to fit the scaled image.
  * 
  * @param {*} srcCanvas 
