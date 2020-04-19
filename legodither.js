@@ -335,34 +335,39 @@ function derezBox(srcCanvas, destCanvas, scaleFactor = 2) {
     destCanvas.setAttribute("width", destImg.width);
     destCanvas.setAttribute("height", destImg.height);
 
-    // We currently have a simple box-sampling algorithm; good enough for now
-    // TODO: Figure out how to avoid fuzzy edges when downsampling; need some sort
-    // of heuristic for finding and edge and determining its color. Try bicubic,
-    // nearest-neighbor, and seamcarving. Also vectorizsation....
-    for (let sj = 0, dj = 0; sj < srcImg.height; sj += scaleFactor, dj++) {
-        for (let si = 0, di = 0; si < srcImg.width; si += scaleFactor, di++) {
-            let r = 0, g = 0, b = 0, a = 0;
+    let radius = scaleFactor / 2;   // distance from center to edge of dest pixel, in pixels of the src img
 
-            // Sum all of the pixels in the box
-            for (let y = 0; y < scaleFactor; y++) {
-                for (let x = 0; x < scaleFactor; x++) {
-                    let pixel = srcImg.getPixel(si + x, sj + y);
-                    r += pixel[0];
-                    g += pixel[1];
-                    b += pixel[2];
-                    a += pixel[3];
+    for (let dy = 0; dy < destImg.height; dy++) {
+        let dcenterY = (dy + 0.5) * scaleFactor;
+        let dtopY = dcenterY - radius;
+        let dbottomY = dcenterY + radius;
+
+        let rowTop = Math.floor(dtopY + 0.5);
+        let rowBottom = Math.floor(dbottomY - 0.5);
+
+        for (let dx = 0; dx < destImg.width; dx++) {
+            let dcenterX = (dx + 0.5) * scaleFactor; // center of the dest pixel on the src img
+            let dleftX = dcenterX - radius;     // left edge of the dest pixel on the src img
+            let drightX = dcenterX + radius;    // right edge of the dest pixel on the src img
+
+            let boxSize = 0;
+            let output = [0, 0, 0, 0];
+            // upper left = dleftX, dtopY
+            // bottom right = drightX, dbottomY
+            let colLeft = Math.floor(dleftX + 0.5);
+            let colRight = Math.floor(drightX - 0.5);
+            for (let y = rowTop; y < rowBottom; y++) {
+                for (let x = colLeft; x < colRight; x++) {
+                    let pixel = srcImg.getPixel(x, y);
+                    output[0] += pixel[0];
+                    output[1] += pixel[1];
+                    output[2] += pixel[2];
+                    output[3] += pixel[3];
+                    boxSize++;
                 }
             }
-
-            // Average the pixels in the box
-            let numPixels = scaleFactor * scaleFactor;
-            r = r / numPixels;
-            g = g / numPixels;
-            b = b / numPixels;
-            a = a / numPixels;
-
-            // Draw the averaged value into the output
-            destImg.setPixel(di, dj, [r, g, b, a]);
+            output = output.map(x => x / boxSize);
+            destImg.setPixel(dx, dy, output);
         }
     }
     let destContext = destCanvas.getContext("2d");
