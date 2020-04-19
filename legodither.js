@@ -313,48 +313,28 @@ function derezNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
  * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
  */
 function derez(srcCanvas, destCanvas, scaleFactor = 2) {
-    let srcContext = srcCanvas.getContext("2d");
+    let srcImg = getSrcImage(srcCanvas, scaleFactor);
+    let destImg = getDestImage(srcCanvas, destCanvas, scaleFactor);
 
-    // Ensure that the dimensions of the original are evenly divisible by the dimensions
-    // of the scaled canvas. To do this, clip odd-sized images, ensuring that we discard 
-    // roughly an even amount of each edge if necessary
-    let clipWidth = srcCanvas.width - (srcCanvas.width % scaleFactor);
-    let clipHeight = srcCanvas.height - (srcCanvas.height % scaleFactor);
-    let offsetX = Math.floor((srcCanvas.width - clipWidth) / 2);
-    let offsetY = Math.floor((srcCanvas.height - clipHeight) / 2);
+    destCanvas.setAttribute("width", destImg.width);
+    destCanvas.setAttribute("height", destImg.height);
 
-    let srcImgData = srcContext.getImageData(offsetX, offsetY, clipWidth, clipHeight);
-    let srcData = srcImgData.data;
-
-    let scaledWidth = clipWidth / scaleFactor;
-    let scaledHeight = clipHeight / scaleFactor;
-
-    destCanvas.setAttribute("width", scaledWidth);
-    destCanvas.setAttribute("height", scaledHeight);
-    let destContext = destCanvas.getContext("2d");
-    let destImgData = destContext.getImageData(0, 0, scaledWidth, scaledHeight);
-    let destData = destImgData.data;
-    
     // We currently have a simple box-sampling algorithm; good enough for now
-    let srcLineStride = srcImgData.width * pixelStride;
-    let destLineStride = destImgData.width * pixelStride;
-
-    for (let sj = 0, dj = 0; sj < clipHeight; sj += scaleFactor, dj++) {
-        let srcRowStart = sj * srcLineStride;
-
-        for (let si = 0, di = 0; si < clipWidth; si += scaleFactor, di++) {
-            let srcColumn = si * pixelStride;
+    // TODO: Figure out how to avoid fuzzy edges when downsampling; need some sort
+    // of heuristic for finding and edge and determining its color. Try bicubic,
+    // nearest-neighbor, and seamcarving. Also vectorizsation....
+    for (let sj = 0, dj = 0; sj < srcImg.height; sj += scaleFactor, dj++) {
+        for (let si = 0, di = 0; si < srcImg.width; si += scaleFactor, di++) {
             let r = 0, g = 0, b = 0, a = 0;
 
             // Sum all of the pixels in the box
             for (let y = 0; y < scaleFactor; y++) {
-                let row = srcRowStart + (y * srcLineStride);
                 for (let x = 0; x < scaleFactor; x++) {
-                    let col = srcColumn + (x * pixelStride);
-                    r += srcData[row + col    ];
-                    g += srcData[row + col + 1];
-                    b += srcData[row + col + 2];
-                    a += srcData[row + col + 3];
+                    let pixel = srcImg.getPixel(si + x, sj + y);
+                    r += pixel[0];
+                    g += pixel[1];
+                    b += pixel[2];
+                    a += pixel[3];
                 }
             }
 
@@ -366,10 +346,11 @@ function derez(srcCanvas, destCanvas, scaleFactor = 2) {
             a = a / numPixels;
 
             // Draw the averaged value into the output
-            setPixel(destData, destLineStride, pixelStride, di, dj, [r, g, b, a]);
+            destImg.setPixel(di, dj, [r, g, b, a]);
         }
     }
-    destContext.putImageData(destImgData, 0, 0);
+    let destContext = destCanvas.getContext("2d");
+    destContext.putImageData(destImg.imageData, 0, 0);
 }
 
 /**
@@ -460,23 +441,6 @@ function findNearestColor(palette, pixel) {
     return newColor;
 }
 
-/**
- * Return the r/g/b/a values of the pixel at the given location in the array of
- * RGBA pixel data
- * 
- * @param {*} pixelData 
- * @param {*} lineStride Number of array elements in a line
- * @param {*} pixelStride Number of array elements in a pixel
- * @param {*} x 
- * @param {*} y 
- */
-function getPixel(pixelData, lineStride, pixelStride, x, y) {
-    let r = pixelData[(y * lineStride) + (x * pixelStride)    ];
-    let g = pixelData[(y * lineStride) + (x * pixelStride) + 1];
-    let b = pixelData[(y * lineStride) + (x * pixelStride) + 2];
-    let a = pixelData[(y * lineStride) + (x * pixelStride) + 3];
-    return [r, g, b, a]
-}
 
 /**
  * Utility function to clamp a value to an integer in the given range
@@ -494,25 +458,6 @@ function clamp(value, min = 0, max = 255) {
         return value;
     }
 }
-
-/**
- * Sets the value of the pixel at the given location in the array of
- * RGBA pixel data. Clamps values to the range 0-255.
- * 
- * @param {*} pixelData 
- * @param {*} lineStride Number of array elements in a line
- * @param {*} pixelStride Number of array elements in a pixel
- * @param {*} x 
- * @param {*} y 
- * @param {*} pixel 4-element array of RGBA color data to write
- */
-function setPixel(pixelData, lineStride, pixelStride, x, y, pixel) {
-    pixelData[(y * lineStride) + (x * pixelStride)    ] = clamp(pixel[0]);
-    pixelData[(y * lineStride) + (x * pixelStride) + 1] = clamp(pixel[1]);
-    pixelData[(y * lineStride) + (x * pixelStride) + 2] = clamp(pixel[2]);
-    pixelData[(y * lineStride) + (x * pixelStride) + 3] = clamp(pixel[3]);
-}
-
 
 function updateKernel() {
     let p = document.getElementById("convolutionSelect");
