@@ -111,6 +111,8 @@ function drawLego() {
     let scaleFactor = parseInt(document.getElementById("scaleInput").value);
     //let sharpenFactor = Number(document.getElementById("sharpenInput").value);
 
+    let dithering = document.getElementById("ditheringInput").checked;
+
     let inputLevelsShadow = parseFloat(document.getElementById("inputLevelsShadowInput").value);
     let inputLevelsMidpoint = parseFloat(document.getElementById("inputLevelsMidpointInput").value);
     let inputLevelsHighlight = parseFloat(document.getElementById("inputLevelsHighlightInput").value);
@@ -138,7 +140,7 @@ function drawLego() {
     //renderScaled(scratchCanvas, transformedCanvas, scaleFactor);
 
     if (palette != null) {
-        decolor(scratchCanvas, palette);
+        decolor(scratchCanvas, palette, dithering);
     }
     renderScaled(scratchCanvas, outputCanvas, scaleFactor);
 
@@ -746,8 +748,12 @@ function adjustLevels(canvas, inShadow, inMidpoint, inHighlight, outShadow, outH
 /**
  * Color-quantize the canvas's image with the given color palette. Dithers using
  * Floyd-Steinberg.
+ * 
+ * @param {*} canvas
+ * @param {*} palette
+ * @param {*} dithering True to enable Floyd-Steinberg dithering
  */
-function decolor(canvas, palette) {
+function decolor(canvas, palette, dithering = true) {
     let img = ImageInfo.fromCanvas(canvas);
 
 /* 
@@ -772,51 +778,53 @@ Implement Floyd-Steinberg dithering:
 
             // Draw the new value in each block of pixels
             img.setPixel(i, j, nearest);
-            
-            // Calculate quantization error
-            let errR = pixel[0] - nearest[0];
-            let errG = pixel[1] - nearest[1];
-            let errB = pixel[2] - nearest[2];
-            let errA = pixel[3] - nearest[3];
 
-            /* pixel[x + 1][y    ] := pixel[x + 1][y    ] + quant_error × 7 / 16 */
-            if ((i+1) < img.width) {
-                let tmpPixel = img.getPixel(i+1, j);
-                let tmpR = tmpPixel[0] + parseInt(errR * 7 / 16);
-                let tmpG = tmpPixel[1] + parseInt(errG * 7 / 16);
-                let tmpB = tmpPixel[2] + parseInt(errB * 7 / 16);
-                let tmpA = tmpPixel[3] + parseInt(errA * 7 / 16);
-                img.setPixel(i+1, j, [tmpR, tmpG, tmpB, tmpA]);
-            }
+            if (dithering) {
+                // Calculate quantization error
+                let errR = pixel[0] - nearest[0];
+                let errG = pixel[1] - nearest[1];
+                let errB = pixel[2] - nearest[2];
+                let errA = pixel[3] - nearest[3];
 
-            /* pixel[x - 1][y + 1] := pixel[x - 1][y + 1] + quant_error × 3 / 16 */
-            if (((i-1) >= 0) && ((j+1) < img.height)) {
-                let tmpPixel = img.getPixel(i-1, j+1);
-                let tmpR = tmpPixel[0] + parseInt(errR * 3 / 16);
-                let tmpG = tmpPixel[1] + parseInt(errG * 3 / 16);
-                let tmpB = tmpPixel[2] + parseInt(errB * 3 / 16);
-                let tmpA = tmpPixel[3] + parseInt(errA * 3 / 16);
-                img.setPixel(i-1, j+1, [tmpR, tmpG, tmpB, tmpA]);
-            }
+                /* pixel[x + 1][y    ] := pixel[x + 1][y    ] + quant_error × 7 / 16 */
+                if ((i+1) < img.width) {
+                    let tmpPixel = img.getPixel(i+1, j);
+                    let tmpR = tmpPixel[0] + parseInt(errR * 7 / 16);
+                    let tmpG = tmpPixel[1] + parseInt(errG * 7 / 16);
+                    let tmpB = tmpPixel[2] + parseInt(errB * 7 / 16);
+                    let tmpA = tmpPixel[3] + parseInt(errA * 7 / 16);
+                    img.setPixel(i+1, j, [tmpR, tmpG, tmpB, tmpA]);
+                }
 
-            /* pixel[x    ][y + 1] := pixel[x    ][y + 1] + quant_error × 5 / 16 */
-            if ((j+1) < img.height) {
-                let tmpPixel = img.getPixel(i, j+1);
-                let tmpR = tmpPixel[0] + parseInt(errR * 5 / 16);
-                let tmpG = tmpPixel[1] + parseInt(errG * 5 / 16);
-                let tmpB = tmpPixel[2] + parseInt(errB * 5 / 16);
-                let tmpA = tmpPixel[3] + parseInt(errA * 5 / 16);
-                img.setPixel(i, j+1, [tmpR, tmpG, tmpB, tmpA]);
-            }
+                /* pixel[x - 1][y + 1] := pixel[x - 1][y + 1] + quant_error × 3 / 16 */
+                if (((i-1) >= 0) && ((j+1) < img.height)) {
+                    let tmpPixel = img.getPixel(i-1, j+1);
+                    let tmpR = tmpPixel[0] + parseInt(errR * 3 / 16);
+                    let tmpG = tmpPixel[1] + parseInt(errG * 3 / 16);
+                    let tmpB = tmpPixel[2] + parseInt(errB * 3 / 16);
+                    let tmpA = tmpPixel[3] + parseInt(errA * 3 / 16);
+                    img.setPixel(i-1, j+1, [tmpR, tmpG, tmpB, tmpA]);
+                }
 
-            /* pixel[x + 1][y + 1] := pixel[x + 1][y + 1] + quant_error × 1 / 16 */
-            if (((i+1) < img.width) && ((j+1) < img.height)) {
-                let tmpPixel = img.getPixel(i+1, j+1);
-                let tmpR = tmpPixel[0] + parseInt(errR * 1 / 16);
-                let tmpG = tmpPixel[1] + parseInt(errG * 1 / 16);
-                let tmpB = tmpPixel[2] + parseInt(errB * 1 / 16);
-                let tmpA = tmpPixel[3] + parseInt(errA * 1 / 16);
-                img.setPixel(i+1, j+1, [tmpR, tmpG, tmpB, tmpA]);
+                /* pixel[x    ][y + 1] := pixel[x    ][y + 1] + quant_error × 5 / 16 */
+                if ((j+1) < img.height) {
+                    let tmpPixel = img.getPixel(i, j+1);
+                    let tmpR = tmpPixel[0] + parseInt(errR * 5 / 16);
+                    let tmpG = tmpPixel[1] + parseInt(errG * 5 / 16);
+                    let tmpB = tmpPixel[2] + parseInt(errB * 5 / 16);
+                    let tmpA = tmpPixel[3] + parseInt(errA * 5 / 16);
+                    img.setPixel(i, j+1, [tmpR, tmpG, tmpB, tmpA]);
+                }
+
+                /* pixel[x + 1][y + 1] := pixel[x + 1][y + 1] + quant_error × 1 / 16 */
+                if (((i+1) < img.width) && ((j+1) < img.height)) {
+                    let tmpPixel = img.getPixel(i+1, j+1);
+                    let tmpR = tmpPixel[0] + parseInt(errR * 1 / 16);
+                    let tmpG = tmpPixel[1] + parseInt(errG * 1 / 16);
+                    let tmpB = tmpPixel[2] + parseInt(errB * 1 / 16);
+                    let tmpA = tmpPixel[3] + parseInt(errA * 1 / 16);
+                    img.setPixel(i+1, j+1, [tmpR, tmpG, tmpB, tmpA]);
+                }
             }
         }
     }
