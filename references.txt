@@ -39,3 +39,6 @@ https://en.wikipedia.org/wiki/Unsharp_masking
 
 Decolorize algorithm - contrast-enhancing color to grayscale conversion:
 https://pdfs.semanticscholar.org/2aa8/c902ff93391ea743da823dc05d0e0311c3f9.pdf
+
+Walkthrough of bilinear and bicubic resampling:
+https://ia802707.us.archive.org/23/items/Lectures_on_Image_Processing/EECE_4353_15_Resampling.pdf
