@@ -290,12 +290,12 @@ function derezNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
     let factor = 1 / scaleFactor;
 
     for (let dy = 0; dy < destImg.height; dy++) {
-        nearestY = Math.round(dy / factor);
+        nearestY = Math.floor((dy + 0.5) / factor);
         if (nearestY >= srcImg.height) {   // Clamp source to edge of image
             nearestY = srcImg.height - 1;
         }
         for (let dx = 0; dx < destImg.width; dx++) {
-            nearestX = Math.round(dx / factor);
+            nearestX = Math.floor((dx + 0.5) / factor);
             if (nearestX >= srcImg.width) {    // Clamp to edge of image
                 nearestX = srcImg.width - 1;
             }
