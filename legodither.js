@@ -150,8 +150,8 @@ function drawLego() {
     // rules as in the derez function
     let clipWidth = srcCanvas.width - (srcCanvas.width % scaleFactor);
     let clipHeight = srcCanvas.height - (srcCanvas.height % scaleFactor);
-    let bricksX = clipWidth / scaleFactor;
-    let bricksY = clipHeight / scaleFactor;
+    let bricksX = Math.round(clipWidth / scaleFactor);
+    let bricksY = Math.round(clipHeight / scaleFactor);
     renderStats(bricksX, bricksY, 'lego');
 }
 
