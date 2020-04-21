@@ -15,6 +15,7 @@ https://gfx.cs.princeton.edu/pubs/Gerstner_2012_PIA/Gerstner_2012_PIA_small.pdf
 
 Pixelated Image Abstraction paper (updated):
 http://research.cs.rutgers.edu/~timgerst/files/gerstner13.pdf
+http://research.cs.rutgers.edu/~timgerst/files/gerstner_thesis.pdf
 Corresponding code:
 https://github.com/fHachenberg/pix
 http://research.cs.rutgers.edu/~timgerst/
@@ -45,3 +46,21 @@ https://ia802707.us.archive.org/23/items/Lectures_on_Image_Processing/EECE_4353_
 
 Helpful example of non-integer downsampling (8-->3):
 https://www.gsn-lib.org/docs/nodes/ImageResizeNode.php
+
+Long slide deck on image resampling:
+https://ia802707.us.archive.org/23/items/Lectures_on_Image_Processing/EECE_4353_15_Resampling.pdf
+
+Short descriptions of resampling kernels:
+https://clouard.users.greyc.fr/Pantheon/experiments/rescaling/index-en.html#downsampling
+
+Short description of arbitrary resizing:
+http://fourier.eng.hmc.edu/e161/lectures/resize/node3.html
+
+How much to blur when downsampling:
+https://www2.cs.duke.edu/courses/spring19/compsci527/slides/L03_Pyramids.pdf
+
+Resampling algorithms:
+https://pixinsight.com/doc/docs/InterpolationAlgorithms/InterpolationAlgorithms.html
+
+Novel method for vectorization:
+https://arxiv.org/pdf/1403.0728.pdf
