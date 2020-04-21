@@ -185,14 +185,12 @@ function derezBilinear(srcCanvas, destCanvas, scaleFactor = 2) {
     destCanvas.setAttribute("width", destImg.width);
     destCanvas.setAttribute("height", destImg.height);
 
-    let factor = 1 / scaleFactor;
-
     for (let dy = 0; dy < destImg.height; dy++) {
-        nearestY = dy / factor;
+        nearestY = (dy + 0.5) *  scaleFactor;
         nearestYInt = Math.floor(nearestY);
         deltaY = nearestY - nearestYInt;
         for (let dx = 0; dx < destImg.width; dx++) {
-            nearestX = dx / factor;
+            nearestX = (dx + 0.5) * scaleFactor;
             nearestXInt = Math.floor(nearestX);
             deltaX = nearestX - nearestXInt;
 
@@ -303,15 +301,13 @@ function derezNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
     destCanvas.setAttribute("width", destImg.width);
     destCanvas.setAttribute("height", destImg.height);
     
-    let factor = 1 / scaleFactor;
-
     for (let dy = 0; dy < destImg.height; dy++) {
-        nearestY = Math.floor((dy + 0.5) / factor);
+        nearestY = Math.floor((dy + 0.5) * scaleFactor);
         if (nearestY >= srcImg.height) {   // Clamp source to edge of image
             nearestY = srcImg.height - 1;
         }
         for (let dx = 0; dx < destImg.width; dx++) {
-            nearestX = Math.floor((dx + 0.5) / factor);
+            nearestX = Math.floor((dx + 0.5) * scaleFactor);
             if (nearestX >= srcImg.width) {    // Clamp to edge of image
                 nearestX = srcImg.width - 1;
             }
