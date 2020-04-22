@@ -63,8 +63,14 @@ function getPalette(paletteName) {
         case "4bitgray":
             palette = Palette4BitGray.getPalette();
             break;
+        case "8bitgray":
+            palette = Palette8BitGray.getPalette();
+            break;
         case "4bitcolormac":
             palette = Palette4BitColorMac.getPalette();
+            break;
+        case "websafe":
+            palette = PaletteWebSafeColor.getPalette();
             break;
         default:
             alert("Couldn't find palette " + paletteName);

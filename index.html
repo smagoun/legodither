@@ -10,7 +10,9 @@
 <script src="palette-3bitcolor.js"></script>
 <script src="palette-2bitgray.js"></script>
 <script src="palette-4bitgray.js"></script>
+<script src="palette-8bitgray.js"></script>
 <script src="palette-4bitcolormac.js"></script>
+<script src="palette-websafe.js"></script>
 <script src="legodither.js"></script>
 <script src="imageinfo.js"></script>
 <link rel="stylesheet" type="text/css" href="legodither.css">
@@ -57,15 +59,19 @@
 
         <label for="paletteSelect">Palette:</label>
         <select id="paletteSelect" onchange="drawLego()">
-            <option value="native">Native color (no quantization)</option>
             <option value="lego2016" selected="true">LEGO 2016 palette</option>
             <option value="lego2016grays">LEGO 2016 palette (grays only)</option>
             <option value="peeron">LEGO palette (Peeron)</option>
+            <option value="void" disabled>--------</option>
             <option value="mono">Black + White</option>
-            <option value="3bitcolor">8 colors</option>
             <option value="2bitgray">4 grays</option>
             <option value="4bitgray">16 grays</option>
+            <option value="8bitgray">256 grays</option>
+            <option value="void" disabled>--------</option>
+            <option value="3bitcolor">8 colors</option>
             <option value="4bitcolormac">16 colors (Mac Palette)</option>
+            <option value="websafe">216 websafe colors</option>
+            <option value="native">Native color (no quantization)</option>
         </select>
 
         <label for="ditheringInput">Dithering enabled</label>
