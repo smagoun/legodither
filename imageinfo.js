@@ -21,10 +21,11 @@ class ImageInfo {
      * @param {*} y 
      */
     getPixel(x, y) {
-        let r = this.data[(y * this.lineStride) + (x * this.pixelStride)    ];
-        let g = this.data[(y * this.lineStride) + (x * this.pixelStride) + 1];
-        let b = this.data[(y * this.lineStride) + (x * this.pixelStride) + 2];
-        let a = this.data[(y * this.lineStride) + (x * this.pixelStride) + 3];
+        let xy = (y * this.lineStride) + (x * this.pixelStride);
+        let r = this.data[xy    ];
+        let g = this.data[xy + 1];
+        let b = this.data[xy + 2];
+        let a = this.data[xy + 3];
         return [r, g, b, a];
     }
 
@@ -37,10 +38,11 @@ class ImageInfo {
      * @param {*} pixel 4-element array of RGBA color data to write
      */
     setPixel(x, y, pixel) {
-        this.data[(y * this.lineStride) + (x * this.pixelStride)    ] = clamp(pixel[0]);
-        this.data[(y * this.lineStride) + (x * this.pixelStride) + 1] = clamp(pixel[1]);
-        this.data[(y * this.lineStride) + (x * this.pixelStride) + 2] = clamp(pixel[2]);
-        this.data[(y * this.lineStride) + (x * this.pixelStride) + 3] = clamp(pixel[3]);
+        let xy = (y * this.lineStride) + (x * this.pixelStride);
+        this.data[xy    ] = clamp(pixel[0]);
+        this.data[xy + 1] = clamp(pixel[1]);
+        this.data[xy + 2] = clamp(pixel[2]);
+        this.data[xy + 3] = clamp(pixel[3]);
     }
 
     /**
