@@ -423,6 +423,50 @@ function mmToIn(dimension) {
 }
 
 /**
+ * Convert an (s)RGB pixel to linear RGB values.
+ * 
+ * Adapted from http://www.ericbrasseur.org/gamma.html?i=1#formulas
+ * 
+ * Not sure it does what I want. :)
+ * 
+ * @param {*} pixel 
+ */
+function srgbToLinear(pixel) {
+    let n = 0.055;
+    let ret = [0, 0, 0, pixel[3]];  // Ignore alpha for now
+    for (let i = 0; i < 3; i++) {
+        if (pixel[i] <= 0.04045) {
+            ret[i] = pixel[i] / 12.92;
+        } else {
+            ret[i] = ((n + pixel[i]) / (1 + n)) ** 2.4;
+        }
+    }
+    return ret;
+}
+
+/**
+ * Convert a linear RGB pixel value back to (s)RGB
+ * 
+ * Adapted from http://www.ericbrasseur.org/gamma.html?i=1#formulas
+ * 
+ * Not sure it does what I want. :)
+ * 
+ * @param {*} pixel 
+ */
+function linearToSRGB(pixel) {
+    let n = 0.055;
+    let ret = [0, 0, 0, pixel[3]];  // Ignore alpha for now
+    for (let i = 0; i < 3; i++) {
+        if (pixel[i] <= 0.0031308) {
+            ret[i] = pixel[i] * 12.92;
+        } else {
+            ret[i] = (1 + n) * pixel[i]**(1/2.4) - n;
+        }
+    }
+    return ret;
+}
+
+/**
  * Given an RGB input color, return the nearest color from the given palette.
  * 
  * Finds the nearest color using euclidean distance:
