@@ -450,7 +450,7 @@ function findNearestColor(palette, pixel) {
             newColor[1] = palG;
             newColor[2] = palB;
         }
-        if (dist = 0) {
+        if (dist === 0) {
             //alert("found exact color match!");
             break;
         }
