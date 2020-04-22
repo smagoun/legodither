@@ -352,8 +352,8 @@ function derezBox(srcCanvas, destCanvas, scaleFactor = 2) {
             // bottom right = drightX, dbottomY
             let colLeft = Math.floor(dleftX + 0.5);
             let colRight = Math.floor(drightX - 0.5);
-            for (let y = rowTop; y < rowBottom; y++) {
-                for (let x = colLeft; x < colRight; x++) {
+            for (let y = rowTop; y <= rowBottom; y++) {
+                for (let x = colLeft; x <= colRight; x++) {
                     let pixel = srcImg.getPixel(x, y);
                     output[0] += pixel[0];
                     output[1] += pixel[1];
