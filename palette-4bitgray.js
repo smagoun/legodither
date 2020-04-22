@@ -1,10 +1,13 @@
 
-class Palette4BitGray {
+class Palette4BitGray extends Palette {
     static getPalette() {
-        let palette = [];
-        for (i = 0; i < 256; i+= 17) {
-            palette.push([i, i, i]);
+        if (this.palette.length === 0) {
+            for (i = 0; i < 256; i+= 17) {
+                this.palette.push([i, i, i]);
+            }
         }
-        return palette;
+        return super.getPalette();
     }
 }
+
+Palette4BitGray.palette = [];

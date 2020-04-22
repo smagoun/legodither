@@ -3,9 +3,16 @@
  * RGB values determined via OSX Digital Color Meter App
 */
 
-class PaletteLEGO2016Grays {
+class PaletteLEGO2016Grays extends Palette {
 
     static getPalette() {
+        if (this.palette.length === 0) {
+            this.palette = this.makePalette();
+        }
+        return super.getPalette();
+    }
+
+    static makePalette() {
         let palette = [];
         let radix = 10;
         let tmp;

@@ -3,9 +3,16 @@
  * Converted to JSON array via https://www.convertjson.com/html-table-to-json.htm
 */
 
-class PalettePeeron {
+class PalettePeeron extends Palette {
 
     static getPalette() {
+        if (this.palette.length === 0) {
+            this.palette = this.makePalette();
+        }
+        return super.getPalette();
+    }
+
+    static makePalette() {
         let palette = [];
         let radix = 10;
         let tmp;

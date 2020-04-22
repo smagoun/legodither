@@ -1,9 +1,8 @@
 
-class PaletteMono {
-    static getPalette() {
-        return [
-            [0, 0, 0],
-            [255, 255, 255]
-        ];
-    }
+class PaletteMono extends Palette {
 }
+
+PaletteMono.palette = [
+    [0, 0, 0],
+    [255, 255, 255]
+];
