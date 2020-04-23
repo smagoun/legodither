@@ -8,3 +8,5 @@ Palette2BitGray.palette = [
     [169, 169, 169],
     [255, 255, 255],
     ];
+
+Palette2BitGray.isColor = false;

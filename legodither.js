@@ -818,6 +818,14 @@ Implement Floyd-Steinberg dithering:
         for (let i = 0; i < img.width; i++) {
             let pixel = img.getPixel(i, j);
 
+            if (!palette.isColor()) {
+                // Special case for grayscale: convert to perceptual grayscale
+                // Algorithm from http://entropymine.com/imageworsener/grayscale/
+                let gray = ((0.2126 * (pixel[0] ** 2.2)) + (0.7152 * (pixel[1] ** 2.2))
+                    + (0.0722 * (pixel[2] ** 2.2))) ** (1/2.2);
+                pixel = [gray, gray, gray, pixel[3]];
+            }
+
             // Find the nearest color in the palette
             let nearest = findNearestColor(palette, pixel);
 

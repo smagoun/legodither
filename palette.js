@@ -13,7 +13,12 @@ class Palette {
         }
         return this.paletteLinear;
     }
+
+    isColor() {
+        return this.constructor.isColor;
+    }
 }
 
 Palette.palette = [];
 Palette.paletteLinear = [];
+Palette.isColor = true;

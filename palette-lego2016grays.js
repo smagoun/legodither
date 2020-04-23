@@ -34,3 +34,4 @@ PaletteLEGO2016Grays.colors = [
   ["199"," Dark Stone Grey",101,103,101,0,0  ],
   ["26"," Black",0,0,0,0,0  ],
 ];
+PaletteLEGO2016Grays.isColor = false;

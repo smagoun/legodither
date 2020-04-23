@@ -11,3 +11,4 @@ class Palette4BitGray extends Palette {
 }
 
 Palette4BitGray.palette = [];
+Palette4BitGray.isColor = false;
