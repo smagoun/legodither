@@ -5,9 +5,9 @@
 
 class PaletteLEGO2016 extends Palette {
 
-    static getPalette() {
-        if (this.palette.length === 0) {
-            this.palette = this.makePalette();
+    getPalette() {
+        if (this.constructor.palette.length === 0) {
+            this.constructor.palette = this.constructor.makePalette();
         }
         return super.getPalette();
     }

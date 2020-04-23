@@ -1,9 +1,9 @@
 
 class Palette8BitGray extends Palette {
-    static getPalette() {
-        if (this.palette.length === 0) {
+    getPalette() {
+        if (this.constructor.palette.length === 0) {
             for (i = 0; i < 256; i++) {
-                this.palette.push([i, i, i]);
+                this.constructor.palette.push([i, i, i]);
             }
         }
         return super.getPalette();

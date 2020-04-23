@@ -39,39 +39,17 @@ function resetLevels() {
 function getPalette(paletteName) {
     let palette;
     switch (paletteName) {
-        case "native":
-            palette = null;
-            break;
-        case "lego2016":
-            palette = PaletteLEGO2016.getPalette();
-            break;
-        case "lego2016grays":
-            palette = PaletteLEGO2016Grays.getPalette();
-            break;
-        case "peeron":
-            palette = PalettePeeron.getPalette();
-            break;
-        case "mono":
-            palette = PaletteMono.getPalette();
-            break;
-        case "3bitcolor":
-            palette = Palette3BitColor.getPalette();
-            break;
-        case "2bitgray":
-            palette = Palette2BitGray.getPalette();
-            break;
-        case "4bitgray":
-            palette = Palette4BitGray.getPalette();
-            break;
-        case "8bitgray":
-            palette = Palette8BitGray.getPalette();
-            break;
-        case "4bitcolormac":
-            palette = Palette4BitColorMac.getPalette();
-            break;
-        case "websafe":
-            palette = PaletteWebSafeColor.getPalette();
-            break;
+        case "native":          palette = null;                         break;
+        case "lego2016":        palette = new PaletteLEGO2016();        break;
+        case "lego2016grays":   palette = new PaletteLEGO2016Grays();   break;
+        case "peeron":          palette = new PalettePeeron();          break;
+        case "mono":            palette = new PaletteMono();            break;
+        case "3bitcolor":       palette = new Palette3BitColor();       break;
+        case "2bitgray":        palette = new Palette2BitGray();        break;
+        case "4bitgray":        palette = new Palette4BitGray();        break;
+        case "8bitgray":        palette = new Palette8BitGray();        break;
+        case "4bitcolormac":    palette = new Palette4BitColorMac();    break;
+        case "websafe":         palette = new PaletteWebSafeColor();    break;
         default:
             alert("Couldn't find palette " + paletteName);
     }
@@ -485,10 +463,12 @@ function findNearestColor(palette, pixel) {
 
     let distance = Infinity;
     let dist;
-    for (let n = 0; n < palette.length; n++) {
-        palR = palette[n][0];
-        palG = palette[n][1];
-        palB = palette[n][2];
+    let pal = palette.getPalette();
+    for (let n = 0; n < pal.length; n++) {
+        palR = pal[n][0];
+        palG = pal[n][1];
+        palB = pal[n][2];
+
         dist = Math.sqrt(
                 ((r - palR) * (r - palR)) + 
                 ((g - palG) * (g - palG)) + 

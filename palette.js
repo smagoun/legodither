@@ -1,11 +1,11 @@
 
 class Palette {
 
-    static getPalette() {
-        return this.palette;
+    getPalette() {
+        return this.constructor.palette;
     }
 
-    static getPaletteLinear() {
+    getPaletteLinear() {
         if (this.paletteLinear === []) {
             for (i = 0; i < this.palette.length; i++) {
                 this.paletteLinear[i] = srgbToLinear(this.palette[i]);
