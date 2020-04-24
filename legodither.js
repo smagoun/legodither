@@ -842,40 +842,40 @@ Implement Floyd-Steinberg dithering:
                 /* pixel[x + 1][y    ] := pixel[x + 1][y    ] + quant_error × 7 / 16 */
                 if ((i+1) < img.width) {
                     let tmpPixel = img.getPixel(i+1, j);
-                    let tmpR = tmpPixel[0] + parseInt(errR * 7 / 16);
-                    let tmpG = tmpPixel[1] + parseInt(errG * 7 / 16);
-                    let tmpB = tmpPixel[2] + parseInt(errB * 7 / 16);
-                    let tmpA = tmpPixel[3] + parseInt(errA * 7 / 16);
+                    let tmpR = tmpPixel[0] + Math.round(errR * 7 / 16);
+                    let tmpG = tmpPixel[1] + Math.round(errG * 7 / 16);
+                    let tmpB = tmpPixel[2] + Math.round(errB * 7 / 16);
+                    let tmpA = tmpPixel[3] + Math.round(errA * 7 / 16);
                     img.setPixel(i+1, j, [tmpR, tmpG, tmpB, tmpA]);
                 }
 
                 /* pixel[x - 1][y + 1] := pixel[x - 1][y + 1] + quant_error × 3 / 16 */
                 if (((i-1) >= 0) && ((j+1) < img.height)) {
                     let tmpPixel = img.getPixel(i-1, j+1);
-                    let tmpR = tmpPixel[0] + parseInt(errR * 3 / 16);
-                    let tmpG = tmpPixel[1] + parseInt(errG * 3 / 16);
-                    let tmpB = tmpPixel[2] + parseInt(errB * 3 / 16);
-                    let tmpA = tmpPixel[3] + parseInt(errA * 3 / 16);
+                    let tmpR = tmpPixel[0] + Math.round(errR * 3 / 16);
+                    let tmpG = tmpPixel[1] + Math.round(errG * 3 / 16);
+                    let tmpB = tmpPixel[2] + Math.round(errB * 3 / 16);
+                    let tmpA = tmpPixel[3] + Math.round(errA * 3 / 16);
                     img.setPixel(i-1, j+1, [tmpR, tmpG, tmpB, tmpA]);
                 }
 
                 /* pixel[x    ][y + 1] := pixel[x    ][y + 1] + quant_error × 5 / 16 */
                 if ((j+1) < img.height) {
                     let tmpPixel = img.getPixel(i, j+1);
-                    let tmpR = tmpPixel[0] + parseInt(errR * 5 / 16);
-                    let tmpG = tmpPixel[1] + parseInt(errG * 5 / 16);
-                    let tmpB = tmpPixel[2] + parseInt(errB * 5 / 16);
-                    let tmpA = tmpPixel[3] + parseInt(errA * 5 / 16);
+                    let tmpR = tmpPixel[0] + Math.round(errR * 5 / 16);
+                    let tmpG = tmpPixel[1] + Math.round(errG * 5 / 16);
+                    let tmpB = tmpPixel[2] + Math.round(errB * 5 / 16);
+                    let tmpA = tmpPixel[3] + Math.round(errA * 5 / 16);
                     img.setPixel(i, j+1, [tmpR, tmpG, tmpB, tmpA]);
                 }
 
                 /* pixel[x + 1][y + 1] := pixel[x + 1][y + 1] + quant_error × 1 / 16 */
                 if (((i+1) < img.width) && ((j+1) < img.height)) {
                     let tmpPixel = img.getPixel(i+1, j+1);
-                    let tmpR = tmpPixel[0] + parseInt(errR * 1 / 16);
-                    let tmpG = tmpPixel[1] + parseInt(errG * 1 / 16);
-                    let tmpB = tmpPixel[2] + parseInt(errB * 1 / 16);
-                    let tmpA = tmpPixel[3] + parseInt(errA * 1 / 16);
+                    let tmpR = tmpPixel[0] + Math.round(errR * 1 / 16);
+                    let tmpG = tmpPixel[1] + Math.round(errG * 1 / 16);
+                    let tmpB = tmpPixel[2] + Math.round(errB * 1 / 16);
+                    let tmpA = tmpPixel[3] + Math.round(errA * 1 / 16);
                     img.setPixel(i+1, j+1, [tmpR, tmpG, tmpB, tmpA]);
                 }
             }
