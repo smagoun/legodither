@@ -80,16 +80,53 @@ function getResizingFilter(type) {
     return func;
 }
 
+/**
+ * Scratch for canvas-swapping routine
+ */
+var currCanvas;
+/**
+ * Scratch for canvas-swapping routine
+ */
+var nextCanvas;
+/**
+ * Initialize the canvas-swapping routine
+ * 
+ * @param {*} scratchACanvas 
+ * @param {*} scratchBCanvas 
+ */
+function setupScratch(scratchACanvas, scratchBCanvas) {
+    currCanvas = scratchACanvas;
+    nextCanvas = scratchBCanvas;
+}
+/**
+ * Returns the currently-active scratch canvas
+ */
+function getCurrCanvas() {
+    return currCanvas;
+}
+/**
+ * Returns the next scratch canvas, effectively
+ * swapping current + next
+ */
+function getNextCanvas() {
+    let tmp = currCanvas;
+    currCanvas = nextCanvas;
+    nextCanvas = tmp;
+    return currCanvas;
+}
 
 /**
  * Read the source image and draw a lego-ized version of it into the lego canvas.
  * 
- * Uses the 'transformed' and 'scratch' canvases as intermediate scratch space.
+ * Uses a pair of additional canvases as scratch space. Swaps between them depending
+ * on the operation; some operations run in-place and others copy from one canvas
+ * to another.
  */
 function drawLego() {
     let srcCanvas = document.getElementById("originalCanvas");
-    let scratchCanvas = document.getElementById("scratchCanvas");
-    let transformedCanvas = document.getElementById("transformedCanvas");
+    let scratchACanvas = document.getElementById("scratchACanvas");
+    let scratchBCanvas = document.getElementById("scratchBCanvas");
+    setupScratch(scratchACanvas, scratchBCanvas);
     let outputCanvas = document.getElementById("legoCanvas");
 
     let scaleFactor = Number(document.getElementById("scaleInput").value);
@@ -107,12 +144,12 @@ function drawLego() {
     let paletteName = p.options[p.selectedIndex].value;
     let palette = getPalette(paletteName);
 
-    convolve(srcCanvas, transformedCanvas);
+    copyImage(srcCanvas, getCurrCanvas());
 
     // TODO: Should probably split the level adjustment into 2. Adjust input levels
     // before applying destructive transformations (convolutions, scaling), and
     // apply output levels on rendering
-    adjustLevels(transformedCanvas, inputLevelsShadow, inputLevelsMidpoint, inputLevelsHighlight, outputLevelsShadow, outputLevelsHighlight);
+    adjustLevels(getCurrCanvas(), inputLevelsShadow, inputLevelsMidpoint, inputLevelsHighlight, outputLevelsShadow, outputLevelsHighlight);
 
     // Downsample the image using the selected algorithm
     // TODO: What is the ideal blur before downsizing? Box filter already blurs;
@@ -120,13 +157,13 @@ function drawLego() {
     let r = document.getElementById("resizeSelect");
     let resizeFilterName = r.options[r.selectedIndex].value;
     let resize = getResizingFilter(resizeFilterName);
-    resize(transformedCanvas, scratchCanvas, scaleFactor);
-    //renderScaled(scratchCanvas, transformedCanvas, scaleFactor);
+    resize(getCurrCanvas(), getNextCanvas(), scaleFactor);
 
     if (palette != null) {
-        decolor(scratchCanvas, palette, dithering);
+        decolor(getCurrCanvas(), palette, dithering, linearColor);
+        t1 = performance.now();
     }
-    renderScaled(scratchCanvas, outputCanvas, Math.round(scaleFactor));
+    renderScaled(getCurrCanvas(), outputCanvas, Math.round(scaleFactor));
 
     renderStats(srcCanvas.width, srcCanvas.height, 'orig');
 
@@ -156,6 +193,21 @@ function renderStats(bricksX, bricksY, outputPrefix) {
     document.getElementById(outputPrefix + 'HeightInch').textContent = mmToIn(bricksY * brickWidth);
 }
 
+/**
+ * Copies an image from one canvas to another.
+ * 
+ * @param {*} srcCanvas 
+ * @param {*} destCanvas 
+ */
+function copyImage(srcCanvas, destCanvas) {
+    let srcContext = srcCanvas.getContext("2d");
+    let destContext = destCanvas.getContext("2d");
+    destCanvas.setAttribute("width", srcCanvas.width);
+    destCanvas.setAttribute("height", srcCanvas.height);
+    destContext.putImageData(srcContext.getImageData(0, 0, srcCanvas.width, srcCanvas.height), 0, 0);
+}
+
+/**
 /**
  * Reduce the resolution of the source image and render it into the destination image
  * using a bilinear interpolation algorithm.
