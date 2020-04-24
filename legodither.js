@@ -130,7 +130,7 @@ function drawLego() {
     let outputCanvas = document.getElementById("legoCanvas");
 
     let scaleFactor = Number(document.getElementById("scaleInput").value);
-    //let sharpenFactor = Number(document.getElementById("sharpenInput").value);
+    let sharpenFactor = Number(document.getElementById("sharpenInput").value);
 
     let dithering = document.getElementById("ditheringInput").checked;
 
@@ -158,6 +158,8 @@ function drawLego() {
     let resizeFilterName = r.options[r.selectedIndex].value;
     let resize = getResizingFilter(resizeFilterName);
     resize(getCurrCanvas(), getNextCanvas(), scaleFactor);
+
+    unsharpMask(getCurrCanvas(), getNextCanvas(), sharpenFactor);
 
     if (palette != null) {
         decolor(getCurrCanvas(), palette, dithering, linearColor);
@@ -208,6 +210,58 @@ function copyImage(srcCanvas, destCanvas) {
 }
 
 /**
+ * Apply an unsharp mask to the image, placing the output in the destination
+ * canvas.
+ * 
+ * @param {*} srcCanvas 
+ * @param {*} destCanvas 
+ * @param {*} factor
+ */
+function unsharpMask(srcCanvas, destCanvas, factor) {
+    // TODO: don't steal the convolution filter for this
+    let kernel = getConvolutionKernel();
+
+    let srcImg = ImageInfo.fromCanvas(srcCanvas);
+    destCanvas.setAttribute("width", srcCanvas.width);
+    destCanvas.setAttribute("height", srcCanvas.height);
+    let destImg = ImageInfo.fromCanvas(destCanvas);
+
+    for (y = 0; y < srcCanvas.height; y++) {
+        for (x = 0; x < srcCanvas.width; x++) {
+            origPixel = srcImg.getPixel(x, y);
+            // Don't apply convolutions to edge cases where the filter needs to look
+            // outside image boundaries
+            if (x == 0 || y == 0 || x == (srcCanvas.width-1) || y == (srcCanvas.height-1)) {
+                destImg.setPixel(x, y, origPixel);
+                continue;
+            }
+            // TODO: Use a gaussian blur to find the low-frequency data. For now
+            // borrow the convolution kernel. Could also use a box blur for this.
+            let r=0, g=0, b=0, a=0;
+            for (ky = -1; ky < 2; ky++) {
+                for (kx = -1; kx < 2; kx++) {
+                    pixel = srcImg.getPixel(x+kx, y+ky);
+                    r += kernel[ky + 1][kx + 1] * pixel[0];
+                    g += kernel[ky + 1][kx + 1] * pixel[1];
+                    b += kernel[ky + 1][kx + 1] * pixel[2];
+                    a += pixel[3];  // Ignore alpha for now
+                }
+            }
+            // Subtract the low-frequency components from the high-frequency components,
+            // then combine them with the original to get the sharpened original
+            newPixel = [
+                origPixel[0] + ((origPixel[0] - r) * factor),
+                origPixel[1] + ((origPixel[1] - g) * factor),
+                origPixel[2] + ((origPixel[2] - b) * factor),
+                origPixel[3],   // Ignore alpha for now
+            ];
+            destImg.setPixel(x, y, newPixel);
+        }
+    }
+    let destContext = destCanvas.getContext("2d");
+    destContext.putImageData(destImg.imageData, 0, 0);
+}
+
 /**
  * Reduce the resolution of the source image and render it into the destination image
  * using a bilinear interpolation algorithm.
