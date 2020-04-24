@@ -468,12 +468,11 @@ function findNearestColor(palette, pixel) {
         palR = pal[n][0];
         palG = pal[n][1];
         palB = pal[n][2];
-
-        dist = Math.sqrt(
-                ((r - palR) * (r - palR)) + 
+        // We do't care about the actual distance, just the relative distance,
+        // so we can avoid an expensive sqrt()
+        dist = ((r - palR) * (r - palR)) + 
                 ((g - palG) * (g - palG)) + 
-                ((b - palB) * (b - palB))
-                );
+            ((b - palB) * (b - palB));
         if (dist < distance) {
             distance = dist;
             newColor[0] = palR;
