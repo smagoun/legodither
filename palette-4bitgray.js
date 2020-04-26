@@ -1,12 +1,12 @@
 
 class Palette4BitGray extends Palette {
-    getPalette() {
-        if (this.constructor.palette.length === 0) {
-            for (i = 0; i < 256; i+= 17) {
-                this.constructor.palette.push([i, i, i]);
-            }
+
+    static makePalette() {
+        let ret = [];
+        for (i = 0; i < 256; i+= 17) {
+            ret.push([new Color([i, i, i]), true]);   // Colors are always enabled at first
         }
-        return super.getPalette();
+        return ret;
     }
 }
 

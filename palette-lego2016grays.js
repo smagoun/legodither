@@ -5,22 +5,17 @@
 
 class PaletteLEGO2016Grays extends Palette {
 
-    getPalette() {
-        if (this.constructor.palette.length === 0) {
-            this.constructor.palette = this.constructor.makePalette();
-        }
-        return super.getPalette();
-    }
-
     static makePalette() {
         let palette = [];
         let radix = 10;
-        let tmp;
+        let rgb, name, color;
         for (let i = 1; i < PaletteLEGO2016Grays.colors.length; i++) {  // 1-indexed to skip header row
-            tmp = [parseInt(PaletteLEGO2016Grays.colors[i][2], radix), 
+            name = PaletteLEGO2016Grays.colors[i][1];
+            rgb = [parseInt(PaletteLEGO2016Grays.colors[i][2], radix), 
                     parseInt(PaletteLEGO2016Grays.colors[i][3], radix), 
                     parseInt(PaletteLEGO2016Grays.colors[i][4], radix)];
-            palette.push(tmp);
+            color = new Color(rgb, name);
+            palette.push([color, true]);   // Colors are always enabled at first
         }
         //alert("Found " + palette.length + " colors in palette")
         return palette;

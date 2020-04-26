@@ -9,3 +9,33 @@
 .scratch {
     display: none;
 }
+
+.palette-checkbox span {
+    display: block;
+}
+
+.palette-checkbox span::before {
+    content: "";
+    display: block;
+    /*position: absolute;*/
+    width: 20px;
+    height: 20px;
+    border: 1px solid;
+    background-color: var(--checked-color);
+    opacity: 0.5;   /* when unchecked */
+}
+
+.palette-checkbox span::after {
+    width: 20px;
+    height: 20px;
+}
+
+.hidden-checkbox {
+    opacity: 0;
+    /*z-index: -1;*/
+    position: absolute;
+  }
+
+  .palette-checkbox input[type="checkbox"]:checked + span::before {
+      opacity: 1.0;
+  }

@@ -5,26 +5,21 @@
 
 class PaletteLEGO2016 extends Palette {
 
-    getPalette() {
-        if (this.constructor.palette.length === 0) {
-            this.constructor.palette = this.constructor.makePalette();
-        }
-        return super.getPalette();
-    }
-
     static makePalette() {
         let palette = [];
         let radix = 10;
-        let tmp;
+        let rgb, name, color;
         for (let i = 1; i < PaletteLEGO2016.colors.length; i++) {  // 1-indexed to skip header row
             if ((PaletteLEGO2016.colors[i][5] == 1) || (PaletteLEGO2016.colors[i][6] == 1)) {
                 // Skip transparent + metallic colors
                 continue;
             }
-            tmp = [parseInt(PaletteLEGO2016.colors[i][2], radix), 
+            name = PaletteLEGO2016.colors[i][1];
+            rgb = [parseInt(PaletteLEGO2016.colors[i][2], radix), 
                     parseInt(PaletteLEGO2016.colors[i][3], radix), 
                     parseInt(PaletteLEGO2016.colors[i][4], radix)];
-            palette.push(tmp);
+            color = new Color(rgb, name);
+            palette.push([color, true]);   // Colors are always enabled at first
         }
         //alert("Found " + palette.length + " colors in palette")
         return palette;

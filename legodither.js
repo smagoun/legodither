@@ -37,25 +37,31 @@ function resetLevels() {
  * @param {*} paletteName 
  */
 function getPalette(paletteName) {
-    let palette;
+    if (currPalette != null && paletteName === currPalette.getId()) {
+        return currPalette;
+    }
     switch (paletteName) {
-        case "native":          palette = null;                         break;
-        case "lego2016":        palette = new PaletteLEGO2016();        break;
-        case "lego2016grays":   palette = new PaletteLEGO2016Grays();   break;
-        case "peeron":          palette = new PalettePeeron();          break;
-        case "mono":            palette = new PaletteMono();            break;
-        case "3bitcolor":       palette = new Palette3BitColor();       break;
-        case "2bitgray":        palette = new Palette2BitGray();        break;
-        case "4bitgray":        palette = new Palette4BitGray();        break;
-        case "8bitgray":        palette = new Palette8BitGray();        break;
-        case "4bitcolormac":    palette = new Palette4BitColorMac();    break;
-        case "websafe":         palette = new PaletteWebSafeColor();    break;
+        case "native":          currPalette = null;                                     break;
+        case "lego2016":        currPalette = new PaletteLEGO2016(paletteName);         break;
+        case "lego2016grays":   currPalette = new PaletteLEGO2016Grays(paletteName);    break;
+        case "peeron":          currPalette = new PalettePeeron(paletteName);           break;
+        case "mono":            currPalette = new PaletteMono(paletteName);             break;
+        case "3bitcolor":       currPalette = new Palette3BitColor(paletteName);        break;
+        case "2bitgray":        currPalette = new Palette2BitGray(paletteName);         break;
+        case "4bitgray":        currPalette = new Palette4BitGray(paletteName);         break;
+        case "8bitgray":        currPalette = new Palette8BitGray(paletteName);         break;
+        case "4bitcolormac":    currPalette = new Palette4BitColorMac(paletteName);     break;
+        case "websafe":         currPalette = new PaletteWebSafeColor(paletteName);     break;
         default:
             alert("Couldn't find palette " + paletteName);
     }
-    return palette;
+    return currPalette;
 }
 
+/**
+ * Current palette
+ */
+var currPalette = null;
 
 /**
  * Return a resizing filter function.
@@ -176,6 +182,8 @@ function drawLego() {
     let bricksX = Math.round(clipWidth / scaleFactor);
     let bricksY = Math.round(clipHeight / scaleFactor);
     renderStats(bricksX, bricksY, 'lego');
+
+    drawPalette(palette);
 }
 
 /**
@@ -194,6 +202,65 @@ function renderStats(bricksX, bricksY, outputPrefix) {
     document.getElementById(outputPrefix + 'WidthInch').textContent = mmToIn(bricksX * brickWidth);
     document.getElementById(outputPrefix + 'HeightInch').textContent = mmToIn(bricksY * brickWidth);
 }
+
+/**
+ * Toggles the color at the given index in the color palette
+ * 
+ * @param {*} index 
+ */
+function toggleColor(index) {
+    if (currPalette != null) {
+        currPalette.toggleColor(index);
+    }
+}
+
+/**
+ * Draws the color palette
+ * 
+ * @param {Palette} palette 
+ */
+function drawPalette(palette) {
+    let displayWidth = 8;
+    let tableDiv = document.getElementById("paletteDisplay");
+    let newTable = document.createElement("table");
+    let body = newTable.createTBody();
+    let row, cell;
+    if (palette != null) {
+        let paletteList = palette.getPalette();
+        for (let i = 0; i < paletteList.length; i++) {
+            if (i % displayWidth === 0) {
+                row = body.insertRow();
+            }
+            let color = paletteList[i][0];
+            let rgb = color.getRGB();
+            let enabled = paletteList[i][1];
+            cell = row.insertCell();
+            // Wrap the checkbox in a label w/ an empty span. Hack to get custom
+            // checkboxes in Safari
+            let label = document.createElement("label");
+            label.setAttribute("class", "palette-checkbox");
+            if (color.getName() != undefined) {
+                label.setAttribute("title", color.getName());
+            }
+            let span = document.createElement("span");
+            span.setAttribute("style", "--checked-color: rgb(" + rgb[0] + ", "
+                + rgb[1] + ", " + rgb[2] + ")");
+            let cb = document.createElement("input");
+            cb.setAttribute("type", "checkbox");
+            cb.setAttribute("name", i);
+            cb.setAttribute("onchange", "toggleColor(" + i + "); drawLego();");
+            cb.setAttribute("class", "hidden-checkbox");
+            if (enabled) {
+                cb.checked = true;
+            }
+            label.appendChild(cb);
+            label.appendChild(span);
+            cell.appendChild(label);
+        }
+    }
+    tableDiv.replaceChild(newTable, tableDiv.firstChild);
+}
+
 
 /**
  * Copies an image from one canvas to another.
@@ -569,11 +636,16 @@ function findNearestColor(palette, pixel) {
 
     let distance = Infinity;
     let dist;
-    let pal = palette.getPalette();
-    for (let n = 0; n < pal.length; n++) {
-        palR = pal[n][0];
-        palG = pal[n][1];
-        palB = pal[n][2];
+    let paletteList = palette.getPalette();
+    for (let n = 0; n < paletteList.length; n++) {
+        let enabled = paletteList[n][1];
+        if (!enabled) {
+            continue;
+        }
+        let pal = paletteList[n][0].getRGB();
+        palR = pal[0];
+        palG = pal[1];
+        palB = pal[2];
         // We do't care about the actual distance, just the relative distance,
         // so we can avoid an expensive sqrt()
         dist = ((r - palR) * (r - palR)) + 
