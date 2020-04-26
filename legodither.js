@@ -261,6 +261,18 @@ function drawPalette(palette) {
     tableDiv.replaceChild(newTable, tableDiv.firstChild);
 }
 
+/**
+ * Enable all colors in the palette
+ */
+function enableAllColors() {
+    if (currPalette != null) {
+        let paletteList = currPalette.getPalette();
+        for (let i = 0; i < paletteList.length; i++) {
+            paletteList[i][1] = true;
+        }
+    }
+    drawLego();
+}
 
 /**
  * Copies an image from one canvas to another.
