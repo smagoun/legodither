@@ -168,8 +168,7 @@ function drawLego() {
     unsharpMask(getCurrCanvas(), getNextCanvas(), sharpenFactor);
 
     if (palette != null) {
-        decolor(getCurrCanvas(), palette, dithering, linearColor);
-        t1 = performance.now();
+        decolor(getCurrCanvas(), palette, dithering);
     }
     renderScaled(getCurrCanvas(), outputCanvas, Math.round(scaleFactor));
 
