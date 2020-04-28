@@ -44,6 +44,8 @@ function getPalette(paletteName) {
         case "native":          currPalette = null;                                     break;
         case "lego2016":        currPalette = new PaletteLEGO2016(paletteName);         break;
         case "lego2016grays":   currPalette = new PaletteLEGO2016Grays(paletteName);    break;
+        case "legoPABplates":   currPalette = new PaletteLEGOPABPlates(paletteName);    break;
+        case "legoPABbricks":   currPalette = new PaletteLEGOPABBricks(paletteName);    break;
         case "peeron":          currPalette = new PalettePeeron(paletteName);           break;
         case "mono":            currPalette = new PaletteMono(paletteName);             break;
         case "3bitcolor":       currPalette = new Palette3BitColor(paletteName);        break;

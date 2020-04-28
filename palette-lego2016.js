@@ -1,23 +1,22 @@
 /**
  * Official LEGO 2016 palette from https://www.thebrickfan.com/wp-content/uploads/2016/05/LEGO-Color-Palette-2016.pdf
  * RGB values determined via OSX Digital Color Meter App
-*/
-
+ */
 class PaletteLEGO2016 extends Palette {
 
     static makePalette() {
         let palette = [];
         let radix = 10;
         let rgb, name, color;
-        for (let i = 1; i < PaletteLEGO2016.colors.length; i++) {  // 1-indexed to skip header row
-            if ((PaletteLEGO2016.colors[i][5] == 1) || (PaletteLEGO2016.colors[i][6] == 1)) {
+        for (let i = 1; i < this.colors.length; i++) {  // 1-indexed to skip header row
+            if ((this.colors[i][5] == 1) || (this.colors[i][6] == 1)) {
                 // Skip transparent + metallic colors
                 continue;
             }
-            name = PaletteLEGO2016.colors[i][1];
-            rgb = [parseInt(PaletteLEGO2016.colors[i][2], radix), 
-                    parseInt(PaletteLEGO2016.colors[i][3], radix), 
-                    parseInt(PaletteLEGO2016.colors[i][4], radix)];
+            name = this.colors[i][1];
+            rgb = [parseInt(this.colors[i][2], radix), 
+                    parseInt(this.colors[i][3], radix), 
+                    parseInt(this.colors[i][4], radix)];
             color = new Color(rgb, name);
             palette.push([color, true]);   // Colors are always enabled at first
         }

@@ -6,6 +6,8 @@
 <script src="color.js"></script>
 <script src="palette-lego2016.js"></script>
 <script src="palette-lego2016grays.js"></script>
+<script src="palette-legopickabrickplates.js"></script>
+<script src="palette-legopickabrickbricks.js"></script>
 <script src="palette-peeron.js"></script>
 <script src="palette-mono.js"></script>
 <script src="palette-3bitcolor.js"></script>
@@ -60,8 +62,10 @@
 
         <label for="paletteSelect">Palette:</label>
         <select id="paletteSelect" onchange="drawLego()">
-            <option value="lego2016" selected="true">LEGO 2016 palette</option>
+            <option value="lego2016">LEGO 2016 palette</option>
             <option value="lego2016grays">LEGO 2016 palette (grays only)</option>
+            <option value="legoPABplates" selected="true">LEGO Pick-A-Brick 1x1 plates</option>
+            <option value="legoPABbricks">LEGO Pick-A-Brick 1x1 bricks</option>
             <option value="peeron">LEGO palette (Peeron)</option>
             <option value="void" disabled>--------</option>
             <option value="mono">Black + White</option>
