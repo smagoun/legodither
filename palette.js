@@ -55,6 +55,8 @@ class Palette {
             let name = "";
             if (tmp.length >= 2) {
                 name = tmp[1];
+            } else {
+                name = "" + tmp;
             }
             let color = new Color([tmp[0][0], tmp[0][1], tmp[0][2]], name);
             ret.push([color, true]);   // Colors are always enabled at first
