@@ -73,15 +73,9 @@ var currPalette = null;
 function getResizingFilter(type) {
     let func = derezBox;
     switch (type) {
-        case "box":
-            func = derezBox;
-            break;
-        case "nearestNeighbor":
-            func = derezNearestNeighbor;
-            break;
-        case "bilinear":
-            func = derezBilinear;
-            break;
+        case "box":             func = derezBox;                break;
+        case "nearestNeighbor": func = derezNearestNeighbor;    break;
+        case "bilinear":        func = derezBilinear;           break;
         default:
             alert("Unknown resizing filter " + type);
     }
