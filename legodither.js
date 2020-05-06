@@ -179,6 +179,11 @@ function drawLego() {
     renderStats(bricksX, bricksY, 'lego');
 
     drawPalette(palette);
+
+    // Figure out bill of materials
+    let img = ImageInfo.fromCanvas(getCurrCanvas());
+    let {cost, bom} = calculateBOMSingleLines(img);
+    renderBOM(cost, bom, palette);
 }
 
 /**

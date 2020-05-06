@@ -18,6 +18,8 @@
 <script src="palette-websafe.js"></script>
 <script src="legodither.js"></script>
 <script src="imageinfo.js"></script>
+<script src="bom.js"></script>
+<script src="brick.js"></script>
 <link rel="stylesheet" type="text/css" href="legodither.css">
 
 </head>
@@ -172,7 +174,16 @@
             <canvas id="scratchACanvas"></canvas>
             <canvas id="scratchBCanvas"></canvas>
         </div>
+    </div>
 
+    <div class="bomContainer">
+        <p>Bill of Materials</p>
+        <div class="bom">
+            <p>Total cost: <span id="bomTotalCost"></span></p>
+            <p>Total bricks: <span id="bomTotalBrickCount"></span></p>
+            <p>Bricks: </p>
+            <div id="brickList"><div class="dummy"></div>
+        </div>
     </div>
 </body>
 </html>
