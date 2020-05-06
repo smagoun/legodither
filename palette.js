@@ -74,6 +74,21 @@ class Palette {
     isColor() {
         return this.constructor.isColor;
     }
+
+    /**
+     * Look up the name of a color using its RGB values. Ignores alpha channel.
+     * 
+     * @param {*} rgb 
+     */
+    getColorName(rgb) {
+        for (const [palColor, ] of this.palette) {
+            const tmp = palColor.getRGB();
+            if (Color.sameColor(tmp, rgb)) {
+                return palColor.getName();
+            }
+        }
+        return rgb;
+    }
 }
 
 Palette.palette = [];
