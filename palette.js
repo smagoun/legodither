@@ -83,13 +83,14 @@ class Palette {
      * @param {*} rgba 
      */
     getColorName(rgba) {
-        for (const [palColor, ] of this.palette) {
-            const tmp = palColor.getRGBA();
-            if (Color.sameColor(tmp, rgba)) {
-                return palColor.getName();
+        if (this.nameMap === undefined) {
+            this.nameMap = new Map();
+            for (const [palColor, ] of this.palette) {
+                this.nameMap.set("" + palColor.getRGBA(), palColor.getName());
             }
         }
-        return rgba;
+        let ret = this.nameMap.get("" + rgba);
+        return (ret === undefined) ? rgba : ret;
     }
 }
 
