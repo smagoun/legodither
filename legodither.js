@@ -818,7 +818,9 @@ function convolve(srcCanvas, destCanvas) {
 
 
 /**
- * Adjust shadow/highlight levels for a pixel
+ * Adjust shadow/highlight levels for a pixel.
+ * 
+ * Side effect: modifies pixel directly. Does not return a value.
  * 
  * TODO: Split this so that output levels are handled separately, later in the pipeline
  * 
@@ -831,8 +833,8 @@ function convolve(srcCanvas, destCanvas) {
  * @param {*} outHighlight 
  */
 function adjustLevel(pixel, inShadow = 0.0, inMidpoint = 0.5, inHighlight = 1.0, outShadow = 0, outHighlight = 1.0) {
-    let hsl = rgb2hsl(pixel);
-    let lightness = hsl[2];
+    rgb2hsl(pixel);
+    let lightness = pixel[2];
 
     // Calculate gamma
     let gamma = 1.0;
@@ -856,8 +858,8 @@ function adjustLevel(pixel, inShadow = 0.0, inMidpoint = 0.5, inHighlight = 1.0,
     // Output levels
     newLight = newLight * (outHighlight - outShadow) + outShadow;
     
-    let rgb = hsl2rgb([hsl[0], hsl[1], newLight]);
-    return [rgb[0], rgb[1], rgb[2], pixel[3]];  // Ignore alpha for now
+    pixel[2] = newLight;
+    hsl2rgb(pixel);
 }
 
 function autoLevels() {
@@ -872,8 +874,8 @@ function autoLevels() {
     for (let j = 0; j < img.height; j++) {
         for (let i = 0; i < img.width; i++) {
             img.getPixel(i, j, pixel);
-            hsl = rgb2hsl(pixel);
-            lValues.push(hsl[2]);
+            rgb2hsl(pixel);
+            lValues.push(pixel[2]);
         }
     }
     lValues.sort();
@@ -896,8 +898,10 @@ function autoLevels() {
 }
 
 /**
- * Returns hue (degrees in the range 0-360), saturation (range 0-1), and lightness 
- * (range 0-1).
+ * Replaces the RGB values in the pixel with hue (degrees in the range 0-360), saturation (range 0-1),
+ * and lightness (range 0-1).
+ * 
+ * Side effect is that pixel is updated. Does not return a value
  * 
  * @param {*} pixel 
  */
@@ -935,44 +939,45 @@ function rgb2hsl(pixel) {
         }
         hue = hue * 60; // Convert to degrees
     }
-    return [hue, sat, lightness];
+    pixel[0] = hue;
+    pixel[1] = sat;
+    pixel[2] = lightness;
 }
 
 /**
- * Returns an RGB pixel from the given hue [0-360 degrees], saturation [0-1], and lightness [0-1].
+ * Converts hue [0-360 degrees], saturation [0-1], and lightness [0-1] pixel values to RGB.
+ * 
+ * Side effect: updates pixel in-place. No return value.
  * 
  * @param {*} hsl 
  */
-function hsl2rgb(hsl) {
-    let hue = hsl[0];
-    let sat = hsl[1];
-    let lightness = hsl[2];
+function hsl2rgb(pixel) {
+    let hue = pixel[0];
+    let sat = pixel[1];
+    let lightness = pixel[2];
 
     let c = (1 - Math.abs((2 * lightness) - 1)) * sat;
     let hh = hue / 60;
     let x = c * (1 - Math.abs((hh % 2) - 1));
-    let rgb;
+    let r, g, b;
     hc = Math.ceil(hh);
     switch (hc) {
         case 0:
-        case 1: rgb = [c, x, 0];   break;
-        case 2: rgb = [x, c, 0];   break;
-        case 3: rgb = [0, c, x];   break;
-        case 4: rgb = [0, x, c];   break;
-        case 5: rgb = [x, 0, c];   break;
-        case 6: rgb = [c, 0, x];   break;
+        case 1: r=c, g=x, b=0;   break;
+        case 2: r=x, g=c, b=0;   break;
+        case 3: r=0, g=c, b=x;   break;
+        case 4: r=0, g=x, b=c;   break;
+        case 5: r=x, g=0, b=c;   break;
+        case 6: r=c, g=0, b=x;   break;
         default:
-            console.log("hc isn't expected: " + hc + ": " + hsl[0], + ", " + hsl[1] + ", " + hsl[2]);
-            rgb = [0, 0, 0];
+            console.log("hc isn't expected: " + hc + ": " + pixel[0], + ", " + pixel[1] + ", " + pixel[2]);
+            r=0, g=0, b=0;
     }
     let m = lightness - (c / 2);
     // Add lightness
-    rgb = [
-        clamp(Math.round((rgb[0] + m) * 255)), 
-        clamp(Math.round((rgb[1] + m) * 255)), 
-        clamp(Math.round((rgb[2] + m) * 255))
-    ];
-    return rgb;
+    pixel[0] = clamp(Math.round((r + m) * 255));
+    pixel[1] = clamp(Math.round((g + m) * 255)); 
+    pixel[2] = clamp(Math.round((b + m) * 255));
 }
 
 
@@ -994,8 +999,8 @@ function adjustLevels(canvas, inShadow, inMidpoint, inHighlight, outShadow, outH
     for (let j = 0; j < img.height; j++) {
         for (let i = 0; i < img.width; i++) {
             img.getPixel(i, j, pixel);
-            let newPixel = adjustLevel(pixel, inShadow, inMidpoint, inHighlight, outShadow, outHighlight);
-            img.setPixel(i, j, newPixel);
+            adjustLevel(pixel, inShadow, inMidpoint, inHighlight, outShadow, outHighlight);
+            img.setPixel(i, j, pixel);
         }
     }
     let context = canvas.getContext("2d");
