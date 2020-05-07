@@ -7,17 +7,19 @@ class PaletteLEGO2016 extends Palette {
     static makePalette() {
         let palette = [];
         let radix = 10;
-        let rgb, name, color;
+        let rgba, name, color;
         for (let i = 1; i < this.colors.length; i++) {  // 1-indexed to skip header row
             if ((this.colors[i][5] == 1) || (this.colors[i][6] == 1)) {
                 // Skip transparent + metallic colors
                 continue;
             }
             name = this.colors[i][1];
-            rgb = [parseInt(this.colors[i][2], radix), 
+            rgba = [parseInt(this.colors[i][2], radix), 
                     parseInt(this.colors[i][3], radix), 
-                    parseInt(this.colors[i][4], radix)];
-            color = new Color(rgb, name);
+                    parseInt(this.colors[i][4], radix),
+                    255,
+                ];
+            color = new Color(rgba, name);
             palette.push([color, true]);   // Colors are always enabled at first
         }
         //alert("Found " + palette.length + " colors in palette")

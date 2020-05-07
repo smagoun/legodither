@@ -8,13 +8,15 @@ class PalettePeeron extends Palette {
     static makePalette() {
         let palette = [];
         let radix = 10;
-        let rgb, name, color;
+        let rgba, name, color;
         for (let i = 1; i < PalettePeeron.colors.length; i++) {  // 1-indexed to skip header row
             name = PalettePeeron.colors[i][1];
-            rgb = [parseInt(PalettePeeron.colors[i][7], radix), 
+            rgba = [parseInt(PalettePeeron.colors[i][7], radix), 
                     parseInt(PalettePeeron.colors[i][8], radix), 
-                    parseInt(PalettePeeron.colors[i][9], radix)];
-            color = new Color(rgb, name);
+                    parseInt(PalettePeeron.colors[i][9], radix),
+                    255,
+            ];
+            color = new Color(rgba, name);
             palette.push([color, true]);   // Colors are always enabled at first
         }
         //alert("Found " + palette.length + " colors in palette")

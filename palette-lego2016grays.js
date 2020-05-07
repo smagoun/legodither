@@ -8,13 +8,15 @@ class PaletteLEGO2016Grays extends Palette {
     static makePalette() {
         let palette = [];
         let radix = 10;
-        let rgb, name, color;
+        let rgba, name, color;
         for (let i = 1; i < PaletteLEGO2016Grays.colors.length; i++) {  // 1-indexed to skip header row
             name = PaletteLEGO2016Grays.colors[i][1];
-            rgb = [parseInt(PaletteLEGO2016Grays.colors[i][2], radix), 
+            rgba = [parseInt(PaletteLEGO2016Grays.colors[i][2], radix), 
                     parseInt(PaletteLEGO2016Grays.colors[i][3], radix), 
-                    parseInt(PaletteLEGO2016Grays.colors[i][4], radix)];
-            color = new Color(rgb, name);
+                    parseInt(PaletteLEGO2016Grays.colors[i][4], radix),
+                    255,
+            ];
+            color = new Color(rgba, name);
             palette.push([color, true]);   // Colors are always enabled at first
         }
         //alert("Found " + palette.length + " colors in palette")

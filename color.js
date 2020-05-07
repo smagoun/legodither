@@ -2,16 +2,16 @@
 class Color {
 
     /**
-     * @param {Array} rgb 3-element array of R,G,B representing the color
+     * @param {Array} rgb 4-element array of R,G,B,A representing the color
      * @param {*} name 
      */
-    constructor(rgb, name) {
-        this.rgb = rgb;
+    constructor(rgba, name) {
+        this.rgba = rgba;
         this.name = name;
     }
 
-    getRGB() {
-        return this.rgb;
+    getRGBA() {
+        return this.rgba;
     }
 
     getName() {

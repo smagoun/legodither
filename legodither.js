@@ -235,7 +235,7 @@ function drawPalette(palette) {
                 row = body.insertRow();
             }
             let color = paletteList[i][0];
-            let rgb = color.getRGB();
+            let rgb = color.getRGBA();
             let enabled = paletteList[i][1];
             cell = row.insertCell();
             // Wrap the checkbox in a label w/ an empty span. Hack to get custom
@@ -651,6 +651,7 @@ function linearToSRGB(pixel) {
 
 /**
  * Given an RGB input color, return the nearest color from the given palette.
+ * Ignores the alpha channel.
  * 
  * Finds the nearest color using euclidean distance:
  * sqrt((r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2)
@@ -674,11 +675,11 @@ function findNearestColor(palette, pixel) {
         if (!enabled) {
             continue;
         }
-        let pal = paletteList[n][0].getRGB();
+        let pal = paletteList[n][0].getRGBA();
         palR = pal[0];
         palG = pal[1];
         palB = pal[2];
-        // We do't care about the actual distance, just the relative distance,
+        // We don't care about the actual distance, just the relative distance,
         // so we can avoid an expensive sqrt()
         dist = ((r - palR) * (r - palR)) + 
                 ((g - palG) * (g - palG)) + 

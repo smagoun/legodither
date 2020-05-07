@@ -58,7 +58,7 @@ class Palette {
             } else {
                 name = "" + tmp;
             }
-            let color = new Color([tmp[0][0], tmp[0][1], tmp[0][2]], name);
+            let color = new Color([tmp[0][0], tmp[0][1], tmp[0][2]], 255, name);
             ret.push([color, true]);   // Colors are always enabled at first
         }
         return ret;
@@ -80,16 +80,16 @@ class Palette {
     /**
      * Look up the name of a color using its RGB values. Ignores alpha channel.
      * 
-     * @param {*} rgb 
+     * @param {*} rgba 
      */
-    getColorName(rgb) {
+    getColorName(rgba) {
         for (const [palColor, ] of this.palette) {
-            const tmp = palColor.getRGB();
-            if (Color.sameColor(tmp, rgb)) {
+            const tmp = palColor.getRGBA();
+            if (Color.sameColor(tmp, rgba)) {
                 return palColor.getName();
             }
         }
-        return rgb;
+        return rgba;
     }
 }
 
