@@ -514,6 +514,7 @@ function derezBox(srcCanvas, destCanvas, scaleFactor = 2) {
     let radius = scaleFactor / 2;   // distance from center to edge of dest pixel, in pixels of the src img
 
     let pixel = [0, 0, 0, 0];
+    let output = [0, 0, 0, 0];
     for (let dy = 0; dy < destImg.height; dy++) {
         let dcenterY = (dy + 0.5) * scaleFactor;
         let dtopY = dcenterY - radius;
@@ -528,7 +529,10 @@ function derezBox(srcCanvas, destCanvas, scaleFactor = 2) {
             let drightX = dcenterX + radius;    // right edge of the dest pixel on the src img
 
             let boxSize = 0;
-            let output = [0, 0, 0, 0];
+            output[0] = 0;
+            output[1] = 0;
+            output[2] = 0;
+            output[3] = 0;
             // upper left = dleftX, dtopY
             // bottom right = drightX, dbottomY
             let colLeft = Math.floor(dleftX + 0.5);
@@ -543,7 +547,10 @@ function derezBox(srcCanvas, destCanvas, scaleFactor = 2) {
                     boxSize++;
                 }
             }
-            output = output.map(x => x / boxSize);
+            output[0] = output[0] / boxSize;
+            output[1] = output[1] / boxSize;
+            output[2] = output[2] / boxSize;
+            output[3] = output[3] / boxSize;
             destImg.setPixel(dx, dy, output);
         }
     }
