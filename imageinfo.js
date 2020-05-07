@@ -14,19 +14,19 @@ class ImageInfo {
     }
 
     /**
-     * Return the r/g/b/a values of the pixel at the given location in the array of
-     * RGBA pixel data
+     * Write the r/g/b/a values of the pixel at (x, y) into the given array.
+     * No return value; side effect is that the array is modified.
      * 
      * @param {*} x 
      * @param {*} y 
+     * @param {Array} pixel 4-element array to write into
      */
-    getPixel(x, y) {
+    getPixel(x, y, pixel) {
         let xy = (y * this.lineStride) + (x * this.pixelStride);
-        let r = this.data[xy    ];
-        let g = this.data[xy + 1];
-        let b = this.data[xy + 2];
-        let a = this.data[xy + 3];
-        return [r, g, b, a];
+        pixel[0] = this.data[xy    ];
+        pixel[1] = this.data[xy + 1];
+        pixel[2] = this.data[xy + 2];
+        pixel[3] = this.data[xy + 3];
     }
 
     /**

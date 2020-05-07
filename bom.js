@@ -144,16 +144,17 @@ function findBestCostBricks(length) {
 function calculateBOMSingleLines(img) {
     let bom = [];   // Brick objects: size, price, color, x/y coords of top left
     let totalCost = 0;
+    let nextColor = [0, 0, 0, 0];
+    let currColor = [0, 0, 0, 0];
     for (y = 0; y < img.height; y++) {
         let brickStart = -1;    // -1 means there is no current brick
         let brickLength = 0;
-        let currColor;
         for (x = 0; x < img.width; x++) {
-            let nextColor = img.getPixel(x, y);
+            img.getPixel(x, y, nextColor);
             if (brickStart === -1) {    // Check whether we should start a new brick
                 brickStart = x;
                 brickLength = 0;
-                currColor = nextColor;
+                currColor = [...nextColor];
             } else if (!Color.sameColor(currColor, nextColor)) {
                 const {cost, bricks} = findOptimalBricks(brickStart, y, brickLength, currColor);
                 bom.push(...bricks);
@@ -161,7 +162,7 @@ function calculateBOMSingleLines(img) {
                 // console.log("New color end-of-run, placing brick (start, length, color): " + bricks);
                 brickStart = x;
                 brickLength = 0;
-                currColor = nextColor;
+                currColor = [...nextColor];
             }
             brickLength++;      // Consume the pixel
         }

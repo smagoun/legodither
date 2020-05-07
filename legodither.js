@@ -125,6 +125,7 @@ function getNextCanvas() {
  * to another.
  */
 function drawLego() {
+    let t0 = performance.now();
     let srcCanvas = document.getElementById("originalCanvas");
     let scratchACanvas = document.getElementById("scratchACanvas");
     let scratchBCanvas = document.getElementById("scratchBCanvas");
@@ -184,6 +185,8 @@ function drawLego() {
     let img = ImageInfo.fromCanvas(getCurrCanvas());
     let {cost, bom} = calculateBOMSingleLines(img);
     renderBOM(cost, bom, palette);
+    let t1 = performance.now();
+    console.log("Total time: " + (t1 - t0) + "ms");
 }
 
 /**
@@ -305,9 +308,12 @@ function unsharpMask(srcCanvas, destCanvas, factor) {
     destCanvas.setAttribute("height", srcCanvas.height);
     let destImg = ImageInfo.fromCanvas(destCanvas);
 
+    let origPixel = [0, 0, 0, 0];
+    let pixel = [0, 0, 0, 0];
+    let newPixel = [0, 0, 0, 0];
     for (y = 0; y < srcCanvas.height; y++) {
         for (x = 0; x < srcCanvas.width; x++) {
-            origPixel = srcImg.getPixel(x, y);
+            srcImg.getPixel(x, y, origPixel);
             // Don't apply convolutions to edge cases where the filter needs to look
             // outside image boundaries
             if (x == 0 || y == 0 || x == (srcCanvas.width-1) || y == (srcCanvas.height-1)) {
@@ -319,7 +325,7 @@ function unsharpMask(srcCanvas, destCanvas, factor) {
             let r=0, g=0, b=0, a=0;
             for (ky = -1; ky < 2; ky++) {
                 for (kx = -1; kx < 2; kx++) {
-                    pixel = srcImg.getPixel(x+kx, y+ky);
+                    srcImg.getPixel(x+kx, y+ky, pixel);
                     r += kernel[ky + 1][kx + 1] * pixel[0];
                     g += kernel[ky + 1][kx + 1] * pixel[1];
                     b += kernel[ky + 1][kx + 1] * pixel[2];
@@ -354,6 +360,12 @@ function derezBilinear(srcCanvas, destCanvas, scaleFactor = 2) {
     destCanvas.setAttribute("width", destImg.width);
     destCanvas.setAttribute("height", destImg.height);
 
+    let box = [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ];
     for (let dy = 0; dy < destImg.height; dy++) {
         nearestY = (dy + 0.5) *  scaleFactor;
         nearestYInt = Math.floor(nearestY);
@@ -370,12 +382,10 @@ function derezBilinear(srcCanvas, destCanvas, scaleFactor = 2) {
                 (1 - deltaX) * deltaY,          // 0, 1
                 deltaX * deltaY,                // 1, 1
             ];
-            let box = [
-                srcImg.getPixel(nearestXInt, nearestYInt),
-                srcImg.getPixel(nearestXInt + 1, nearestYInt),
-                srcImg.getPixel(nearestXInt, nearestYInt + 1),
-                srcImg.getPixel(nearestXInt + 1, nearestYInt + 1),
-            ];
+            srcImg.getPixel(nearestXInt, nearestYInt, box[0]);
+            srcImg.getPixel(nearestXInt + 1, nearestYInt, box[1]);
+            srcImg.getPixel(nearestXInt, nearestYInt + 1, box[2]);
+            srcImg.getPixel(nearestXInt + 1, nearestYInt + 1, box[3]);
 
             // Sum the weighted values of each pixel to find the output pixel
             let outputPixel = [0, 0, 0, 255];   // Ignore alpha for now
@@ -470,6 +480,7 @@ function derezNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
     destCanvas.setAttribute("width", destImg.width);
     destCanvas.setAttribute("height", destImg.height);
     
+    let nearestPixel = [0, 0, 0, 0];
     for (let dy = 0; dy < destImg.height; dy++) {
         nearestY = Math.floor((dy + 0.5) * scaleFactor);
         if (nearestY >= srcImg.height) {   // Clamp source to edge of image
@@ -480,7 +491,7 @@ function derezNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
             if (nearestX >= srcImg.width) {    // Clamp to edge of image
                 nearestX = srcImg.width - 1;
             }
-            nearestPixel = srcImg.getPixel(nearestX, nearestY);
+            srcImg.getPixel(nearestX, nearestY, nearestPixel);
             destImg.setPixel(dx, dy, nearestPixel);
         }
     }
@@ -502,6 +513,7 @@ function derezBox(srcCanvas, destCanvas, scaleFactor = 2) {
 
     let radius = scaleFactor / 2;   // distance from center to edge of dest pixel, in pixels of the src img
 
+    let pixel = [0, 0, 0, 0];
     for (let dy = 0; dy < destImg.height; dy++) {
         let dcenterY = (dy + 0.5) * scaleFactor;
         let dtopY = dcenterY - radius;
@@ -523,7 +535,7 @@ function derezBox(srcCanvas, destCanvas, scaleFactor = 2) {
             let colRight = Math.floor(drightX - 0.5);
             for (let y = rowTop; y <= rowBottom; y++) {
                 for (let x = colLeft; x <= colRight; x++) {
-                    let pixel = srcImg.getPixel(x, y);
+                    srcImg.getPixel(x, y, pixel);
                     output[0] += pixel[0];
                     output[1] += pixel[1];
                     output[2] += pixel[2];
@@ -559,11 +571,12 @@ function renderScaled(srcCanvas, destCanvas, scaleFactor) {
     destCanvas.setAttribute("height", scaledHeight);
     let destImg = ImageInfo.fromCanvas(destCanvas);
 
+    let pixel = [0, 0, 0, 0];
     // sj is row index of original; dj is row index of scaled image
     for (let sj = 0, dj = 0; sj < srcImg.height; sj++, dj += scaleFactor) {
         // si is col index of original; di is col index of scaled image
         for (let si = 0, di = 0; si < srcImg.width; si++, di += scaleFactor) {
-            let pixel = srcImg.getPixel(si, sj);
+            srcImg.getPixel(si, sj, pixel);
 
             // Draw the new value in each block of pixels
             for (let y = 0; y < scaleFactor; y++) {
@@ -760,9 +773,11 @@ function convolve(srcCanvas, destCanvas) {
     destCanvas.setAttribute("height", srcCanvas.height);
     let destImg = ImageInfo.fromCanvas(destCanvas);
 
+    let origPixel = [0, 0, 0, 0];
+    let pixel = [0, 0, 0, 0];
     for (y = 0; y < srcCanvas.height; y++) {
         for (x = 0; x < srcCanvas.width; x++) {
-            origPixel = srcImg.getPixel(x, y);
+            srcImg.getPixel(x, y, origPixel);
             // Don't apply convolutions to edge cases where the filter needs to look
             // outside image boundaries
             if (x == 0 || y == 0 || x == (srcCanvas.width-1) || y == (srcCanvas.height-1)) {
@@ -772,7 +787,7 @@ function convolve(srcCanvas, destCanvas) {
             let r=0, g=0, b=0, a=0;
             for (ky = -1; ky < 2; ky++) {
                 for (kx = -1; kx < 2; kx++) {
-                    pixel = srcImg.getPixel(x+kx, y+ky);
+                    srcImg.getPixel(x+kx, y+ky, pixel);
                     r += kernel[ky + 1][kx + 1] * pixel[0];
                     g += kernel[ky + 1][kx + 1] * pixel[1];
                     b += kernel[ky + 1][kx + 1] * pixel[2];
@@ -846,9 +861,10 @@ function autoLevels() {
     let maxL = 0.0;
     let medianL = 0.5;
     let lValues = [];
+    let pixel = [0, 0, 0, 0];
     for (let j = 0; j < img.height; j++) {
         for (let i = 0; i < img.width; i++) {
-            let pixel = img.getPixel(i, j);
+            img.getPixel(i, j, pixel);
             hsl = rgb2hsl(pixel);
             lValues.push(hsl[2]);
         }
@@ -967,9 +983,10 @@ function hsl2rgb(hsl) {
  */
 function adjustLevels(canvas, inShadow, inMidpoint, inHighlight, outShadow, outHighlight) {
     let img = ImageInfo.fromCanvas(canvas);
+    let pixel = [0, 0, 0, 0];
     for (let j = 0; j < img.height; j++) {
         for (let i = 0; i < img.width; i++) {
-            let pixel = img.getPixel(i, j);
+            img.getPixel(i, j, pixel);
             let newPixel = adjustLevel(pixel, inShadow, inMidpoint, inHighlight, outShadow, outHighlight);
             img.setPixel(i, j, newPixel);
         }
@@ -1003,9 +1020,11 @@ Implement Floyd-Steinberg dithering:
             pixel[x    ][y + 1] := pixel[x    ][y + 1] + quant_error × 5 / 16
             pixel[x + 1][y + 1] := pixel[x + 1][y + 1] + quant_error × 1 / 16
 */
+    let pixel = [0, 0, 0, 0];
+    let tmpPixel = [0, 0, 0, 0];
     for (let j = 0; j < img.height; j++) {
         for (let i = 0; i < img.width; i++) {
-            let pixel = img.getPixel(i, j);
+            img.getPixel(i, j, pixel);
 
             if (!palette.isColor()) {
                 // Special case for grayscale: convert to perceptual grayscale
@@ -1030,7 +1049,7 @@ Implement Floyd-Steinberg dithering:
 
                 /* pixel[x + 1][y    ] := pixel[x + 1][y    ] + quant_error × 7 / 16 */
                 if ((i+1) < img.width) {
-                    let tmpPixel = img.getPixel(i+1, j);
+                    img.getPixel(i+1, j, tmpPixel);
                     let tmpR = tmpPixel[0] + Math.round(errR * 7 / 16);
                     let tmpG = tmpPixel[1] + Math.round(errG * 7 / 16);
                     let tmpB = tmpPixel[2] + Math.round(errB * 7 / 16);
@@ -1040,7 +1059,7 @@ Implement Floyd-Steinberg dithering:
 
                 /* pixel[x - 1][y + 1] := pixel[x - 1][y + 1] + quant_error × 3 / 16 */
                 if (((i-1) >= 0) && ((j+1) < img.height)) {
-                    let tmpPixel = img.getPixel(i-1, j+1);
+                    img.getPixel(i-1, j+1, tmpPixel);
                     let tmpR = tmpPixel[0] + Math.round(errR * 3 / 16);
                     let tmpG = tmpPixel[1] + Math.round(errG * 3 / 16);
                     let tmpB = tmpPixel[2] + Math.round(errB * 3 / 16);
@@ -1050,7 +1069,7 @@ Implement Floyd-Steinberg dithering:
 
                 /* pixel[x    ][y + 1] := pixel[x    ][y + 1] + quant_error × 5 / 16 */
                 if ((j+1) < img.height) {
-                    let tmpPixel = img.getPixel(i, j+1);
+                    img.getPixel(i, j+1, tmpPixel);
                     let tmpR = tmpPixel[0] + Math.round(errR * 5 / 16);
                     let tmpG = tmpPixel[1] + Math.round(errG * 5 / 16);
                     let tmpB = tmpPixel[2] + Math.round(errB * 5 / 16);
@@ -1060,7 +1079,7 @@ Implement Floyd-Steinberg dithering:
 
                 /* pixel[x + 1][y + 1] := pixel[x + 1][y + 1] + quant_error × 1 / 16 */
                 if (((i+1) < img.width) && ((j+1) < img.height)) {
-                    let tmpPixel = img.getPixel(i+1, j+1);
+                    img.getPixel(i+1, j+1, tmpPixel);
                     let tmpR = tmpPixel[0] + Math.round(errR * 1 / 16);
                     let tmpG = tmpPixel[1] + Math.round(errG * 1 / 16);
                     let tmpB = tmpPixel[2] + Math.round(errB * 1 / 16);
