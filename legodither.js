@@ -135,7 +135,7 @@ function drawLego() {
     let scaleFactor = Number(document.getElementById("scaleInput").value);
     let sharpenFactor = Number(document.getElementById("sharpenInput").value);
 
-    let dithering = document.getElementById("ditheringInput").checked;
+    let ditherType = document.getElementById("ditheringSelect").value;
 
     let inputLevelsShadow = parseFloat(document.getElementById("inputLevelsShadowInput").value);
     let inputLevelsMidpoint = parseFloat(document.getElementById("inputLevelsMidpointInput").value);
@@ -165,7 +165,7 @@ function drawLego() {
     unsharpMask(getCurrCanvas(), getNextCanvas(), sharpenFactor);
 
     if (palette != null) {
-        decolor(getCurrCanvas(), palette, dithering);
+        decolor(getCurrCanvas(), palette, ditherType);
     }
     renderScaled(getCurrCanvas(), outputCanvas, Math.round(scaleFactor));
 
@@ -1015,9 +1015,9 @@ function adjustLevels(canvas, inShadow, inMidpoint, inHighlight, outShadow, outH
  * 
  * @param {*} canvas
  * @param {*} palette
- * @param {*} dithering True to enable Floyd-Steinberg dithering
+ * @param {*} ditherType Dithering algorithm to apply: floyd-steinberg, ordered, or none 
  */
-function decolor(canvas, palette, dithering = true) {
+function decolor(canvas, palette, ditherType = "none") {
     let img = ImageInfo.fromCanvas(canvas);
 
 /* 
@@ -1047,6 +1047,32 @@ Implement Floyd-Steinberg dithering:
                     + (0.0722 * (pixel[2] ** 2.2))) ** (1/2.2);
                 pixel = [gray, gray, gray, pixel[3]];
             }
+            
+            if (ditherType === "ordered") {
+                let map = [
+                    [0, 8, 2, 10],
+                    [12, 4, 14, 6],
+                    [3, 11, 1, 9],
+                    [15, 7, 13, 5]
+                ];
+                
+                // Since we're going to calculate an offset to add to the pixel,
+                // recenter and scale the map to the range [-1, 1]. Recentering allows
+                // the offset to darken the pixel. Scale since we'll multiply
+                // by 255 later on to scale up to the range 0-255.
+                // Subtracting 0.5 takes care of the centering
+                map = map.map(y =>
+                    y.map(x => (x + 0.5) / (map.length * map.length) - 0.5)
+                );
+
+                let bits = Math.floor(Math.log2(palette.getPalette().length)); 
+                let r = 255 / bits;
+                let threshold = map[j % map.length][i % map.length];
+                let offset = r * threshold;
+                pixel[0] = pixel[0] + offset; 
+                pixel[1] = pixel[1] + offset;
+                pixel[2] = pixel[2] + offset;
+            }
 
             // Find the nearest color in the palette
             let nearest = findNearestColor(palette, pixel);
@@ -1054,7 +1080,7 @@ Implement Floyd-Steinberg dithering:
             // Draw the new value in each block of pixels
             img.setPixel(i, j, nearest);
 
-            if (dithering) {
+            if (ditherType === "floyd-steinberg") {
                 // Calculate quantization error
                 errR = pixel[0] - nearest[0];
                 errG = pixel[1] - nearest[1];

@@ -81,8 +81,12 @@
             <option value="native">Native color (no quantization)</option>
         </select>
 
-        <label for="ditheringInput">Dithering enabled</label>
-        <input type="checkbox" id="ditheringInput" checked onchange="drawLego()"/>
+        <label for="ditheringSelect">Color dithering:</label>
+        <select id="ditheringSelect" onchange="drawLego()">
+            <option value="none">None</option>
+            <option value="floyd-steinberg" selected="true">Floyd-Steinberg</option>
+            <option value="ordered">Ordered</option>
+        </select>
 
         <label for="linearColorInput">Use linear color</label>
         <input type="checkbox" id="linearColorInput" onchange="drawLego()"/>
