@@ -803,13 +803,6 @@ function convolve(srcCanvas, destCanvas) {
                 }
             }
             newPixel = [r, g, b, a];
-            /* For unsharp mask...
-            newPixel = [
-                origPixel[0] + ((origPixel[0] - r) * factor),
-                origPixel[1] + ((origPixel[1] - g) * factor),
-                origPixel[2] + ((origPixel[2] - b) * factor),
-                origPixel[3],   // Ignore alpha for now
-            ];*/
             destImg.setPixel(x, y, newPixel);
         }
     }
