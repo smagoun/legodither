@@ -857,7 +857,7 @@ function adjustLevel(pixel, inShadow = 0.0, inMidpoint = 0.5, inHighlight = 1.0,
     newLight = newLight * (outHighlight - outShadow) + outShadow;
     
     let rgb = hsl2rgb([hsl[0], hsl[1], newLight]);
-    return [clamp(rgb[0]), clamp(rgb[1]), clamp(rgb[2]), pixel[3]];  // Ignore alpha for now
+    return [rgb[0], rgb[1], rgb[2], pixel[3]];  // Ignore alpha for now
 }
 
 function autoLevels() {
