@@ -143,6 +143,10 @@ function drawLego() {
     let outputLevelsShadow = parseFloat(document.getElementById("outputLevelsShadowInput").value);
     let outputLevelsHighlight = parseFloat(document.getElementById("outputLevelsHighlightInput").value);
 
+    let brightnessAdjustment = Number(document.getElementById("brightnessInput").value);
+    let saturationAdjustment = parseFloat(document.getElementById("saturationInput").value);
+    let contrastAdjustment = Number(document.getElementById("contrastInput").value);
+
     let p = document.getElementById("paletteSelect");
     let paletteName = p.options[p.selectedIndex].value;
     let palette = getPalette(paletteName);
@@ -153,6 +157,10 @@ function drawLego() {
     // before applying destructive transformations (convolutions, scaling), and
     // apply output levels on rendering
     adjustLevels(getCurrCanvas(), inputLevelsShadow, inputLevelsMidpoint, inputLevelsHighlight, outputLevelsShadow, outputLevelsHighlight);
+
+    brightness(getCurrCanvas(), brightnessAdjustment);
+    saturate(getCurrCanvas(), saturationAdjustment);
+    contrast(getCurrCanvas(), contrastAdjustment);
 
     // Downsample the image using the selected algorithm
     // TODO: What is the ideal blur before downsizing? Box filter already blurs;
@@ -890,6 +898,96 @@ function autoLevels() {
     document.getElementById("outputLevelsShadowInput").value="0";
     document.getElementById("outputLevelsHighlightInput").value="1.0";
 }
+
+/**
+ * Reset the brightness adjustment to the default.
+ */
+function resetBrightness() {
+    document.getElementById("brightnessInput").value = 0;
+}
+
+/**
+ * Adjust the brightness of the image.
+ * 
+ * @param {*} canvas 
+ * @param {*} factor Brightness adjustment from -255 to +255. 0 is default.
+ */
+function brightness(canvas, factor) {
+    let img = ImageInfo.fromCanvas(canvas);
+    let pixel = [0, 0, 0, 0];
+    for (let j = 0; j < img.height; j++) {
+        for (let i = 0; i < img.width; i++) {
+            img.getPixel(i, j, pixel);
+            pixel[0] = clamp(pixel[0] + factor);
+            pixel[1] = clamp(pixel[1] + factor);
+            pixel[2] = clamp(pixel[2] + factor);
+            img.setPixel(i, j, pixel);
+        }
+    }
+    let context = canvas.getContext("2d");
+    context.putImageData(img.imageData, 0, 0);
+}
+
+/**
+ * Reset the saturation adjustment to the default.
+ */
+function resetSaturation() {
+    document.getElementById("saturationInput").value = 1.0;
+}
+
+/**
+ * Adjust the saturation of the image.
+ * 
+ * @param {*} canvas 
+ * @param {*} factor Saturation adjustment factor. 1.0 is default.
+ */
+function saturate(canvas, factor) {
+    let img = ImageInfo.fromCanvas(canvas);
+    let pixel = [0, 0, 0, 0];
+    for (let j = 0; j < img.height; j++) {
+        for (let i = 0; i < img.width; i++) {
+            img.getPixel(i, j, pixel);
+            rgb2hsl(pixel);
+            pixel[1] = Math.min(pixel[1] * factor, 1.0);
+            hsl2rgb(pixel);
+            img.setPixel(i, j, pixel);
+        }
+    }
+    let context = canvas.getContext("2d");
+    context.putImageData(img.imageData, 0, 0);
+}
+
+/**
+ * Reset the contrast adjustment to the default.
+ */
+function resetContrast() {
+    document.getElementById("contrastInput").value = 0;
+}
+
+/**
+ * Adjust the contrast of the image.
+ * 
+ * @param {*} canvas 
+ * @param {*} factor Contrast adjustment from -255 to +255. 0 is default.
+ */
+function contrast(canvas, factor) {
+    // From https://stackoverflow.com/questions/2976274/adjust-bitmap-image-brightness-contrast-using-c
+    let newFactor = (259.0 * (factor + 255.0)) / (255.0 * (259.0 - factor));
+    let img = ImageInfo.fromCanvas(canvas);
+    let pixel = [0, 0, 0, 0];
+    for (let j = 0; j < img.height; j++) {
+        for (let i = 0; i < img.width; i++) {
+            img.getPixel(i, j, pixel);
+            pixel[0] = clamp((newFactor * (pixel[0] - 128) + 128));
+            pixel[1] = clamp((newFactor * (pixel[1] - 128) + 128));
+            pixel[2] = clamp((newFactor * (pixel[2] - 128) + 128));
+            img.setPixel(i, j, pixel);
+        }
+    }
+    let context = canvas.getContext("2d");
+    context.putImageData(img.imageData, 0, 0);
+}
+
 
 /**
  * Replaces the RGB values in the pixel with hue (degrees in the range 0-360), saturation (range 0-1),
