@@ -658,32 +658,36 @@ function linearToSRGB(pixel) {
 }
 
 /**
- * Given an RGB input color, return the nearest color from the given palette.
- * Ignores the alpha channel.
+ * Given an RGB input color, find the nearest color from the given palette
+ * and write it into the output color. Ignores the alpha channel.
  * 
  * Finds the nearest color using euclidean distance:
  * sqrt((r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2)
  * 
  * @param {*} palette 
- * @param {*} pixel 4-element array of RGBA
+ * @param {*} input 4-element array of RGBA
+ * @param {*} output 4-element array of RGBA
  */
-function findNearestColor(palette, pixel) {
-    let r = pixel[0];
-    let g = pixel[1]; 
-    let b = pixel[2];
-    let newColor = [r, g, b, pixel[3]];     // Ignore the alpha channel for now
+function findNearestColor(palette, input, output) {
+    let r = input[0];
+    let g = input[1]; 
+    let b = input[2];
+    output[0] = r;
+    output[1] = g;
+    output[2] = b;
+    output[3] = input[3];
 
     let palR, palG, palB;
 
     let distance = Infinity;
     let dist;
     let paletteList = palette.getPalette();
+    let pal;
     for (let n = 0; n < paletteList.length; n++) {
-        let enabled = paletteList[n][1];
-        if (!enabled) {
+        if (!paletteList[n][1]) {   // Ignore palette colors that have been disabled
             continue;
         }
-        let pal = paletteList[n][0].getRGBA();
+        pal = paletteList[n][0].getRGBA();
         palR = pal[0];
         palG = pal[1];
         palB = pal[2];
@@ -694,16 +698,15 @@ function findNearestColor(palette, pixel) {
             ((b - palB) * (b - palB));
         if (dist < distance) {
             distance = dist;
-            newColor[0] = palR;
-            newColor[1] = palG;
-            newColor[2] = palB;
+            output[0] = palR;
+            output[1] = palG;
+            output[2] = palB;
         }
         if (dist === 0) {
             //alert("found exact color match!");
             break;
         }
     }
-    return newColor;
 }
 
 
@@ -1125,6 +1128,7 @@ Implement Floyd-Steinberg dithering:
             pixel[x + 1][y + 1] := pixel[x + 1][y + 1] + quant_error × 1 / 16
 */
     let pixel = [0, 0, 0, 0];
+    let nearest = [0, 0, 0, 0];
     let tmpPixel = [0, 0, 0, 0];
     let errR, errG, errB, errA;
     for (let j = 0; j < img.height; j++) {
@@ -1166,55 +1170,50 @@ Implement Floyd-Steinberg dithering:
             }
 
             // Find the nearest color in the palette
-            let nearest = findNearestColor(palette, pixel);
+            findNearestColor(palette, pixel, nearest);
 
             // Draw the new value in each block of pixels
             img.setPixel(i, j, nearest);
 
             if (ditherType === "floyd-steinberg") {
                 // Calculate quantization error
-                errR = pixel[0] - nearest[0];
-                errG = pixel[1] - nearest[1];
-                errB = pixel[2] - nearest[2];
-                errA = pixel[3] - nearest[3];
+                errR = (pixel[0] - nearest[0]) / 16;
+                errG = (pixel[1] - nearest[1]) / 16;
+                errB = (pixel[2] - nearest[2]) / 16;
 
                 /* pixel[x + 1][y    ] := pixel[x + 1][y    ] + quant_error × 7 / 16 */
                 if ((i+1) < img.width) {
                     img.getPixel(i+1, j, tmpPixel);
-                    tmpPixel[0] = tmpPixel[0] + Math.round(errR * 7 / 16);
-                    tmpPixel[1] = tmpPixel[1] + Math.round(errG * 7 / 16);
-                    tmpPixel[2] = tmpPixel[2] + Math.round(errB * 7 / 16);
-                    tmpPixel[3] = tmpPixel[3] + Math.round(errA * 7 / 16);
+                    tmpPixel[0] = tmpPixel[0] + Math.round(errR * 7);
+                    tmpPixel[1] = tmpPixel[1] + Math.round(errG * 7);
+                    tmpPixel[2] = tmpPixel[2] + Math.round(errB * 7);
                     img.setPixel(i+1, j, tmpPixel);
                 }
 
                 /* pixel[x - 1][y + 1] := pixel[x - 1][y + 1] + quant_error × 3 / 16 */
                 if (((i-1) >= 0) && ((j+1) < img.height)) {
                     img.getPixel(i-1, j+1, tmpPixel);
-                    tmpPixel[0] = tmpPixel[0] + Math.round(errR * 3 / 16);
-                    tmpPixel[1] = tmpPixel[1] + Math.round(errG * 3 / 16);
-                    tmpPixel[2] = tmpPixel[2] + Math.round(errB * 3 / 16);
-                    tmpPixel[3] = tmpPixel[3] + Math.round(errA * 3 / 16);
+                    tmpPixel[0] = tmpPixel[0] + Math.round(errR * 3);
+                    tmpPixel[1] = tmpPixel[1] + Math.round(errG * 3);
+                    tmpPixel[2] = tmpPixel[2] + Math.round(errB * 3);
                     img.setPixel(i-1, j+1, tmpPixel);
                 }
 
                 /* pixel[x    ][y + 1] := pixel[x    ][y + 1] + quant_error × 5 / 16 */
                 if ((j+1) < img.height) {
                     img.getPixel(i, j+1, tmpPixel);
-                    tmpPixel[0] = tmpPixel[0] + Math.round(errR * 5 / 16);
-                    tmpPixel[1] = tmpPixel[1] + Math.round(errG * 5 / 16);
-                    tmpPixel[2] = tmpPixel[2] + Math.round(errB * 5 / 16);
-                    tmpPixel[3] = tmpPixel[3] + Math.round(errA * 5 / 16);
+                    tmpPixel[0] = tmpPixel[0] + Math.round(errR * 5);
+                    tmpPixel[1] = tmpPixel[1] + Math.round(errG * 5);
+                    tmpPixel[2] = tmpPixel[2] + Math.round(errB * 5);
                     img.setPixel(i, j+1, tmpPixel);
                 }
 
                 /* pixel[x + 1][y + 1] := pixel[x + 1][y + 1] + quant_error × 1 / 16 */
                 if (((i+1) < img.width) && ((j+1) < img.height)) {
                     img.getPixel(i+1, j+1, tmpPixel);
-                    tmpPixel[0] = tmpPixel[0] + Math.round(errR * 1 / 16);
-                    tmpPixel[1] = tmpPixel[1] + Math.round(errG * 1 / 16);
-                    tmpPixel[2] = tmpPixel[2] + Math.round(errB * 1 / 16);
-                    tmpPixel[3] = tmpPixel[3] + Math.round(errA * 1 / 16);
+                    tmpPixel[0] = tmpPixel[0] + Math.round(errR);
+                    tmpPixel[1] = tmpPixel[1] + Math.round(errG);
+                    tmpPixel[2] = tmpPixel[2] + Math.round(errB);
                     img.setPixel(i+1, j+1, tmpPixel);
                 }
             }
