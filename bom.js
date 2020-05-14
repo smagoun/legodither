@@ -103,7 +103,7 @@ function findOptimalBricks(x, y, brickLength, color) {
  * 
  * Caches calculations in brickCost array for future use.
  * 
- * Returns an array of [cost, [brickSize, brickSize, ...]]
+ * Returns an Object of {cost, [brickSize, brickSize, ...]}
  * 
  * @param {*} length 
  */
