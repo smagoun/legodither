@@ -79,7 +79,7 @@ function renderBOM(cost, bom, palette) {
  * @param {*} color 
  */
 function findOptimalBricks(x, y, brickLength, color) {
-    const [cost, bricks] = findBestCostBricks(brickLength);
+    const {cost, bricks} = findBestCostBricks(brickLength);
     // console.log("Best cost for " + brickLength + " is " + cost + " with bricks " + bricks);
     const ret = [];
     for (const brickSize of bricks) {
@@ -120,13 +120,13 @@ function findBestCostBricks(length) {
         for (let i = 1; i <= Math.floor(length / 2); i++) {
             const a = findBestCostBricks(length - i);
             const b = findBestCostBricks(i);
-            if ((a[0] + b[0]) < minCost) {
-                minCost = a[0] + b[0];
-                minCostBricks = [...a[1], ...b[1]];
+            if ((a.cost + b.cost) < minCost) {
+                minCost = a.cost + b.cost;
+                minCostBricks = [...a.bricks, ...b.bricks];
             }
         }
-        brickCostMap[length] = [minCost, minCostBricks];
-        ret = [minCost, minCostBricks];
+        ret = {cost: minCost, bricks: minCostBricks};
+        brickCostMap[length] = ret;
     } 
     return ret;
 }
