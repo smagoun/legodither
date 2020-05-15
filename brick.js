@@ -9,4 +9,38 @@ class Brick {
         this.x = x;
         this.y = y;
     }
+
+    /**
+     * Compares two bricks for equality.
+     * 
+     * @param {*} obj Object to compare to this
+     */
+    isEqual(obj) {
+        if (!obj instanceof Brick) {
+            return false;
+        }
+        if (this.size != obj.size || this.x != obj.x || this.y != obj.y
+                || this.price != obj.price || this.color != obj.color) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns true if no properties have the value undefined
+     */
+    isComplete() {
+        if (this.size === undefined || this.price === undefined || this.color === undefined
+            || this.x === undefined || this.y === undefined) {
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns a string representation of the Brick
+     */
+    toString() {
+        return `{s:${this.size}, p:${this.price}, c:${this.color}, x:${this.x}, y:${this.y}}`;
+    }
 }
