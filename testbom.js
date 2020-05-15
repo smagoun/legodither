@@ -43,37 +43,38 @@ function test1D() {
 
     // Base case: 0x0
     testCnt++;
-    length=0, x=0, y=0, expectedCost=0, expectedBricks=[new Brick(length, 0, color, 0, 0)];
+    // height=1 is a hack to get around hardcoded 1px height assumption of findOptimalBricks
+    length=0, x=0, y=0, expectedCost=0, expectedBricks=[new Brick(0, 1, 0, color, 0, 0)];
     if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
 
     // 1x1
     testCnt++;
-    length=1, x=0, y=0, expectedCost=6, expectedBricks=[new Brick(1, 6, color, 0, 0)];
+    length=1, x=0, y=0, expectedCost=6, expectedBricks=[new Brick(1, 1, 6, color, 0, 0)];
     if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
 
     // Longer brick
     testCnt++;
-    length=4, x=0, y=0, expectedCost=10, expectedBricks=[new Brick(4, 10, color, 0, 0)];
+    length=4, x=0, y=0, expectedCost=10, expectedBricks=[new Brick(4, 1, 10, color, 0, 0)];
     if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
 
     // Composite
     testCnt++;
-    length=5, x=0, y=0, expectedCost=14, expectedBricks=[new Brick(3, 7, color, 0, 0),
-        new Brick(2, 7, color, 3, 0)];  // 2,3 would also work...
+    length=5, x=0, y=0, expectedCost=14, expectedBricks=[new Brick(3, 1, 7, color, 0, 0),
+        new Brick(2, 1, 7, color, 3, 0)];  // 2,3 would also work...
     if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
 
     // Long run
     testCnt++;
-    length=12, x=0, y=0, expectedCost=27, expectedBricks=[new Brick(8, 17, color, 0, 0),
-        new Brick(4, 10, color, 8, 0)]; // 4,8 would also work...
+    length=12, x=0, y=0, expectedCost=27, expectedBricks=[new Brick(8, 1, 17, color, 0, 0),
+        new Brick(4, 1, 10, color, 8, 0)]; // 4,8 would also work...
     if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
@@ -84,8 +85,8 @@ function test1D() {
     let tmpBCM = brickCostMap[4]; // Since it's a global we need to put it back the way we found it
     brickCost[4] = 16;
     delete brickCostMap[4];
-    length=4, x=0, y=0, expectedCost=13, expectedBricks=[new Brick(3, 7, color, 0, 0),
-        new Brick(1, 6, color, 3, 0)]; // 1,3 would also work...
+    length=4, x=0, y=0, expectedCost=13, expectedBricks=[new Brick(3, 1, 7, color, 0, 0),
+        new Brick(1, 1, 6, color, 3, 0)]; // 1,3 would also work...
     if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
@@ -94,8 +95,8 @@ function test1D() {
 
     // Composite
     testCnt++;
-    length=5, x=3, y=2, expectedCost=14, expectedBricks=[new Brick(3, 7, color, 3, 2),
-        new Brick(2, 7, color, 6, 2)];  // 2,3 would also work...
+    length=5, x=3, y=2, expectedCost=14, expectedBricks=[new Brick(3, 1, 7, color, 3, 2),
+        new Brick(2, 1, 7, color, 6, 2)];  // 2,3 would also work...
     if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
         errCnt++;
     }

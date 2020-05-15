@@ -85,7 +85,8 @@ function findOptimalBricks(x, y, brickLength, color) {
     for (const brickSize of bricks) {
         // Could also use brickCostMap; shouldn't matter (even in the case of (2) 1x2s that are cheaper
         // than a 1x4, since findBestCostBricks() should have given us the 1x2s to look up)
-        ret.push(new Brick(brickSize, brickCost[brickSize], color, x, y));
+        // TODO: Don't hardcode height=1
+        ret.push(new Brick(brickSize, 1, brickCost[brickSize], color, x, y));
         x += brickSize;
     }
     return {

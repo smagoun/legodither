@@ -2,8 +2,9 @@
  * Information that describes a brick.
  */
 class Brick {
-    constructor(size, price, color, x = 0, y = 0) {
-        this.size = size;
+    constructor(width, height, price, color, x = 0, y = 0) {
+        this.width = width;
+        this.height = height;
         this.price = price;
         this.color = color;
         this.x = x;
@@ -19,7 +20,7 @@ class Brick {
         if (!obj instanceof Brick) {
             return false;
         }
-        if (this.size != obj.size || this.x != obj.x || this.y != obj.y
+        if (this.width != obj.width || this.height != obj.height || this.x != obj.x || this.y != obj.y
                 || this.price != obj.price || this.color != obj.color) {
             return false;
         }
@@ -30,7 +31,7 @@ class Brick {
      * Returns true if no properties have the value undefined
      */
     isComplete() {
-        if (this.size === undefined || this.price === undefined || this.color === undefined
+        if (this.width === undefined || this.height === undefined || this.price === undefined || this.color === undefined
             || this.x === undefined || this.y === undefined) {
                 return false;
         }
@@ -41,6 +42,6 @@ class Brick {
      * Returns a string representation of the Brick
      */
     toString() {
-        return `{s:${this.size}, p:${this.price}, c:${this.color}, x:${this.x}, y:${this.y}}`;
+        return `{s:${this.width}x${this.height}, p:${this.price}, c:${this.color}, x:${this.x}, y:${this.y}}`;
     }
 }
