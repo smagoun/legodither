@@ -32,6 +32,72 @@ function testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks
     return ret;
 }
 
+function testFindRects() {
+    let errCnt = 0;
+    let testCnt = 0;
+    let expected = [];
+
+    // Create image with test data
+    let width = 4;
+    let height = 4;
+    let pixelStride = 4;    // RGBA
+    let lineStride = width * pixelStride;
+    let imageData = {};
+    let red = [255, 0, 0, 255];
+    let blue = [0, 0, 255, 255];
+    imageData.data = new Array(width * height * pixelStride);
+    let img = new ImageInfo(width, height, lineStride, pixelStride, imageData);
+    
+    // Line that's all the same color
+    for (let i = 0; i < width; i++) {   
+        img.setPixel(i, 0, red);
+    }
+    expected.push({x: 0, y: 0, width: width, height: 1, color: red});
+
+    // Line with multiple colors
+    img.setPixel(0, 1, red);
+    img.setPixel(1, 1, red);
+    img.setPixel(2, 1, blue);
+    img.setPixel(3, 1, blue);
+    expected.push({x: 0, y: 1, width: 2, height: 1, color: red});
+    expected.push({x: 2, y: 1, width: 2, height: 1, color: blue});
+
+    // Line whose last pixel is its own color
+    img.setPixel(0, 2, red);
+    img.setPixel(1, 2, red);
+    img.setPixel(2, 2, red);
+    img.setPixel(3, 2, blue);
+    expected.push({x: 0, y: 2, width: 3, height: 1, color: red});
+    expected.push({x: 3, y: 2, width: 1, height: 1, color: blue});
+
+    // Alternating colors
+    img.setPixel(0, 3, red);
+    img.setPixel(1, 3, blue);
+    img.setPixel(2, 3, red);
+    img.setPixel(3, 3, blue);
+    expected.push({x: 0, y: 3, width: 1, height: 1, color: red});
+    expected.push({x: 1, y: 3, width: 1, height: 1, color: blue});
+    expected.push({x: 2, y: 3, width: 1, height: 1, color: red});
+    expected.push({x: 3, y: 3, width: 1, height: 1, color: blue});
+
+    let rects = findRects(img);
+    for (let i = 0; i < rects.length; i++) {
+        let a = rects[i];
+        let b = expected[i];
+        testCnt++
+        if (a.x != b.x || a.y != b.y || a.width != b.width || a.height != b.height) {
+            // Ignore color for now, color differences will manifest as different rectangles
+            errCnt++
+            console.error(`Test ${testCnt} expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`);
+        }
+    }
+    if (errCnt === 0) {
+        console.log(`FindRects: ${testCnt}/${testCnt} tests passed!`);
+    } else {
+        console.warn(`FindRects: tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
+    }
+}
+
 function test1D() {
     let testCnt = 0;
     let errCnt = 0;
@@ -102,10 +168,11 @@ function test1D() {
     }
 
     if (errCnt === 0) {
-        console.log("1D-BOM tests passed!");
+        console.log(`1D-BOM: ${testCnt}/${testCnt} tests passed!`);
     } else {
-        console.warn(`1D-BOM tests failed (${errCnt} failures)`);
+        console.warn(`1D-BOM tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
     }
 }
 
+testFindRects();
 test1D();

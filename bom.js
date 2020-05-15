@@ -132,6 +132,46 @@ function findBestCostBricks(length) {
     return ret;
 }
 
+/**
+ * Return the set of rectangles of the same color in each line. These represent
+ * runs of studs, and potentitally multi-stud bricks.
+ * 
+ * Does not support bricks that span multiple lines, either due to 
+ * orientation or brick size (such as 2x4 bricks).
+ * 
+ * Returns an array of rectangles: {x, y, width, height, color}
+ * 
+ * @param {ImageInfo} img
+ */
+function findRects(img) {
+    let rects = [];   // List of rectangles: width/height + x/y coords
+    let nextColor = [0, 0, 0, 0];
+    let currColor = [0, 0, 0, 0];
+    for (y = 0; y < img.height; y++) {
+        let brickStart = -1;    // -1 means there is no current brick
+        let brickLength = 0;
+        for (x = 0; x < img.width; x++) {
+            img.getPixel(x, y, nextColor);
+            if (brickStart === -1) {    // Check whether we should start a new brick
+                brickStart = x;
+                brickLength = 0;
+                currColor = [...nextColor];
+            } else if (!Color.sameColor(currColor, nextColor)) {
+                rects.push({x: brickStart, y: y, width: brickLength, height: 1, color: currColor});
+                // console.log("New color end-of-run, placing brick (start, length, color): " + bricks);
+                brickStart = x;
+                brickLength = 0;
+                currColor = [...nextColor];
+            }
+            brickLength++;      // Consume the pixel
+        }
+        if (brickStart != -1) {
+            rects.push({x: brickStart, y: y, width: brickLength, height: 1, color: currColor});
+            // console.log("Found end of line, placing brick (start, length, color): " + bricks);
+        }
+    }
+    return rects;
+}
 
 /**
  * Calculate the bill of materials for an image by calculating the set of bricks to use
@@ -145,36 +185,13 @@ function findBestCostBricks(length) {
 function calculateBOMSingleLines(img) {
     let bom = [];   // Brick objects: size, price, color, x/y coords of top left
     let totalCost = 0;
-    let nextColor = [0, 0, 0, 0];
-    let currColor = [0, 0, 0, 0];
-    for (y = 0; y < img.height; y++) {
-        let brickStart = -1;    // -1 means there is no current brick
-        let brickLength = 0;
-        for (x = 0; x < img.width; x++) {
-            img.getPixel(x, y, nextColor);
-            if (brickStart === -1) {    // Check whether we should start a new brick
-                brickStart = x;
-                brickLength = 0;
-                currColor = [...nextColor];
-            } else if (!Color.sameColor(currColor, nextColor)) {
-                const {cost, bricks} = findOptimalBricks(brickStart, y, brickLength, currColor);
-                bom.push(...bricks);
-                totalCost += cost;
-                // console.log("New color end-of-run, placing brick (start, length, color): " + bricks);
-                brickStart = x;
-                brickLength = 0;
-                currColor = [...nextColor];
-            }
-            brickLength++;      // Consume the pixel
-        }
-        if (brickStart != -1) {
-            const {cost, bricks} = findOptimalBricks(brickStart, y, brickLength, currColor);
+    let rects = findRects(img);
+    for (rect of rects) {
+        // For each rectangle, find the minimum set of bricks required to implement it
+        const {cost, bricks} = findOptimalBricks(rect.x, rect.y, rect.width, rect.color);
             bom.push(...bricks);
             totalCost += cost;
-            // console.log("Found end of line, placing brick (start, length, color): " + bricks);
-        }
     }
-    // console.log("Total cost of image: " + totalCost + " for " + bom.length + " bricks");
     return {
         cost: totalCost,
         bom: bom,
