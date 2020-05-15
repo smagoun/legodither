@@ -36,14 +36,14 @@ function renderBOM(cost, bom, palette) {
     // Group the bricks by color then size
     for (brick of bom) {
         const color = palette.getColorName(brick.color);
-        const size = brick.size;
+        const width = brick.width;
         if (bomSimplified[color] === undefined) {
             bomSimplified[color] = {}
         }
-        if (bomSimplified[color][size] === undefined) {
-            bomSimplified[color][size] = 1;
+        if (bomSimplified[color][width] === undefined) {
+            bomSimplified[color][width] = 1;
         } else {
-            bomSimplified[color][size] += 1;
+            bomSimplified[color][width] += 1;
         }
     }
     // Render the brick list
