@@ -174,5 +174,42 @@ function test1D() {
     }
 }
 
+function testGenerateBOM() {
+    let testCnt = 0;
+    let errCnt = 0;
+    const red = [255, 0, 0, 255];
+    const blue = [0, 0, 255, 255];
+    const palette = new Palette3BitColor("testGenerateBOM"); // Chosen since it's simple
+    // Palettes lazy-load colors, so force the palette to initialize itself
+    palette.getPalette();
+
+    const input = [
+        new Brick(3, 1, 7, red, 3, 2),
+        new Brick(2, 1, 7, red, 6, 2),
+        new Brick(8, 1, 17, blue, 0, 0),
+        new Brick(4, 1, 10, blue, 8, 0)
+    ];
+    // Comparing HTML is not ideal, but far simpler than comparing DOM trees. Good enough for now.
+    const expected = "<ul><li>Red<ul><li>1 x 2: 1</li><li>1 x 3: 1</li></ul></li><li>Blue<ul><li>1 x 4: 1</li><li>1 x 8: 1</li></ul></li></ul>";
+
+    testCnt++;
+    const output = generateBOM(input, palette);
+    if (!output instanceof HTMLUListElement) {
+        console.error(`Error: output not an HTML UL (got ${output})`);
+        errCnt++;
+    } else if (output.outerHTML != expected) {
+        console.error(`Error: wrong BOM HTML: got: ${output.outerHTML},
+            expected: ${expected}`);
+        errCnt++;
+    }
+
+    if (errCnt === 0) {
+        console.log(`generateBOM: ${testCnt}/${testCnt} tests passed!`);
+    } else {
+        console.warn(`generateBOM tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
+    }
+}
+
+testGenerateBOM();
 testFindRects();
 test1D();

@@ -32,6 +32,21 @@ const brickCostMap = [];
 function renderBOM(cost, bom, palette) {
     document.getElementById("bomTotalCost").textContent = "$" + (cost / 100).toFixed(2);
     document.getElementById("bomTotalBrickCount").textContent = bom.length;
+    let bomList = generateBOM(bom, palette);
+    document.getElementById("brickList").firstChild.replaceWith(bomList);
+}
+
+
+/**
+ * Generate the Bill of Materials. Groups the bricks by color, then for each color generates
+ * a list of bricks.
+ * 
+ * Returns an element to be placed in the DOM.
+ * 
+ * @param {*} bom Array of Bricks
+ * @param {*} palette 
+ */
+function generateBOM(bom, palette) {
     bomSimplified = {};     // 2-level associative array of Bricks grouped by color then size
     // Group the bricks by color then size
     for (brick of bom) {
@@ -64,7 +79,7 @@ function renderBOM(cost, bom, palette) {
         elt.appendChild(ul);
         bomList.appendChild(elt);
     }
-    document.getElementById("brickList").firstChild.replaceWith(bomList);
+    return bomList;
 }
 
 /**
@@ -189,8 +204,8 @@ function calculateBOMSingleLines(img) {
     for (rect of rects) {
         // For each rectangle, find the minimum set of bricks required to implement it
         const {cost, bricks} = findOptimalBricks(rect.x, rect.y, rect.width, rect.color);
-            bom.push(...bricks);
-            totalCost += cost;
+        bom.push(...bricks);
+        totalCost += cost;
     }
     return {
         cost: totalCost,
