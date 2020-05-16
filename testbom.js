@@ -18,15 +18,15 @@ function checkBricks(a, b) {
     return false;
 }   
 
-function testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks) {
+function testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks) {
     ret = true;
-    const {cost, bricks} = findOptimalBricks(x, y, length, color);
+    const {cost, bricks} = findOptimalBricks(x, y, width, height, color);
     if (cost != expectedCost) {
-        console.error(`Length ${length} cost: ${cost}, expected: ${expectedCost}`);
+        console.error(`${width}x${height} cost: ${cost}, expected: ${expectedCost}`);
         ret = false;
     }
     if (!checkBricks(bricks, expectedBricks)) {
-        console.error(`Length ${length} got bricks ${bricks}, expected: ${expectedBricks}`);
+        console.error(`${width}x${height} got bricks ${bricks}, expected: ${expectedBricks}`);
         ret = false;
     }
     return ret;
@@ -104,66 +104,129 @@ function test1D() {
 
     let expectedCost;
     let expectedBricks = [];
-    let length;
+    let x, y, width, height;
     const color = [0, 0, 0, 0];
 
     // Base case: 0x0
     testCnt++;
-    // height=1 is a hack to get around hardcoded 1px height assumption of findOptimalBricks
-    length=0, x=0, y=0, expectedCost=0, expectedBricks=[new Brick(0, 1, 0, color, 0, 0)];
-    if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
+    width=0, height=0, x=0, y=0, expectedCost=0, expectedBricks=[new Brick(0, 0, 0, color, 0, 0)];
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
 
     // 1x1
     testCnt++;
-    length=1, x=0, y=0, expectedCost=6, expectedBricks=[new Brick(1, 1, 6, color, 0, 0)];
-    if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
+    width=1, height=1, x=0, y=0, expectedCost=6, expectedBricks=[new Brick(1, 1, 6, color, 0, 0)];
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
 
     // Longer brick
     testCnt++;
-    length=4, x=0, y=0, expectedCost=10, expectedBricks=[new Brick(4, 1, 10, color, 0, 0)];
-    if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
+    width=4, height=1, x=0, y=0, expectedCost=10, expectedBricks=[new Brick(4, 1, 10, color, 0, 0)];
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
 
     // Composite
     testCnt++;
-    length=5, x=0, y=0, expectedCost=14, expectedBricks=[new Brick(3, 1, 7, color, 0, 0),
+    width=5, height=1, x=0, y=0, expectedCost=14, expectedBricks=[new Brick(3, 1, 7, color, 0, 0),
         new Brick(2, 1, 7, color, 3, 0)];  // 2,3 would also work...
-    if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
 
     // Long run
     testCnt++;
-    length=12, x=0, y=0, expectedCost=27, expectedBricks=[new Brick(8, 1, 17, color, 0, 0),
+    width=12, height=1, x=0, y=0, expectedCost=27, expectedBricks=[new Brick(8, 1, 17, color, 0, 0),
         new Brick(4, 1, 10, color, 8, 0)]; // 4,8 would also work...
-    if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
 
     // Long brick with pricing that encourages avoiding it in favor of smaller bricks
     testCnt++;
-    let tmpBC = brickCost[4];     // Since it's a global we need to put it back the way we found it
-    let tmpBCM = brickCostMap[4]; // Since it's a global we need to put it back the way we found it
-    brickCost[4] = 16;
+    let tmpBC = brickCost[4][1];    // Since it's a global we need to put it back the way we found it
+    let tmpBCM = brickCostMap[4];   // Since it's a global we need to put it back the way we found it
+    brickCost[4][1] = 16;
     delete brickCostMap[4];
-    length=4, x=0, y=0, expectedCost=13, expectedBricks=[new Brick(3, 1, 7, color, 0, 0),
+    width=4, height=1, x=0, y=0, expectedCost=13, expectedBricks=[new Brick(3, 1, 7, color, 0, 0),
         new Brick(1, 1, 6, color, 3, 0)]; // 1,3 would also work...
-    if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
-    brickCost[4] = tmpBC;
+    brickCost[4][1] = tmpBC;
     brickCostMap[4] = tmpBCM;
 
-    // Composite
+    // Composite at different x/y coordinates
     testCnt++;
-    length=5, x=3, y=2, expectedCost=14, expectedBricks=[new Brick(3, 1, 7, color, 3, 2),
+    width=5, height=1, x=3, y=2, expectedCost=14, expectedBricks=[new Brick(3, 1, 7, color, 3, 2),
         new Brick(2, 1, 7, color, 6, 2)];  // 2,3 would also work...
-    if (!testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks)) {
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
+        errCnt++;
+    }
+
+    // 2x4
+    testCnt++;
+    width=2, height=4, expectedCost=14, x=0, y=0, expectedBricks = [new Brick(2, 4, 14, color, 0, 0)];  // 4x2 would also work...
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
+        errCnt++;
+    }
+
+    // 4x2, which doesn't have pre-populated pricing data
+    testCnt++;
+    width=4, height=2, expectedCost=14, x=0, y=0, expectedBricks = [new Brick(4, 2, 14, color, 0, 0)];  // 2x4 would also work...
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
+        errCnt++;
+    }
+
+    // 2x5
+    testCnt++;
+    width=2, height=5, expectedCost=21, x=0, y=0, expectedBricks = [new Brick(2, 4, 14, color, 0, 0),
+        new Brick(2, 1, 7, color, 0, 4)];
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
+        errCnt++;
+    }
+
+    // 5x2
+    testCnt++;
+    width=5, height=2, expectedCost=21, x=0, y=0, expectedBricks = [new Brick(4, 2, 14, color, 0, 0),
+        new Brick(1, 2, 7, color, 4, 0)];
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
+        errCnt++;
+    }
+
+    // 3x3
+    testCnt++;
+    width=3, height=3, expectedCost=21, x=0, y=0, expectedBricks = [new Brick(2, 3, 14, color, 0, 0),
+        new Brick(1, 3, 7, color, 2, 0)];
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
+        errCnt++;
+    }
+    
+    // 7x5
+    /*
+     * |oooo|oo|o|
+     * |oooo|oo|o|
+     * |oooo|oo|o|
+     * |oooo|oo|o|
+     * -----------
+     * |oooo|oo o|
+     */
+    testCnt++;
+    width=7, height=5, expectedCost=61, x=0, y=0, expectedBricks = [new Brick(4, 4, 20, color, 0, 0),
+        new Brick(4, 1, 10, color, 0, 4), new Brick(2, 4, 14, color, 4, 0), new Brick(1, 4, 10, color, 6, 0), 
+        new Brick(3, 1, 7, color, 4, 4) ];
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
+        errCnt++;
+    }
+
+    // 7x5 at a different x,y coordinate
+    testCnt++;
+    width=7, height=5, expectedCost=61, x=3, y=2, expectedBricks = [new Brick(4, 4, 20, color, 3, 2),
+        new Brick(4, 1, 10, color, 3, 6), new Brick(2, 4, 14, color, 7, 2), new Brick(1, 4, 10, color, 9, 2), 
+        new Brick(3, 1, 7, color, 7, 6) ];
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
         errCnt++;
     }
 
