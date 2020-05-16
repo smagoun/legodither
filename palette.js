@@ -50,8 +50,7 @@ class Palette {
      */
     static makePalette() {
         let ret = [];
-        for (i = 0; i < this.palette.length; i++) {
-            let tmp = this.palette[i];
+        for (let tmp of this.palette) {
             let name = "";
             if (tmp.length >= 2) {
                 name = tmp[1];
@@ -66,7 +65,7 @@ class Palette {
 
     getPaletteLinear() {
         if (this.paletteLinear === []) {
-            for (i = 0; i < this.palette.length; i++) {
+            for (let i = 0; i < this.palette.length; i++) {
                 this.paletteLinear[i] = srgbToLinear(this.palette[i]);
             }
         }
