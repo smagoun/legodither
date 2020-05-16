@@ -32,7 +32,7 @@ function testFindOptimalBricks(x, y, width, height, color, expectedCost, expecte
     return ret;
 }
 
-function testFindRects() {
+function testFindRectsSingleLine() {
     let errCnt = 0;
     let testCnt = 0;
     const expected = [];
@@ -80,7 +80,7 @@ function testFindRects() {
     expected.push({x: 2, y: 3, width: 1, height: 1, color: red});
     expected.push({x: 3, y: 3, width: 1, height: 1, color: blue});
 
-    const rects = findRects(img);
+    const rects = findRectsSingleLine(img);
     for (let i = 0; i < rects.length; i++) {
         const a = rects[i];
         const b = expected[i];
@@ -92,13 +92,13 @@ function testFindRects() {
         }
     }
     if (errCnt === 0) {
-        console.log(`FindRects: ${testCnt}/${testCnt} tests passed!`);
+        console.log(`FindRectsSingleLine: ${testCnt}/${testCnt} tests passed!`);
     } else {
-        console.warn(`FindRects: tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
+        console.warn(`FindRectsSingleLine: tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
     }
 }
 
-function test1D() {
+function testFindBricks() {
     let testCnt = 0;
     let errCnt = 0;
 
@@ -231,9 +231,9 @@ function test1D() {
     }
 
     if (errCnt === 0) {
-        console.log(`1D-BOM: ${testCnt}/${testCnt} tests passed!`);
+        console.log(`FindBricks: ${testCnt}/${testCnt} tests passed!`);
     } else {
-        console.warn(`1D-BOM tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
+        console.warn(`FindBricks tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
     }
 }
 
@@ -274,5 +274,5 @@ function testGenerateBOM() {
 }
 
 testGenerateBOM();
-testFindRects();
-test1D();
+testFindRectsSingleLine();
+testFindBricks();

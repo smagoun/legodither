@@ -227,7 +227,7 @@ function findBestCostBricks(width, height, color, x, y) {
  * 
  * @param {ImageInfo} img
  */
-function findRects(img) {
+function findRectsSingleLine(img) {
     let rects = [];   // List of rectangles: width/height + x/y coords
     let nextColor = [0, 0, 0, 0];
     let currColor = [0, 0, 0, 0];
@@ -269,7 +269,7 @@ function findRects(img) {
 function calculateBOMSingleLines(img) {
     let bom = [];   // Brick objects: size, price, color, x/y coords of top left
     let totalCost = 0;
-    let rects = findRects(img);
+    let rects = findRectsSingleLine(img);
     for (rect of rects) {
         // For each rectangle, find the minimum set of bricks required to implement it
         const {cost, bricks} = findOptimalBricks(rect.x, rect.y, rect.width, rect.height, rect.color);
