@@ -20,7 +20,7 @@ function checkBricks(a, b) {
 
 function testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks) {
     ret = true;
-    let {cost, bricks} = findOptimalBricks(x, y, length, color);
+    const {cost, bricks} = findOptimalBricks(x, y, length, color);
     if (cost != expectedCost) {
         console.error(`Length ${length} cost: ${cost}, expected: ${expectedCost}`);
         ret = false;
@@ -35,18 +35,18 @@ function testFindOptimalBricks(x, y, length, color, expectedCost, expectedBricks
 function testFindRects() {
     let errCnt = 0;
     let testCnt = 0;
-    let expected = [];
+    const expected = [];
 
     // Create image with test data
-    let width = 4;
-    let height = 4;
-    let pixelStride = 4;    // RGBA
-    let lineStride = width * pixelStride;
-    let imageData = {};
-    let red = [255, 0, 0, 255];
-    let blue = [0, 0, 255, 255];
+    const width = 4;
+    const height = 4;
+    const pixelStride = 4;    // RGBA
+    const lineStride = width * pixelStride;
+    const imageData = {};
+    const red = [255, 0, 0, 255];
+    const blue = [0, 0, 255, 255];
     imageData.data = new Array(width * height * pixelStride);
-    let img = new ImageInfo(width, height, lineStride, pixelStride, imageData);
+    const img = new ImageInfo(width, height, lineStride, pixelStride, imageData);
     
     // Line that's all the same color
     for (let i = 0; i < width; i++) {   
@@ -80,10 +80,10 @@ function testFindRects() {
     expected.push({x: 2, y: 3, width: 1, height: 1, color: red});
     expected.push({x: 3, y: 3, width: 1, height: 1, color: blue});
 
-    let rects = findRects(img);
+    const rects = findRects(img);
     for (let i = 0; i < rects.length; i++) {
-        let a = rects[i];
-        let b = expected[i];
+        const a = rects[i];
+        const b = expected[i];
         testCnt++
         if (a.x != b.x || a.y != b.y || a.width != b.width || a.height != b.height) {
             // Ignore color for now, color differences will manifest as different rectangles
@@ -105,7 +105,7 @@ function test1D() {
     let expectedCost;
     let expectedBricks = [];
     let length;
-    let color = [0, 0, 0, 0];
+    const color = [0, 0, 0, 0];
 
     // Base case: 0x0
     testCnt++;
