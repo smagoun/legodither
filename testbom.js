@@ -237,34 +237,56 @@ function testFindBricks() {
     }
 }
 
+function testOneBOM(input, palette, expected) {
+    let errCnt = 0;
+    const output = generateBOM(input, palette);
+    if (!output instanceof HTMLUListElement) {
+        console.error(`Error: output not an HTML UL (got ${output})`);
+        errCnt = 1;
+    } else if (output.outerHTML != expected) {
+        console.error(`Error: wrong BOM HTML: got: ${output.outerHTML},
+            expected: ${expected}`);
+        errCnt = 1;
+    }
+    return errCnt;
+}
+
 function testGenerateBOM() {
     let testCnt = 0;
     let errCnt = 0;
     const red = [255, 0, 0, 255];
     const blue = [0, 0, 255, 255];
+    let input, expected;
     const palette = new Palette3BitColor("testGenerateBOM"); // Chosen since it's simple
     // Palettes lazy-load colors, so force the palette to initialize itself
     palette.getPalette();
 
-    const input = [
+    input = [
         new Brick(3, 1, 7, red, 3, 2),
         new Brick(2, 1, 7, red, 6, 2),
         new Brick(8, 1, 17, blue, 0, 0),
         new Brick(4, 1, 10, blue, 8, 0)
     ];
     // Comparing HTML is not ideal, but far simpler than comparing DOM trees. Good enough for now.
-    const expected = "<ul><li>Red<ul><li>1 x 2: 1</li><li>1 x 3: 1</li></ul></li><li>Blue<ul><li>1 x 4: 1</li><li>1 x 8: 1</li></ul></li></ul>";
+    expected = "<ul><li>Red<ul><li>1 x 2: 1</li><li>1 x 3: 1</li></ul></li><li>Blue<ul><li>1 x 4: 1</li><li>1 x 8: 1</li></ul></li></ul>";
+    ++testCnt;
+    errCnt += testOneBOM(input, palette, expected);
 
-    testCnt++;
-    const output = generateBOM(input, palette);
-    if (!output instanceof HTMLUListElement) {
-        console.error(`Error: output not an HTML UL (got ${output})`);
-        errCnt++;
-    } else if (output.outerHTML != expected) {
-        console.error(`Error: wrong BOM HTML: got: ${output.outerHTML},
-            expected: ${expected}`);
-        errCnt++;
-    }
+    // Right triangle with right angle at the origin
+    input = [
+        new Brick(3, 2, 14, red, 0, 0),
+        new Brick(1, 1, 6, red, 3, 0),
+        new Brick(1, 3, 7, blue, 3, 1),
+        new Brick(2, 1, 7, red, 0, 2),
+        new Brick(1, 2, 7, blue, 2, 2),
+        new Brick(1, 1, 6, red, 0, 3),
+        new Brick(1, 1, 6, blue, 1, 3),
+    ];
+    // Comparing HTML is not ideal, but far simpler than comparing DOM trees. Good enough for now.
+    expected = "<ul><li>Red<ul><li>1 x 1: 2</li><li>1 x 2: 1</li><li>2 x 3: 1</li></ul></li>"
+        + "<li>Blue<ul><li>1 x 1: 1</li><li>1 x 2: 1</li><li>1 x 3: 1</li></ul></li></ul>";
+    ++testCnt;
+    errCnt += testOneBOM(input, palette, expected);
 
     if (errCnt === 0) {
         console.log(`generateBOM: ${testCnt}/${testCnt} tests passed!`);

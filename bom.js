@@ -70,23 +70,33 @@ function renderBOM(cost, bom, palette) {
  * @param {*} palette 
  */
 function generateBOM(bom, palette) {
-    bomSimplified = {};     // 2-level associative array of Bricks grouped by color then size
+    bomSimplified = {};     // 3-level associative array of Bricks grouped by color then size
     // Group the bricks by color then size
     for (brick of bom) {
         const color = palette.getColorName(brick.color);
-        const width = brick.width;
-        if (bomSimplified[color] === undefined) {
-            bomSimplified[color] = {}
+        let width = brick.width;
+        let height = brick.height;
+        if (height > width) {
+            // Normalize the orientation of bricks
+            const tmp = width;
+            width = height;
+            height = tmp;
         }
-        if (bomSimplified[color][width] === undefined) {
-            bomSimplified[color][width] = 1;
+        if (bomSimplified[color] === undefined) {
+            bomSimplified[color] = [];
+        }
+        if (bomSimplified[color][height] === undefined) {
+            bomSimplified[color][height] = [];
+        }
+        if (bomSimplified[color][height][width] === undefined) {
+            bomSimplified[color][height][width] = 1;
         } else {
-            bomSimplified[color][width] += 1;
+            bomSimplified[color][height][width] += 1;
         }
     }
     // Render the brick list
     let bomList = document.createElement("ul");
-    for (const [bomColor, bomSizes] of Object.entries(bomSimplified)) {
+    for (let [bomColor, bomHeights] of Object.entries(bomSimplified)) {
         let elt = document.createElement("li");
         let colorName = bomColor;
         if (palette != null) {
@@ -94,11 +104,13 @@ function generateBOM(bom, palette) {
         }
         elt.textContent = colorName;
         let ul = document.createElement("ul");
-        for (bomSize in bomSizes) {
+        bomHeights.forEach(function (widths, height) { 
+            widths.forEach(function (numBricks, width) {
             let li = document.createElement("li");
-            li.textContent = "1 x " + bomSize + ": " + bomSimplified[bomColor][bomSize];
+                li.textContent = `${height} x ${width}: ${numBricks}`;
             ul.appendChild(li);
-        }
+            });
+        });
         elt.appendChild(ul);
         bomList.appendChild(elt);
     }
