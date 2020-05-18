@@ -263,10 +263,10 @@ function findRectsSingleLine(img) {
     let rects = [];   // List of rectangles: width/height + x/y coords
     let nextColor = [0, 0, 0, 0];
     let currColor = [0, 0, 0, 0];
-    for (y = 0; y < img.height; y++) {
+    for (let y = 0; y < img.height; y++) {
         let brickStart = -1;    // -1 means there is no current brick
         let brickLength = 0;
-        for (x = 0; x < img.width; x++) {
+        for (let x = 0; x < img.width; x++) {
             img.getPixel(x, y, nextColor);
             if (brickStart === -1) {    // Check whether we should start a new brick
                 brickStart = x;
