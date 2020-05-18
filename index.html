@@ -197,6 +197,12 @@
     </div>
 
     <div class="bomContainer">
+        <label for="findRectsSelect">BOM generation:</label>
+        <!-- TODO: onchange should just change bom; no need to redraw the image -->
+        <select id="findRectsSelect" onchange="drawLego()">
+            <option value="singleLine" selected="true">Single-line (1D)</option>
+            <option value="expandingRects">Expanding rectangles (2D)</option>
+        </select>
         <p>Bill of Materials</p>
         <div class="bom">
             <p>Total cost: <span id="bomTotalCost"></span></p>

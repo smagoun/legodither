@@ -415,18 +415,24 @@ function findRectsExpanding(img) {
 }
 
 /**
- * Calculate the bill of materials for an image by calculating the set of bricks to use
- * on each line. Does not support bricks that span multiple lines, either due to orientation
- * or brick size (such as 2x4 bricks).
+ * Calculate the bill of materials for an image by calculating the set of bricks required
+ * using the specified algorithm.
  * 
  * Returns a tuple of cost and an array of Bricks
  * 
  * @param {*} img
+ * @param {*} algorithm Name of the algorithm to use, such as "singleLine"
  */
-function calculateBOMSingleLines(img) {
+function calculateBOM(img, algorithm) {
     let bom = [];   // Brick objects: size, price, color, x/y coords of top left
     let totalCost = 0;
-    let rects = findRectsSingleLine(img);
+    let rects;
+    switch(algorithm) {
+        case "singleLine":      rects = findRectsSingleLine(img);   break;
+        case "expandingRects":  rects = findRectsExpanding(img);    break;
+        default:
+            alert("Invalid BOM algorithm: " + algorithm);
+    }
     for (rect of rects) {
         // For each rectangle, find the minimum set of bricks required to implement it
         const {cost, bricks} = findOptimalBricks(rect.x, rect.y, rect.width, rect.height, rect.color);

@@ -151,6 +151,8 @@ function drawLego() {
     let paletteName = p.options[p.selectedIndex].value;
     let palette = getPalette(paletteName);
 
+    let bomAlgorithm = document.getElementById("findRectsSelect").value;
+
     copyImage(srcCanvas, getCurrCanvas());
 
     // TODO: Should probably split the level adjustment into 2. Adjust input levels
@@ -191,7 +193,7 @@ function drawLego() {
 
     // Figure out bill of materials
     let img = ImageInfo.fromCanvas(getCurrCanvas());
-    let {cost, bom} = calculateBOMSingleLines(img);
+    let {cost, bom} = calculateBOM(img, bomAlgorithm);
     renderBOM(cost, bom, palette);
     let t1 = performance.now();
     console.log("Total time: " + (t1 - t0) + "ms");
