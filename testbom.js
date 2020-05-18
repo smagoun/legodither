@@ -16,7 +16,7 @@ function checkBricks(a, b) {
         return true;
     }
     return false;
-}   
+}
 
 function testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks) {
     ret = true;
@@ -87,7 +87,7 @@ function testFindRectsSingleLine() {
         testCnt++
         if (a.x != b.x || a.y != b.y || a.width != b.width || a.height != b.height) {
             // Ignore color for now, color differences will manifest as different rectangles
-            errCnt++
+            errCnt++;
             console.error(`Test ${testCnt} expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`);
         }
     }
@@ -95,6 +95,162 @@ function testFindRectsSingleLine() {
         console.log(`FindRectsSingleLine: ${testCnt}/${testCnt} tests passed!`);
     } else {
         console.warn(`FindRectsSingleLine: tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
+    }
+}
+
+function testOneImg(img, fn, expected, testCnt) {
+    let rects = fn(img);
+    let errCnt = 0;
+    if (rects.length === expected.length) {
+        for (let i = 0; i < rects.length; i++) {
+            const a = rects[i];
+            const b = expected[i];
+            if (a.x != b.x || a.y != b.y || a.width != b.width || a.height != b.height) {
+                errCnt = 1;
+                break;
+            }
+            for (let j = 0; j < a.color.length; j++) {
+                if (a.color[j] != b.color[j]) {
+                    errCnt = 1;
+                    break;
+                }
+            }
+        }
+    } else {
+        console.error(`Test ${testCnt} expected ${JSON.stringify(expected)}, 
+            got ${JSON.stringify(rects)}`);
+    }
+    if (errCnt > 0) {
+        console.error(`Test ${testCnt} expected ${JSON.stringify(expected)}, 
+            got ${JSON.stringify(rects)}`);
+    }
+    return errCnt;
+}
+
+function testFindRectsExpanding() {
+    let errCnt = 0;
+    let testCnt = 0;
+    let expected;
+
+    // Create image with test data
+    const width = 4;
+    const height = 4;
+    const pixelStride = 4;    // RGBA
+    const lineStride = width * pixelStride;
+    const imageData = {};
+    const red = [255, 0, 0, 255];
+    const blue = [0, 0, 255, 255];
+    imageData.data = new Array(width * height * pixelStride);
+    const img = new ImageInfo(width, height, lineStride, pixelStride, imageData);
+    
+    // 4x4 grid of one color
+    expected = [];
+    for (let j = 0; j < height; j++) {
+        for (let i = 0; i < width; i++) {
+            img.setPixel(i, j, red);
+        }
+    }
+    expected.push({x: 0, y: 0, width: 4, height: 4, color: red});
+    errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
+
+    // 4x2 on top, 4x2 on bottom
+    expected = [];
+    for (let j = 0; j < height; j++) {
+        for (let i = 0; i < width; i++) {
+            img.setPixel(i, j, (j>1) ? blue: red);
+        }
+    }
+    expected.push({x: 0, y: 0, width: 4, height: 2, color: red});
+    expected.push({x: 0, y: 2, width: 4, height: 2, color: blue});
+    errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
+
+    // Right triangle with corner at top left
+    expected = [];
+    for (let j = 0; j < height; j++) {
+        for (let i = 0; i < width; i++) {
+            img.setPixel(i, j, ((width-j-i) > 0) ? red : blue);
+        }
+    }
+    expected.push({x: 0, y: 0, width: 3, height: 2, color: red});
+    expected.push({x: 3, y: 0, width: 1, height: 1, color: red});
+    expected.push({x: 3, y: 1, width: 1, height: 3, color: blue});
+    expected.push({x: 0, y: 2, width: 2, height: 1, color: red});
+    expected.push({x: 2, y: 2, width: 1, height: 2, color: blue});
+    expected.push({x: 0, y: 3, width: 1, height: 1, color: red});
+    expected.push({x: 1, y: 3, width: 1, height: 1, color: blue});
+    errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
+
+    // Right triangle with corner at top right
+    expected = [];
+    for (let j = 0; j < height; j++) {
+        for (let i = 0; i < width; i++) {
+            img.setPixel(i, j, (j > i) ? red : blue);
+        }
+    }
+    expected.push({x: 0, y: 0, width: 4, height: 1, color: blue});
+    expected.push({x: 0, y: 1, width: 1, height: 3, color: red});
+    expected.push({x: 1, y: 1, width: 3, height: 1, color: blue});
+    expected.push({x: 1, y: 2, width: 1, height: 2, color: red});
+    expected.push({x: 2, y: 2, width: 2, height: 1, color: blue});
+    expected.push({x: 2, y: 3, width: 1, height: 1, color: red});
+    expected.push({x: 3, y: 3, width: 1, height: 1, color: blue});
+    errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
+
+
+    // Line that's all the same color
+    expected = [];
+    for (let j = 0; j < height; j++) {
+        let color = (j === 0) ? red : blue;
+        for (let i = 0; i < width; i++) {
+            img.setPixel(i, j, color);
+       }
+    }
+    expected.push({x: 0, y: 0, width: 4, height: 1, color: red});
+    expected.push({x: 0, y: 1, width: 4, height: 3, color: blue});
+    errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
+
+    // DCT-ish image
+    expected = [];
+    // Top left cube
+    img.setPixel(0, 0, red);
+    img.setPixel(1, 0, red);
+    img.setPixel(0, 1, red);
+    img.setPixel(1, 1, red);
+    // Top right cube
+    img.setPixel(2, 0, blue);
+    img.setPixel(3, 0, red);
+    img.setPixel(2, 1, blue);
+    img.setPixel(3, 1, red);
+    // Bottom left cube
+    img.setPixel(0, 2, blue);
+    img.setPixel(1, 2, blue);
+    img.setPixel(0, 3, red);
+    img.setPixel(1, 3, red);
+    // Bottom right cube
+    img.setPixel(2, 2, red);
+    img.setPixel(3, 2, blue);
+    img.setPixel(2, 3, blue);
+    img.setPixel(3, 3, red);
+
+    // First 2 rows
+    expected.push({x: 0, y: 0, width: 2, height: 2, color: red});
+    expected.push({x: 2, y: 0, width: 1, height: 2, color: blue});
+    expected.push({x: 3, y: 0, width: 1, height: 2, color: red});
+    // 3rd row
+    expected.push({x: 0, y: 2, width: 2, height: 1, color: blue});
+    expected.push({x: 2, y: 2, width: 1, height: 1, color: red});
+    expected.push({x: 3, y: 2, width: 1, height: 1, color: blue});
+    // Last row
+    expected.push({x: 0, y: 3, width: 2, height: 1, color: red});
+    expected.push({x: 2, y: 3, width: 1, height: 1, color: blue});
+    expected.push({x: 3, y: 3, width: 1, height: 1, color: red});
+    errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
+
+
+    if (errCnt === 0) {
+        console.log(`FindRectsExpanding: ${testCnt}/${testCnt} tests passed!`);
+    } else {
+        console.warn(`FindRectsExpanding: tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
     }
 }
 
@@ -297,4 +453,5 @@ function testGenerateBOM() {
 
 testGenerateBOM();
 testFindRectsSingleLine();
+testFindRectsExpanding();
 testFindBricks();

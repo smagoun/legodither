@@ -106,9 +106,9 @@ function generateBOM(bom, palette) {
         let ul = document.createElement("ul");
         bomHeights.forEach(function (widths, height) { 
             widths.forEach(function (numBricks, width) {
-            let li = document.createElement("li");
+                let li = document.createElement("li");
                 li.textContent = `${height} x ${width}: ${numBricks}`;
-            ul.appendChild(li);
+                ul.appendChild(li);
             });
         });
         elt.appendChild(ul);
@@ -265,6 +265,151 @@ function findRectsSingleLine(img) {
             rects.push({x: brickStart, y: y, width: brickLength, height: 1, color: currColor});
             // console.log("Found end of line, placing brick (start, length, color): " + bricks);
         }
+    }
+    return rects;
+}
+
+/**
+ * Find the rectangles of the same color.
+ * 
+ * Greedy algorithm that looks for horizontal + vertical runs of a color.
+ * Starts at the top left and works toward the bottom-right; not great for shapes 
+ * like a right triangle with right angle at the top right.
+ * 
+ * In this example, the algorithm will find a square inside the base of the
+ * triangle on the left, while on the right it will find a series of horizontal
+ * rectangles:
+ * 
+ * _______         _______
+ * |  |_/           \____|
+ * |__|/      vs     \___|
+ * | |/               \__|
+ * |_/                 \_|
+ * |/                   \|
+ * 
+ * Returns an array of rectangles: {x, y, width, height, color}
+ * 
+ * @param {*} img 
+ */
+function findRectsExpanding(img) {
+    let rects = [];   // List of rectangles: width/height + x/y coords
+
+    // Keeps track of which pixels have been assigned to a rect. Convert to a bitfield to save memory
+    let mapped = new Array(img.width * img.height).fill(0);
+    let tmpColor = [0, 0, 0, 0];
+    // Invariant: we've already mapped all the pixels in rows 0 to (y-1), and we've
+    // mapped all the pixels in the current row from 0 to (x-1)
+    for (let y = 0; y < img.height; y++) {
+        for (let x = 0; x < img.width; x++) {
+            // Find the first unmapped pixel
+            let xy = (y * img.width) + x;
+            let pixel = mapped[xy];
+            if (pixel != 0) {
+                // Pixel is already mapped
+                continue;
+            } else {
+                // Pixel isn't mapped. Find the largest rectangle we can starting from here
+                // Algorithm:
+                // Try to expand by one px in the horizontal, then one px in vertical
+                // Check the entire row/col in the direction we're expanding
+                // If we find a non-matching pixel, stop expanding in that direction
+                // Keep expanding in the other direction until we can't
+                let currColor = [0, 0, 0, 0];
+                img.getPixel(x, y, currColor);
+                let expandX = true;
+                let expandY = true;
+                let rightEdge = x;
+                let bottomEdge = y;
+
+                // Mark the current pixel as being part of a rect
+                mapped[xy]++;
+
+                while (expandY || expandX) {
+                    if (expandX) { 
+                        if ((rightEdge+1) < img.width) {
+                            // Try to expand one pixel to the right
+                            let obstructions = false;
+                            for (let yyy = y; yyy <= bottomEdge && yyy < img.height; yyy++) {
+                                // Check that none of the pixels in the next column
+                                // have been mapped into another rect
+                                let tmp = (yyy * img.width) + rightEdge + 1;
+                                if (mapped[tmp] != 0) {
+                                    obstructions = true;
+                                    break;
+                                }
+                                // Check the colors of the next column
+                                img.getPixel(rightEdge + 1, yyy, tmpColor);
+                                if (!Color.sameColor(currColor, tmpColor)) {
+                                    obstructions = true;
+                                    break;
+                                }
+                            }
+                            if (!obstructions) {
+                                // The next column matches the current one, so we successfully
+                                // expanded in X. Mark all the pixels in the column as 'mapped'
+                                rightEdge++;
+                                for (let yyy = y; yyy <= bottomEdge && yyy < img.height; yyy++) {
+                                    xxyyy = (yyy * img.width) + rightEdge;
+                                    mapped[xxyyy]++;
+                                }
+                            } else {
+                                // The next column has a pixel that doesn't match the current one,
+                                // so stop expanding in that direction
+                                expandX = false;
+                            }
+                        } else {
+                            // Reached the right edge of the image
+                            expandX = false;
+                        }
+                    } 
+                    if (expandY) {
+                        if ((bottomEdge+1) < img.height) {
+                            // Try to expand 1 pixel downward
+                            let obstructions = false;
+                            for (let xxx = x; xxx <= rightEdge && xxx < img.width; xxx++) {
+                                // Check that none of the pixels in the next column
+                                // have been mapped into another rect
+                                let tmp = ((bottomEdge + 1) * img.width) + xxx;
+                                if (mapped[tmp] != 0) {
+                                    obstructions = true;
+                                    break;
+                                }
+                                // Check the colors of the next row
+                                img.getPixel(xxx, bottomEdge + 1, tmpColor);
+                                if (!Color.sameColor(currColor, tmpColor)) {
+                                    obstructions = true;
+                                    break;
+                                }
+                            }
+                            if (!obstructions) {
+                                // The next row matches the current one, so we successfully
+                                // expanded in Y. Mark all the pixels in the row as 'mapped'
+                                bottomEdge++;
+                                for (let xxx = x; xxx <= rightEdge && xxx < img.width; xxx++) {
+                                    xxxyy = (bottomEdge * img.width) + xxx;
+                                    mapped[xxxyy]++;
+                                }
+                            } else {
+                                // The next row has a pixel that doesn't match the current one,
+                                // so stop expanding in that direction
+                                expandY = false;
+                            }
+                        } else {
+                            // Reached the bottom edge of the image
+                            expandY = false;
+                        }
+                    }
+                }
+                let width = rightEdge - x + 1;
+                let height = bottomEdge - y + 1; 
+                rects.push({x: x, y: y, width: width, height: height, color: currColor});
+                // console.log(`Found rectangle #${numRects++} of ${width}x${height}`);
+            }
+        }
+    }
+    let mappedPixels = mapped.reduce((acc, val) => acc + val, 0);
+    if (mappedPixels != (img.width * img.height)) {
+        console.error(`Found rects covering ${mappedPixels} pixels, expected ${img.width * img.height}`);
     }
     return rects;
 }
