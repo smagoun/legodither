@@ -142,11 +142,11 @@ function findOptimalBricks(x, y, width, height, color) {
 }
 
 /**
- * Return the lowest cost to implement a run of studs, and the set of bricks needed. For example
- * a run of 5 studs can be implemented as (1x4 + 1x1) or (1x2 + 1x3); one option might
+ * Return the lowest cost to implement a rectangle of studs, and the set of bricks needed. For 
+ * example a run of 5 studs can be implemented as (1x4 + 1x1) or (1x2 + 1x3); one option might
  * be priced lower than the other. Prices may be such that some brick sizes are never picked. 
  * For example if (2) 1x2 bricks is cheaper than a 1x4, this will always pick (2) 1x2 bricks
- * for a 4-stud run. Does not support bricks wider than 1 stud (e.g. 2x4.
+ * for a 4-stud run.
  * 
  * Caches calculations in brickCost array for future use, and can rotate bricks 90 degrees to find
  * the best orientation.
