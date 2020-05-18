@@ -695,9 +695,9 @@ function findNearestColor(palette, input, output) {
         palB = pal[2];
         // We don't care about the actual distance, just the relative distance,
         // so we can avoid an expensive sqrt()
-        dist = ((r - palR) * (r - palR)) + 
-                ((g - palG) * (g - palG)) + 
-            ((b - palB) * (b - palB));
+        dist = ((r - palR) * (r - palR))
+            + ((g - palG) * (g - palG))
+            + ((b - palB) * (b - palB));
         if (dist < distance) {
             distance = dist;
             output[0] = palR;
