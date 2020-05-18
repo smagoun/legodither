@@ -32,6 +32,76 @@ function testFindOptimalBricks(x, y, width, height, color, expectedCost, expecte
     return ret;
 }
 
+function testFindRectsSinglePixels() {
+    let errCnt = 0;
+    let testCnt = 0;
+    const expected = [];
+
+    // Create image with test data
+    const width = 4;
+    const height = 4;
+    const pixelStride = 4;    // RGBA
+    const lineStride = width * pixelStride;
+    const imageData = {};
+    const red = [255, 0, 0, 255];
+    const blue = [0, 0, 255, 255];
+    imageData.data = new Array(width * height * pixelStride);
+    const img = new ImageInfo(width, height, lineStride, pixelStride, imageData);
+    
+    // Line that's all the same color
+    for (let i = 0; i < width; i++) {   
+        img.setPixel(i, 0, red);
+        expected.push({x: i, y: 0, width: 1, height: 1, color: red})
+    }
+
+    // Line with multiple colors
+    img.setPixel(0, 1, red);
+    img.setPixel(1, 1, red);
+    img.setPixel(2, 1, blue);
+    img.setPixel(3, 1, blue);
+    expected.push({x: 0, y: 1, width: 1, height: 1, color: red});
+    expected.push({x: 1, y: 1, width: 1, height: 1, color: red});
+    expected.push({x: 2, y: 1, width: 1, height: 1, color: blue});
+    expected.push({x: 3, y: 1, width: 1, height: 1, color: blue});
+
+    // Line whose last pixel is its own color
+    img.setPixel(0, 2, red);
+    img.setPixel(1, 2, red);
+    img.setPixel(2, 2, red);
+    img.setPixel(3, 2, blue);
+    expected.push({x: 0, y: 2, width: 1, height: 1, color: red});
+    expected.push({x: 1, y: 2, width: 1, height: 1, color: red});
+    expected.push({x: 2, y: 2, width: 1, height: 1, color: red});
+    expected.push({x: 3, y: 2, width: 1, height: 1, color: blue});
+
+    // Alternating colors
+    img.setPixel(0, 3, red);
+    img.setPixel(1, 3, blue);
+    img.setPixel(2, 3, red);
+    img.setPixel(3, 3, blue);
+    expected.push({x: 0, y: 3, width: 1, height: 1, color: red});
+    expected.push({x: 1, y: 3, width: 1, height: 1, color: blue});
+    expected.push({x: 2, y: 3, width: 1, height: 1, color: red});
+    expected.push({x: 3, y: 3, width: 1, height: 1, color: blue});
+
+    const rects = findRectsSinglePixels(img);
+    for (let i = 0; i < rects.length; i++) {
+        const a = rects[i];
+        const b = expected[i];
+        testCnt++
+        if (a.x != b.x || a.y != b.y || a.width != b.width || a.height != b.height) {
+            // Ignore color for now, color differences will manifest as different rectangles
+            errCnt++;
+            console.error(`Test ${testCnt} expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`);
+        }
+    }
+    if (errCnt === 0) {
+        console.log(`FindRectsSinglePixels: ${testCnt}/${testCnt} tests passed!`);
+    } else {
+        console.warn(`FindRectsSinglePixels: tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
+    }
+}
+
 function testFindRectsSingleLine() {
     let errCnt = 0;
     let testCnt = 0;
@@ -452,6 +522,7 @@ function testGenerateBOM() {
 }
 
 testGenerateBOM();
+testFindRectsSinglePixels();
 testFindRectsSingleLine();
 testFindRectsExpanding();
 testFindBricks();

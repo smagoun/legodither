@@ -229,6 +229,26 @@ function findBestCostBricks(width, height, color, x, y) {
 }
 
 /**
+ * Return the set of rectangles of the same color in each line. For this
+ * algorithm, these are just individual pixels
+ * 
+ * Returns an array of rectangles: {x, y, width, height, color}
+ * 
+ * @param {ImageInfo} img
+ */
+function findRectsSinglePixels(img) {
+    let rects = [];   // List of rectangles: width/height + x/y coords
+    for (y = 0; y < img.height; y++) {
+        for (x = 0; x < img.width; x++) {
+            let color = [0, 0, 0, 0];
+            img.getPixel(x, y, color);
+            rects.push({x: x, y: y, width: 1, height: 1, color: color});
+        }
+    }
+    return rects;
+}
+
+/**
  * Return the set of rectangles of the same color in each line. These represent
  * runs of studs, and potentitally multi-stud bricks.
  * 
@@ -428,6 +448,7 @@ function calculateBOM(img, algorithm) {
     let totalCost = 0;
     let rects;
     switch(algorithm) {
+        case "singlePixels":    rects = findRectsSinglePixels(img); break;
         case "singleLine":      rects = findRectsSingleLine(img);   break;
         case "expandingRects":  rects = findRectsExpanding(img);    break;
         default:
