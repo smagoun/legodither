@@ -77,7 +77,7 @@ Implement Floyd-Steinberg dithering:
     let pixel = [0, 0, 0, 0];
     let nearest = [0, 0, 0, 0];
     let tmpPixel = [0, 0, 0, 0];
-    let errR, errG, errB, errA;
+    let errR, errG, errB;
 
     // Weights for ordered dithering
     let map = [
