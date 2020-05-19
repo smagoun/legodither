@@ -196,6 +196,11 @@ function drawLego() {
     let {cost, bom} = calculateBOM(img, bomAlgorithm);
     renderBOM(cost, bom, palette);
     let t1 = performance.now();
+
+    // Draw the bricks
+    let instructionCanvas = document.getElementById("instructionCanvas");
+    drawBricks(bom, instructionCanvas, bricksX, bricksY);
+
     console.log("Total time: " + (t1 - t0) + "ms");
 }
 
