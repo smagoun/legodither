@@ -78,6 +78,25 @@ Implement Floyd-Steinberg dithering:
     let nearest = [0, 0, 0, 0];
     let tmpPixel = [0, 0, 0, 0];
     let errR, errG, errB, errA;
+
+    // Weights for ordered dithering
+    let map = [
+        [0, 8, 2, 10],
+        [12, 4, 14, 6],
+        [3, 11, 1, 9],
+        [15, 7, 13, 5]
+    ];
+    // Ordered dither: since we're going to calculate an offset to add to the pixel,
+    // recenter and scale the map to the range [-1, 1]. Recentering allows
+    // the offset to darken the pixel. Scale since we'll multiply
+    // by 255 later on to scale up to the range 0-255.
+    // Subtracting 0.5 takes care of the centering
+    map = map.map(y =>
+        y.map(x => (x + 0.5) / (map.length * map.length) - 0.5)
+    );
+    let bits = Math.floor(Math.log2(palette.getPalette().length)); 
+    let r = 255 / bits;
+
     for (let j = 0; j < img.height; j++) {
         for (let i = 0; i < img.width; i++) {
             img.getPixel(i, j, pixel);
@@ -91,24 +110,6 @@ Implement Floyd-Steinberg dithering:
             }
             
             if (ditherType === "ordered") {
-                let map = [
-                    [0, 8, 2, 10],
-                    [12, 4, 14, 6],
-                    [3, 11, 1, 9],
-                    [15, 7, 13, 5]
-                ];
-                
-                // Since we're going to calculate an offset to add to the pixel,
-                // recenter and scale the map to the range [-1, 1]. Recentering allows
-                // the offset to darken the pixel. Scale since we'll multiply
-                // by 255 later on to scale up to the range 0-255.
-                // Subtracting 0.5 takes care of the centering
-                map = map.map(y =>
-                    y.map(x => (x + 0.5) / (map.length * map.length) - 0.5)
-                );
-
-                let bits = Math.floor(Math.log2(palette.getPalette().length)); 
-                let r = 255 / bits;
                 let threshold = map[j % map.length][i % map.length];
                 let offset = r * threshold;
                 pixel[0] = pixel[0] + offset; 
