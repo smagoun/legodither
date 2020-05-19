@@ -392,6 +392,24 @@ function testFindBricks() {
         errCnt++;
     }
 
+    // Pair of composites of the same length, one at arbitrary non-origin x/y coordinates followed by 
+    // one at the origin. Tests whether cached composite bricks start at the origin (if not, they
+    // incorrectly offset the x/y coords when using the cache)
+    testCnt++;
+    width=7, height=1, x=3, y=2, expectedCost=17, expectedBricks=[new Brick(4, 1, 10, color, 3, 2),
+        new Brick(3, 1, 7, color, 7, 2)];  // 2,3 would also work...
+    // Delete cached values to prevent any previous tests from causing errors/false negatives
+    delete brickCost[7];
+    delete brickCostMap[7];    
+    if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
+        errCnt++;
+    } else {
+        x=0, y=0, expectedBricks=[new Brick(4, 1, 10, color, 0, 0), new Brick(3, 1, 7, color, 4, 0)];
+        if (!testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks)) {
+            errCnt++;
+        }
+    }
+
     // 2x4
     testCnt++;
     width=2, height=4, expectedCost=14, x=0, y=0, expectedBricks = [new Brick(2, 4, 14, color, 0, 0)];  // 4x2 would also work...

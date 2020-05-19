@@ -118,7 +118,7 @@ function generateBOM(bom, palette) {
 }
 
 /**
- * Wrapper for findBestCostBricks that applies color information to the bricks.
+ * Wrapper for findBestCostBricks that applies color and location (x/y) information to the bricks.
  * 
  * Returns a tuple of total cost for bricks, and list of Bricks populated with color/price/location
  * information.
@@ -130,10 +130,12 @@ function generateBOM(bom, palette) {
  * @param {*} color 
  */
 function findOptimalBricks(x, y, width, height, color) {
-    const {cost, bricks} = findBestCostBricks(width, height, color, x, y);
+    const {cost, bricks} = findBestCostBricks(width, height, color, 0, 0);
     // console.log(`Best cost for ${width}x${height} is ${cost} with bricks ${bricks}`);
     for (const brick of bricks) {
         brick.color = color;
+        brick.x += x;
+        brick.y += y;
     }
     return {
         cost: cost,
@@ -170,7 +172,6 @@ function findOptimalBricks(x, y, width, height, color) {
  * @param {*} y Top-left Y coordinate of the rectancle
  */
 function findBestCostBricks(width, height, color, x, y) {
-    let ret;    // 2D array of [cost, [list of Bricks]]
     if (brickCostMap[width] === undefined) {
         brickCostMap[width] = [];
     }
@@ -180,7 +181,7 @@ function findBestCostBricks(width, height, color, x, y) {
     if (brickCost[height] === undefined) {
         brickCost[height] = [];
     }
-    cached = brickCostMap[width][height];
+    let cached = brickCostMap[width][height];   // {cost, [list of Bricks]}
     if (cached === undefined) {
         let minCost = Infinity;
         let minCostBricks = [];
@@ -213,18 +214,17 @@ function findBestCostBricks(width, height, color, x, y) {
                 minCostBricks = [...a.bricks, ...b.bricks];
             }
         }
-        ret = {cost: minCost, bricks: minCostBricks};
-        brickCostMap[width][height] = ret;
-    } else {
+        cached = {cost: minCost, bricks: minCostBricks};
+        brickCostMap[width][height] = cached;
+    }
         // Return a copy rather than the cached brick so we can set x/y coords
-        ret = {};
+    let ret = {};
         ret.cost = cached.cost;
         ret.bricks = [];
         for (brick of cached.bricks) {
             let retbrick = new Brick(brick.width, brick.height, brick.price, brick.color, brick.x + x, brick.y + y);
             ret.bricks.push(retbrick);
         }
-    } 
     return ret;
 }
 
