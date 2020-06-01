@@ -31,6 +31,15 @@ function resetLevels() {
 }
 
 /**
+ * Wrapper for getPalette() that looks up palette name from the page.
+ */
+function getPaletteFromSelect() {
+    let p = document.getElementById("paletteSelect");
+    let paletteName = p.options[p.selectedIndex].value;
+    return getPalette(paletteName);
+}
+
+/**
  * Return the palette associated with the given palette name. Returns
  * 'null' for the special-case native palette.
  * 
@@ -147,11 +156,7 @@ function drawLego() {
     let saturationAdjustment = parseFloat(document.getElementById("saturationInput").value);
     let contrastAdjustment = Number(document.getElementById("contrastInput").value);
 
-    let p = document.getElementById("paletteSelect");
-    let paletteName = p.options[p.selectedIndex].value;
-    let palette = getPalette(paletteName);
-
-    let bomAlgorithm = document.getElementById("findRectsSelect").value;
+    let palette = getPaletteFromSelect();
 
     copyImage(srcCanvas, getCurrCanvas());
 
@@ -191,7 +196,7 @@ function drawLego() {
 
     drawPalette(palette);
 
-    drawBricksAndBOM(bricksX, bricksY, palette, bomAlgorithm);
+    drawBricksAndBOM();
 
     let t1 = performance.now();
     console.log("Total time: " + (t1 - t0) + "ms");
@@ -199,14 +204,13 @@ function drawLego() {
 
 /**
  * Convenience wrapper to calculate the bill of materials, render it, 
- * and render the bricks.
- * 
- * @param {*} bricksX 
- * @param {*} bricksY 
- * @param {*} palette 
- * @param {*} bomAlgorithm 
+ * and render the bricks. Looks up the current palette and algorithm
+ * for producing the bill of materials from the page.
  */
-function drawBricksAndBOM(bricksX, bricksY, palette, bomAlgorithm) {
+function drawBricksAndBOM() {
+    let bomAlgorithm = document.getElementById("findRectsSelect").value;
+    let palette = getPaletteFromSelect();
+
     // Figure out bill of materials
     let img = ImageInfo.fromCanvas(getCurrCanvas());
     let {cost, bom} = calculateBOM(img, bomAlgorithm);
@@ -214,7 +218,7 @@ function drawBricksAndBOM(bricksX, bricksY, palette, bomAlgorithm) {
 
     // Draw the bricks
     let instructionCanvas = document.getElementById("instructionCanvas");
-    drawBricks(bom, instructionCanvas, bricksX, bricksY);
+    drawBricks(bom, instructionCanvas, img.width, img.height);
 }
 
 /**

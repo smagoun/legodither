@@ -203,8 +203,7 @@
 
     <div class="bom-container">
         <label for="findRectsSelect">BOM generation:</label>
-        <!-- TODO: onchange should just change bom; no need to redraw the image -->
-        <select id="findRectsSelect" onchange="drawLego()">
+        <select id="findRectsSelect" onchange="drawBricksAndBOM()">
             <option value="singlePixels" selected="true">Only 1x1s</option>
             <option value="singleLine">Single-line (1D)</option>
             <option value="expandingRects">Expanding rectangles (2D)</option>
