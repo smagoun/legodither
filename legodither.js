@@ -198,6 +198,11 @@ function drawLego() {
 
     drawBricksAndBOM();
 
+    // Attach editor
+    attachEditor(outputCanvas, Math.round(scaleFactor));
+
+    drawPenColorChooser(palette);
+
     let t1 = performance.now();
     console.log("Total time: " + (t1 - t0) + "ms");
 }

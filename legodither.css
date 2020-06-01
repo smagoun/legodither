@@ -39,3 +39,37 @@
   .palette-checkbox input[type="checkbox"]:checked + span::before {
       opacity: 1.0;
   }
+
+.bom-container {
+    clear: both;
+}
+
+.instruction-container {
+    clear: both;
+}
+
+.pencolor-radio {
+    display: block;
+}
+
+.pencolor-radio span::before {
+    content: "";
+    display: inline-block;
+    /*position: absolute;*/
+    width: 20px;
+    height: 20px;
+    border: 1px solid;
+    background-color: var(--checked-color);
+}
+
+.pencolor-radio input[type="radio"]:checked + span::before {
+    border: 2px solid black;
+}
+
+.pencolor-dropdown {
+    display: block;
+    /*position: absolute;*/
+    margin: 0;
+    overflow-y: scroll;
+    height: 200px;
+}
