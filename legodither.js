@@ -191,17 +191,30 @@ function drawLego() {
 
     drawPalette(palette);
 
+    drawBricksAndBOM(bricksX, bricksY, palette, bomAlgorithm);
+
+    let t1 = performance.now();
+    console.log("Total time: " + (t1 - t0) + "ms");
+}
+
+/**
+ * Convenience wrapper to calculate the bill of materials, render it, 
+ * and render the bricks.
+ * 
+ * @param {*} bricksX 
+ * @param {*} bricksY 
+ * @param {*} palette 
+ * @param {*} bomAlgorithm 
+ */
+function drawBricksAndBOM(bricksX, bricksY, palette, bomAlgorithm) {
     // Figure out bill of materials
     let img = ImageInfo.fromCanvas(getCurrCanvas());
     let {cost, bom} = calculateBOM(img, bomAlgorithm);
     renderBOM(cost, bom, palette);
-    let t1 = performance.now();
 
     // Draw the bricks
     let instructionCanvas = document.getElementById("instructionCanvas");
     drawBricks(bom, instructionCanvas, bricksX, bricksY);
-
-    console.log("Total time: " + (t1 - t0) + "ms");
 }
 
 /**
