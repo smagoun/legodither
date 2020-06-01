@@ -26,5 +26,7 @@ function drawBricks(bricks, canvas, width, height) {
         const x = brick.x * INST_STUD_WIDTH;
         const y = brick.y * INST_STUD_WIDTH;
         ctx.strokeRect(x + 0.5, y + 0.5, brick.width * INST_STUD_WIDTH, brick.height * INST_STUD_WIDTH);
+        ctx.fillStyle = `rgb(${brick.color[0]}, ${brick.color[1]}, ${brick.color[2]})`;
+        ctx.fillRect(x + 1, y + 1, (brick.width * INST_STUD_WIDTH) - 1, (brick.height * INST_STUD_WIDTH) - 1);
     }
 }
