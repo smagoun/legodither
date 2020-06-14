@@ -6,6 +6,17 @@ const TESTBOM_LINESTRIDE = TESTBOM_IMG_WIDTH * TESTBOM_IMG_PIXELSTRIDE;
 const TESTBOM_RED = [255, 0, 0, 255];   // ■
 const TESTBOM_BLUE = [0, 0, 255, 255];  // □
 
+/**
+ * Create a new mock ImageInfo using the width/height constants
+ */
+function newTestImage() {
+    const imageData = {};
+    imageData.data = new Array(TESTBOM_IMG_WIDTH * TESTBOM_IMG_HEIGHT * TESTBOM_IMG_PIXELSTRIDE);
+    const img = new ImageInfo(TESTBOM_IMG_WIDTH, TESTBOM_IMG_HEIGHT, TESTBOM_LINESTRIDE,
+        TESTBOM_IMG_PIXELSTRIDE, imageData);
+    return img;
+}
+
 function checkBricks(a, b) {
     if (a.length === b.length) {
         for (let i = 0; i < a.length; i++) {
@@ -45,10 +56,7 @@ function testFindRectsSinglePixels() {
     const expected = [];
 
     // Create image with test data
-    const imageData = {};
-    imageData.data = new Array(TESTBOM_IMG_WIDTH * TESTBOM_IMG_HEIGHT * TESTBOM_IMG_PIXELSTRIDE);
-    const img = new ImageInfo(TESTBOM_IMG_WIDTH, TESTBOM_IMG_HEIGHT, TESTBOM_LINESTRIDE,
-        TESTBOM_IMG_PIXELSTRIDE, imageData);
+    const img = newTestImage();
     
     // Line that's all the same color
     // ■ ■ ■ ■
@@ -106,10 +114,7 @@ function testFindRectsSingleLine() {
     const expected = [];
 
     // Create image with test data
-    const imageData = {};
-    imageData.data = new Array(TESTBOM_IMG_WIDTH * TESTBOM_IMG_HEIGHT * TESTBOM_IMG_PIXELSTRIDE);
-    const img = new ImageInfo(TESTBOM_IMG_WIDTH, TESTBOM_IMG_HEIGHT, TESTBOM_LINESTRIDE,
-        TESTBOM_IMG_PIXELSTRIDE, imageData);
+    const img = newTestImage();
     
     // Line that's all the same color
     // ■ ■ ■ ■
@@ -192,10 +197,7 @@ function testFindRectsExpanding() {
     let expected;
 
     // Create image with test data
-    const imageData = {};
-    imageData.data = new Array(TESTBOM_IMG_WIDTH * TESTBOM_IMG_HEIGHT * TESTBOM_IMG_PIXELSTRIDE);
-    const img = new ImageInfo(TESTBOM_IMG_WIDTH, TESTBOM_IMG_HEIGHT, TESTBOM_LINESTRIDE,
-        TESTBOM_IMG_PIXELSTRIDE, imageData);
+    const img = newTestImage();
     
     // 4x4 grid of one color
     // ■ ■ ■ ■
