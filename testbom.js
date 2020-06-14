@@ -43,18 +43,20 @@ function testFindRectsSinglePixels() {
     const pixelStride = 4;    // RGBA
     const lineStride = width * pixelStride;
     const imageData = {};
-    const red = [255, 0, 0, 255];
-    const blue = [0, 0, 255, 255];
+    const red = [255, 0, 0, 255];   // ■
+    const blue = [0, 0, 255, 255];  // □
     imageData.data = new Array(width * height * pixelStride);
     const img = new ImageInfo(width, height, lineStride, pixelStride, imageData);
     
     // Line that's all the same color
+    // ■ ■ ■ ■
     for (let i = 0; i < width; i++) {   
         img.setPixel(i, 0, red);
         expected.push({x: i, y: 0, width: 1, height: 1, color: red})
     }
 
     // Line with multiple colors
+    // ■ ■ □ □
     img.setPixel(0, 1, red);
     img.setPixel(1, 1, red);
     img.setPixel(2, 1, blue);
@@ -65,6 +67,7 @@ function testFindRectsSinglePixels() {
     expected.push({x: 3, y: 1, width: 1, height: 1, color: blue});
 
     // Line whose last pixel is its own color
+    // ■ ■ ■ □
     img.setPixel(0, 2, red);
     img.setPixel(1, 2, red);
     img.setPixel(2, 2, red);
@@ -75,6 +78,7 @@ function testFindRectsSinglePixels() {
     expected.push({x: 3, y: 2, width: 1, height: 1, color: blue});
 
     // Alternating colors
+    // ■ □ ■ □
     img.setPixel(0, 3, red);
     img.setPixel(1, 3, blue);
     img.setPixel(2, 3, red);
@@ -113,18 +117,20 @@ function testFindRectsSingleLine() {
     const pixelStride = 4;    // RGBA
     const lineStride = width * pixelStride;
     const imageData = {};
-    const red = [255, 0, 0, 255];
-    const blue = [0, 0, 255, 255];
+    const red = [255, 0, 0, 255];   // ■
+    const blue = [0, 0, 255, 255];  // □
     imageData.data = new Array(width * height * pixelStride);
     const img = new ImageInfo(width, height, lineStride, pixelStride, imageData);
     
     // Line that's all the same color
+    // ■ ■ ■ ■
     for (let i = 0; i < width; i++) {   
         img.setPixel(i, 0, red);
     }
     expected.push({x: 0, y: 0, width: width, height: 1, color: red});
 
     // Line with multiple colors
+    // ■ ■ □ □
     img.setPixel(0, 1, red);
     img.setPixel(1, 1, red);
     img.setPixel(2, 1, blue);
@@ -133,6 +139,7 @@ function testFindRectsSingleLine() {
     expected.push({x: 2, y: 1, width: 2, height: 1, color: blue});
 
     // Line whose last pixel is its own color
+    // ■ ■ ■ □
     img.setPixel(0, 2, red);
     img.setPixel(1, 2, red);
     img.setPixel(2, 2, red);
@@ -141,6 +148,7 @@ function testFindRectsSingleLine() {
     expected.push({x: 3, y: 2, width: 1, height: 1, color: blue});
 
     // Alternating colors
+    // ■ □ ■ □
     img.setPixel(0, 3, red);
     img.setPixel(1, 3, blue);
     img.setPixel(2, 3, red);
@@ -208,12 +216,16 @@ function testFindRectsExpanding() {
     const pixelStride = 4;    // RGBA
     const lineStride = width * pixelStride;
     const imageData = {};
-    const red = [255, 0, 0, 255];
-    const blue = [0, 0, 255, 255];
+    const red = [255, 0, 0, 255];   // ■
+    const blue = [0, 0, 255, 255];  // □
     imageData.data = new Array(width * height * pixelStride);
     const img = new ImageInfo(width, height, lineStride, pixelStride, imageData);
     
     // 4x4 grid of one color
+    // ■ ■ ■ ■
+    // ■ ■ ■ ■
+    // ■ ■ ■ ■
+    // ■ ■ ■ ■
     expected = [];
     for (let j = 0; j < height; j++) {
         for (let i = 0; i < width; i++) {
@@ -224,6 +236,10 @@ function testFindRectsExpanding() {
     errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
 
     // 4x2 on top, 4x2 on bottom
+    // ■ ■ ■ ■
+    // ■ ■ ■ ■
+    // □ □ □ □
+    // □ □ □ □
     expected = [];
     for (let j = 0; j < height; j++) {
         for (let i = 0; i < width; i++) {
@@ -235,6 +251,10 @@ function testFindRectsExpanding() {
     errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
 
     // Right triangle with corner at top left
+    // ■ ■ ■ ■
+    // ■ ■ ■ □
+    // ■ ■ □ □
+    // ■ □ □ □
     expected = [];
     for (let j = 0; j < height; j++) {
         for (let i = 0; i < width; i++) {
@@ -251,6 +271,10 @@ function testFindRectsExpanding() {
     errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
 
     // Right triangle with corner at top right
+    // □ □ □ □
+    // ■ □ □ □
+    // ■ ■ □ □
+    // ■ ■ ■ □
     expected = [];
     for (let j = 0; j < height; j++) {
         for (let i = 0; i < width; i++) {
@@ -268,6 +292,10 @@ function testFindRectsExpanding() {
 
 
     // Line that's all the same color
+    // ■ ■ ■ ■
+    // □ □ □ □
+    // □ □ □ □
+    // □ □ □ □
     expected = [];
     for (let j = 0; j < height; j++) {
         let color = (j === 0) ? red : blue;
@@ -280,6 +308,10 @@ function testFindRectsExpanding() {
     errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
 
     // DCT-ish image
+    // ■ ■ □ ■
+    // ■ ■ □ ■
+    // □ □ ■ □
+    // ■ ■ □ ■
     expected = [];
     // Top left cube
     img.setPixel(0, 0, red);
@@ -498,8 +530,8 @@ function testOneBOM(input, palette, expected) {
 function testGenerateBOM() {
     let testCnt = 0;
     let errCnt = 0;
-    const red = [255, 0, 0, 255];
-    const blue = [0, 0, 255, 255];
+    const red = [255, 0, 0, 255];   // ■
+    const blue = [0, 0, 255, 255];  // □
     let input, expected;
     const palette = new Palette3BitColor("testGenerateBOM"); // Chosen since it's simple
     // Palettes lazy-load colors, so force the palette to initialize itself
@@ -517,6 +549,10 @@ function testGenerateBOM() {
     errCnt += testOneBOM(input, palette, expected);
 
     // Right triangle with right angle at the origin
+    // ■ ■ ■ ■
+    // ■ ■ ■ □
+    // ■ ■ □ □
+    // ■ □ □ □
     input = [
         new Brick(3, 2, 14, red, 0, 0),
         new Brick(1, 1, 6, red, 3, 0),
