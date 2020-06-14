@@ -88,21 +88,13 @@ function testFindRectsSinglePixels() {
     expected.push({x: 2, y: 3, width: 1, height: 1, color: red});
     expected.push({x: 3, y: 3, width: 1, height: 1, color: blue});
 
-    const rects = findRectsSinglePixels(img);
-    for (let i = 0; i < rects.length; i++) {
-        const a = rects[i];
-        const b = expected[i];
-        testCnt++
-        if (a.x != b.x || a.y != b.y || a.width != b.width || a.height != b.height) {
-            // Ignore color for now, color differences will manifest as different rectangles
-            errCnt++;
-            console.error(`Test ${testCnt} expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`);
-        }
-    }
+    errCnt += testOneImg(img, findRectsSinglePixels, expected, ++testCnt);
+
+
     if (errCnt === 0) {
-        console.log(`FindRectsSinglePixels: ${testCnt}/${testCnt} tests passed!`);
+        console.log(`findRectsSinglePixels: ${testCnt}/${testCnt} tests passed!`);
     } else {
-        console.warn(`FindRectsSinglePixels: tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
+        console.warn(`findRectsSinglePixels: tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
     }
 }
 
@@ -158,21 +150,13 @@ function testFindRectsSingleLine() {
     expected.push({x: 2, y: 3, width: 1, height: 1, color: red});
     expected.push({x: 3, y: 3, width: 1, height: 1, color: blue});
 
-    const rects = findRectsSingleLine(img);
-    for (let i = 0; i < rects.length; i++) {
-        const a = rects[i];
-        const b = expected[i];
-        testCnt++
-        if (a.x != b.x || a.y != b.y || a.width != b.width || a.height != b.height) {
-            // Ignore color for now, color differences will manifest as different rectangles
-            errCnt++;
-            console.error(`Test ${testCnt} expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`);
-        }
-    }
+    errCnt += testOneImg(img, findRectsSingleLine, expected, ++testCnt);
+
+
     if (errCnt === 0) {
-        console.log(`FindRectsSingleLine: ${testCnt}/${testCnt} tests passed!`);
+        console.log(`findRectsSingleLine: ${testCnt}/${testCnt} tests passed!`);
     } else {
-        console.warn(`FindRectsSingleLine: tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
+        console.warn(`findRectsSingleLine: tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
     }
 }
 
