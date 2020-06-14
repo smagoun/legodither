@@ -1,4 +1,11 @@
 
+const TESTBOM_IMG_WIDTH = 4;
+const TESTBOM_IMG_HEIGHT = 4;
+const TESTBOM_IMG_PIXELSTRIDE = 4;    // RGBA
+const TESTBOM_LINESTRIDE = TESTBOM_IMG_WIDTH * TESTBOM_IMG_PIXELSTRIDE;
+const TESTBOM_RED = [255, 0, 0, 255];   // ■
+const TESTBOM_BLUE = [0, 0, 255, 255];  // □
+
 function checkBricks(a, b) {
     if (a.length === b.length) {
         for (let i = 0; i < a.length; i++) {
@@ -38,55 +45,50 @@ function testFindRectsSinglePixels() {
     const expected = [];
 
     // Create image with test data
-    const width = 4;
-    const height = 4;
-    const pixelStride = 4;    // RGBA
-    const lineStride = width * pixelStride;
     const imageData = {};
-    const red = [255, 0, 0, 255];   // ■
-    const blue = [0, 0, 255, 255];  // □
-    imageData.data = new Array(width * height * pixelStride);
-    const img = new ImageInfo(width, height, lineStride, pixelStride, imageData);
+    imageData.data = new Array(TESTBOM_IMG_WIDTH * TESTBOM_IMG_HEIGHT * TESTBOM_IMG_PIXELSTRIDE);
+    const img = new ImageInfo(TESTBOM_IMG_WIDTH, TESTBOM_IMG_HEIGHT, TESTBOM_LINESTRIDE,
+        TESTBOM_IMG_PIXELSTRIDE, imageData);
     
     // Line that's all the same color
     // ■ ■ ■ ■
-    for (let i = 0; i < width; i++) {   
-        img.setPixel(i, 0, red);
-        expected.push({x: i, y: 0, width: 1, height: 1, color: red})
+    for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {   
+        img.setPixel(i, 0, TESTBOM_RED);
+        expected.push({x: i, y: 0, width: 1, height: 1, color: TESTBOM_RED})
     }
 
     // Line with multiple colors
     // ■ ■ □ □
-    img.setPixel(0, 1, red);
-    img.setPixel(1, 1, red);
-    img.setPixel(2, 1, blue);
-    img.setPixel(3, 1, blue);
-    expected.push({x: 0, y: 1, width: 1, height: 1, color: red});
-    expected.push({x: 1, y: 1, width: 1, height: 1, color: red});
-    expected.push({x: 2, y: 1, width: 1, height: 1, color: blue});
-    expected.push({x: 3, y: 1, width: 1, height: 1, color: blue});
+    img.setPixel(0, 1, TESTBOM_RED);
+    img.setPixel(1, 1, TESTBOM_RED);
+    img.setPixel(2, 1, TESTBOM_BLUE);
+    img.setPixel(3, 1, TESTBOM_BLUE);
+    expected.push({x: 0, y: 1, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 1, y: 1, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 2, y: 1, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 3, y: 1, width: 1, height: 1, color: TESTBOM_BLUE});
 
     // Line whose last pixel is its own color
     // ■ ■ ■ □
-    img.setPixel(0, 2, red);
-    img.setPixel(1, 2, red);
-    img.setPixel(2, 2, red);
-    img.setPixel(3, 2, blue);
-    expected.push({x: 0, y: 2, width: 1, height: 1, color: red});
-    expected.push({x: 1, y: 2, width: 1, height: 1, color: red});
-    expected.push({x: 2, y: 2, width: 1, height: 1, color: red});
-    expected.push({x: 3, y: 2, width: 1, height: 1, color: blue});
+    img.setPixel(0, 2, TESTBOM_RED);
+    img.setPixel(1, 2, TESTBOM_RED);
+    img.setPixel(2, 2, TESTBOM_RED);
+    img.setPixel(3, 2, TESTBOM_BLUE);
+    expected.push({x: 0, y: 2, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 1, y: 2, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 2, y: 2, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 2, width: 1, height: 1, color: TESTBOM_BLUE});
 
     // Alternating colors
     // ■ □ ■ □
-    img.setPixel(0, 3, red);
-    img.setPixel(1, 3, blue);
-    img.setPixel(2, 3, red);
-    img.setPixel(3, 3, blue);
-    expected.push({x: 0, y: 3, width: 1, height: 1, color: red});
-    expected.push({x: 1, y: 3, width: 1, height: 1, color: blue});
-    expected.push({x: 2, y: 3, width: 1, height: 1, color: red});
-    expected.push({x: 3, y: 3, width: 1, height: 1, color: blue});
+    img.setPixel(0, 3, TESTBOM_RED);
+    img.setPixel(1, 3, TESTBOM_BLUE);
+    img.setPixel(2, 3, TESTBOM_RED);
+    img.setPixel(3, 3, TESTBOM_BLUE);
+    expected.push({x: 0, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 1, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
 
     errCnt += testOneImg(img, findRectsSinglePixels, expected, ++testCnt);
 
@@ -104,51 +106,46 @@ function testFindRectsSingleLine() {
     const expected = [];
 
     // Create image with test data
-    const width = 4;
-    const height = 4;
-    const pixelStride = 4;    // RGBA
-    const lineStride = width * pixelStride;
     const imageData = {};
-    const red = [255, 0, 0, 255];   // ■
-    const blue = [0, 0, 255, 255];  // □
-    imageData.data = new Array(width * height * pixelStride);
-    const img = new ImageInfo(width, height, lineStride, pixelStride, imageData);
+    imageData.data = new Array(TESTBOM_IMG_WIDTH * TESTBOM_IMG_HEIGHT * TESTBOM_IMG_PIXELSTRIDE);
+    const img = new ImageInfo(TESTBOM_IMG_WIDTH, TESTBOM_IMG_HEIGHT, TESTBOM_LINESTRIDE,
+        TESTBOM_IMG_PIXELSTRIDE, imageData);
     
     // Line that's all the same color
     // ■ ■ ■ ■
-    for (let i = 0; i < width; i++) {   
-        img.setPixel(i, 0, red);
+    for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {   
+        img.setPixel(i, 0, TESTBOM_RED);
     }
-    expected.push({x: 0, y: 0, width: width, height: 1, color: red});
+    expected.push({x: 0, y: 0, width: TESTBOM_IMG_WIDTH, height: 1, color: TESTBOM_RED});
 
     // Line with multiple colors
     // ■ ■ □ □
-    img.setPixel(0, 1, red);
-    img.setPixel(1, 1, red);
-    img.setPixel(2, 1, blue);
-    img.setPixel(3, 1, blue);
-    expected.push({x: 0, y: 1, width: 2, height: 1, color: red});
-    expected.push({x: 2, y: 1, width: 2, height: 1, color: blue});
+    img.setPixel(0, 1, TESTBOM_RED);
+    img.setPixel(1, 1, TESTBOM_RED);
+    img.setPixel(2, 1, TESTBOM_BLUE);
+    img.setPixel(3, 1, TESTBOM_BLUE);
+    expected.push({x: 0, y: 1, width: 2, height: 1, color: TESTBOM_RED});
+    expected.push({x: 2, y: 1, width: 2, height: 1, color: TESTBOM_BLUE});
 
     // Line whose last pixel is its own color
     // ■ ■ ■ □
-    img.setPixel(0, 2, red);
-    img.setPixel(1, 2, red);
-    img.setPixel(2, 2, red);
-    img.setPixel(3, 2, blue);
-    expected.push({x: 0, y: 2, width: 3, height: 1, color: red});
-    expected.push({x: 3, y: 2, width: 1, height: 1, color: blue});
+    img.setPixel(0, 2, TESTBOM_RED);
+    img.setPixel(1, 2, TESTBOM_RED);
+    img.setPixel(2, 2, TESTBOM_RED);
+    img.setPixel(3, 2, TESTBOM_BLUE);
+    expected.push({x: 0, y: 2, width: 3, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 2, width: 1, height: 1, color: TESTBOM_BLUE});
 
     // Alternating colors
     // ■ □ ■ □
-    img.setPixel(0, 3, red);
-    img.setPixel(1, 3, blue);
-    img.setPixel(2, 3, red);
-    img.setPixel(3, 3, blue);
-    expected.push({x: 0, y: 3, width: 1, height: 1, color: red});
-    expected.push({x: 1, y: 3, width: 1, height: 1, color: blue});
-    expected.push({x: 2, y: 3, width: 1, height: 1, color: red});
-    expected.push({x: 3, y: 3, width: 1, height: 1, color: blue});
+    img.setPixel(0, 3, TESTBOM_RED);
+    img.setPixel(1, 3, TESTBOM_BLUE);
+    img.setPixel(2, 3, TESTBOM_RED);
+    img.setPixel(3, 3, TESTBOM_BLUE);
+    expected.push({x: 0, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 1, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
 
     errCnt += testOneImg(img, findRectsSingleLine, expected, ++testCnt);
 
@@ -195,15 +192,10 @@ function testFindRectsExpanding() {
     let expected;
 
     // Create image with test data
-    const width = 4;
-    const height = 4;
-    const pixelStride = 4;    // RGBA
-    const lineStride = width * pixelStride;
     const imageData = {};
-    const red = [255, 0, 0, 255];   // ■
-    const blue = [0, 0, 255, 255];  // □
-    imageData.data = new Array(width * height * pixelStride);
-    const img = new ImageInfo(width, height, lineStride, pixelStride, imageData);
+    imageData.data = new Array(TESTBOM_IMG_WIDTH * TESTBOM_IMG_HEIGHT * TESTBOM_IMG_PIXELSTRIDE);
+    const img = new ImageInfo(TESTBOM_IMG_WIDTH, TESTBOM_IMG_HEIGHT, TESTBOM_LINESTRIDE,
+        TESTBOM_IMG_PIXELSTRIDE, imageData);
     
     // 4x4 grid of one color
     // ■ ■ ■ ■
@@ -211,12 +203,12 @@ function testFindRectsExpanding() {
     // ■ ■ ■ ■
     // ■ ■ ■ ■
     expected = [];
-    for (let j = 0; j < height; j++) {
-        for (let i = 0; i < width; i++) {
-            img.setPixel(i, j, red);
+    for (let j = 0; j < TESTBOM_IMG_HEIGHT; j++) {
+        for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {
+            img.setPixel(i, j, TESTBOM_RED);
         }
     }
-    expected.push({x: 0, y: 0, width: 4, height: 4, color: red});
+    expected.push({x: 0, y: 0, width: 4, height: 4, color: TESTBOM_RED});
     errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
 
     // 4x2 on top, 4x2 on bottom
@@ -225,13 +217,13 @@ function testFindRectsExpanding() {
     // □ □ □ □
     // □ □ □ □
     expected = [];
-    for (let j = 0; j < height; j++) {
-        for (let i = 0; i < width; i++) {
-            img.setPixel(i, j, (j>1) ? blue: red);
+    for (let j = 0; j < TESTBOM_IMG_HEIGHT; j++) {
+        for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {
+            img.setPixel(i, j, (j>1) ? TESTBOM_BLUE: TESTBOM_RED);
         }
     }
-    expected.push({x: 0, y: 0, width: 4, height: 2, color: red});
-    expected.push({x: 0, y: 2, width: 4, height: 2, color: blue});
+    expected.push({x: 0, y: 0, width: 4, height: 2, color: TESTBOM_RED});
+    expected.push({x: 0, y: 2, width: 4, height: 2, color: TESTBOM_BLUE});
     errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
 
     // Right triangle with corner at top left
@@ -240,18 +232,18 @@ function testFindRectsExpanding() {
     // ■ ■ □ □
     // ■ □ □ □
     expected = [];
-    for (let j = 0; j < height; j++) {
-        for (let i = 0; i < width; i++) {
-            img.setPixel(i, j, ((width-j-i) > 0) ? red : blue);
+    for (let j = 0; j < TESTBOM_IMG_HEIGHT; j++) {
+        for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {
+            img.setPixel(i, j, ((TESTBOM_IMG_WIDTH-j-i) > 0) ? TESTBOM_RED : TESTBOM_BLUE);
         }
     }
-    expected.push({x: 0, y: 0, width: 3, height: 2, color: red});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: red});
-    expected.push({x: 3, y: 1, width: 1, height: 3, color: blue});
-    expected.push({x: 0, y: 2, width: 2, height: 1, color: red});
-    expected.push({x: 2, y: 2, width: 1, height: 2, color: blue});
-    expected.push({x: 0, y: 3, width: 1, height: 1, color: red});
-    expected.push({x: 1, y: 3, width: 1, height: 1, color: blue});
+    expected.push({x: 0, y: 0, width: 3, height: 2, color: TESTBOM_RED});
+    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 1, width: 1, height: 3, color: TESTBOM_BLUE});
+    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_RED});
+    expected.push({x: 2, y: 2, width: 1, height: 2, color: TESTBOM_BLUE});
+    expected.push({x: 0, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 1, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
     errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
 
     // Right triangle with corner at top right
@@ -260,18 +252,18 @@ function testFindRectsExpanding() {
     // ■ ■ □ □
     // ■ ■ ■ □
     expected = [];
-    for (let j = 0; j < height; j++) {
-        for (let i = 0; i < width; i++) {
-            img.setPixel(i, j, (j > i) ? red : blue);
+    for (let j = 0; j < TESTBOM_IMG_HEIGHT; j++) {
+        for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {
+            img.setPixel(i, j, (j > i) ? TESTBOM_RED : TESTBOM_BLUE);
         }
     }
-    expected.push({x: 0, y: 0, width: 4, height: 1, color: blue});
-    expected.push({x: 0, y: 1, width: 1, height: 3, color: red});
-    expected.push({x: 1, y: 1, width: 3, height: 1, color: blue});
-    expected.push({x: 1, y: 2, width: 1, height: 2, color: red});
-    expected.push({x: 2, y: 2, width: 2, height: 1, color: blue});
-    expected.push({x: 2, y: 3, width: 1, height: 1, color: red});
-    expected.push({x: 3, y: 3, width: 1, height: 1, color: blue});
+    expected.push({x: 0, y: 0, width: 4, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 0, y: 1, width: 1, height: 3, color: TESTBOM_RED});
+    expected.push({x: 1, y: 1, width: 3, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 1, y: 2, width: 1, height: 2, color: TESTBOM_RED});
+    expected.push({x: 2, y: 2, width: 2, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
     errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
 
 
@@ -281,14 +273,14 @@ function testFindRectsExpanding() {
     // □ □ □ □
     // □ □ □ □
     expected = [];
-    for (let j = 0; j < height; j++) {
-        let color = (j === 0) ? red : blue;
-        for (let i = 0; i < width; i++) {
+    for (let j = 0; j < TESTBOM_IMG_HEIGHT; j++) {
+        let color = (j === 0) ? TESTBOM_RED : TESTBOM_BLUE;
+        for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {
             img.setPixel(i, j, color);
        }
     }
-    expected.push({x: 0, y: 0, width: 4, height: 1, color: red});
-    expected.push({x: 0, y: 1, width: 4, height: 3, color: blue});
+    expected.push({x: 0, y: 0, width: 4, height: 1, color: TESTBOM_RED});
+    expected.push({x: 0, y: 1, width: 4, height: 3, color: TESTBOM_BLUE});
     errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
 
     // DCT-ish image
@@ -298,38 +290,38 @@ function testFindRectsExpanding() {
     // ■ ■ □ ■
     expected = [];
     // Top left cube
-    img.setPixel(0, 0, red);
-    img.setPixel(1, 0, red);
-    img.setPixel(0, 1, red);
-    img.setPixel(1, 1, red);
+    img.setPixel(0, 0, TESTBOM_RED);
+    img.setPixel(1, 0, TESTBOM_RED);
+    img.setPixel(0, 1, TESTBOM_RED);
+    img.setPixel(1, 1, TESTBOM_RED);
     // Top right cube
-    img.setPixel(2, 0, blue);
-    img.setPixel(3, 0, red);
-    img.setPixel(2, 1, blue);
-    img.setPixel(3, 1, red);
+    img.setPixel(2, 0, TESTBOM_BLUE);
+    img.setPixel(3, 0, TESTBOM_RED);
+    img.setPixel(2, 1, TESTBOM_BLUE);
+    img.setPixel(3, 1, TESTBOM_RED);
     // Bottom left cube
-    img.setPixel(0, 2, blue);
-    img.setPixel(1, 2, blue);
-    img.setPixel(0, 3, red);
-    img.setPixel(1, 3, red);
+    img.setPixel(0, 2, TESTBOM_BLUE);
+    img.setPixel(1, 2, TESTBOM_BLUE);
+    img.setPixel(0, 3, TESTBOM_RED);
+    img.setPixel(1, 3, TESTBOM_RED);
     // Bottom right cube
-    img.setPixel(2, 2, red);
-    img.setPixel(3, 2, blue);
-    img.setPixel(2, 3, blue);
-    img.setPixel(3, 3, red);
+    img.setPixel(2, 2, TESTBOM_RED);
+    img.setPixel(3, 2, TESTBOM_BLUE);
+    img.setPixel(2, 3, TESTBOM_BLUE);
+    img.setPixel(3, 3, TESTBOM_RED);
 
     // First 2 rows
-    expected.push({x: 0, y: 0, width: 2, height: 2, color: red});
-    expected.push({x: 2, y: 0, width: 1, height: 2, color: blue});
-    expected.push({x: 3, y: 0, width: 1, height: 2, color: red});
+    expected.push({x: 0, y: 0, width: 2, height: 2, color: TESTBOM_RED});
+    expected.push({x: 2, y: 0, width: 1, height: 2, color: TESTBOM_BLUE});
+    expected.push({x: 3, y: 0, width: 1, height: 2, color: TESTBOM_RED});
     // 3rd row
-    expected.push({x: 0, y: 2, width: 2, height: 1, color: blue});
-    expected.push({x: 2, y: 2, width: 1, height: 1, color: red});
-    expected.push({x: 3, y: 2, width: 1, height: 1, color: blue});
+    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 2, y: 2, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 2, width: 1, height: 1, color: TESTBOM_BLUE});
     // Last row
-    expected.push({x: 0, y: 3, width: 2, height: 1, color: red});
-    expected.push({x: 2, y: 3, width: 1, height: 1, color: blue});
-    expected.push({x: 3, y: 3, width: 1, height: 1, color: red});
+    expected.push({x: 0, y: 3, width: 2, height: 1, color: TESTBOM_RED});
+    expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_RED});
     errCnt += testOneImg(img, findRectsExpanding, expected, ++testCnt);
 
 
@@ -514,18 +506,16 @@ function testOneBOM(input, palette, expected) {
 function testGenerateBOM() {
     let testCnt = 0;
     let errCnt = 0;
-    const red = [255, 0, 0, 255];   // ■
-    const blue = [0, 0, 255, 255];  // □
     let input, expected;
     const palette = new Palette3BitColor("testGenerateBOM"); // Chosen since it's simple
     // Palettes lazy-load colors, so force the palette to initialize itself
     palette.getPalette();
 
     input = [
-        new Brick(3, 1, 7, red, 3, 2),
-        new Brick(2, 1, 7, red, 6, 2),
-        new Brick(8, 1, 17, blue, 0, 0),
-        new Brick(4, 1, 10, blue, 8, 0)
+        new Brick(3, 1, 7, TESTBOM_RED, 3, 2),
+        new Brick(2, 1, 7, TESTBOM_RED, 6, 2),
+        new Brick(8, 1, 17, TESTBOM_BLUE, 0, 0),
+        new Brick(4, 1, 10, TESTBOM_BLUE, 8, 0)
     ];
     // Comparing HTML is not ideal, but far simpler than comparing DOM trees. Good enough for now.
     expected = "<ul><li>Red<ul><li>1 x 2: 1</li><li>1 x 3: 1</li></ul></li><li>Blue<ul><li>1 x 4: 1</li><li>1 x 8: 1</li></ul></li></ul>";
@@ -538,13 +528,13 @@ function testGenerateBOM() {
     // ■ ■ □ □
     // ■ □ □ □
     input = [
-        new Brick(3, 2, 14, red, 0, 0),
-        new Brick(1, 1, 6, red, 3, 0),
-        new Brick(1, 3, 7, blue, 3, 1),
-        new Brick(2, 1, 7, red, 0, 2),
-        new Brick(1, 2, 7, blue, 2, 2),
-        new Brick(1, 1, 6, red, 0, 3),
-        new Brick(1, 1, 6, blue, 1, 3),
+        new Brick(3, 2, 14, TESTBOM_RED, 0, 0),
+        new Brick(1, 1, 6, TESTBOM_RED, 3, 0),
+        new Brick(1, 3, 7, TESTBOM_BLUE, 3, 1),
+        new Brick(2, 1, 7, TESTBOM_RED, 0, 2),
+        new Brick(1, 2, 7, TESTBOM_BLUE, 2, 2),
+        new Brick(1, 1, 6, TESTBOM_RED, 0, 3),
+        new Brick(1, 1, 6, TESTBOM_BLUE, 1, 3),
     ];
     // Comparing HTML is not ideal, but far simpler than comparing DOM trees. Good enough for now.
     expected = "<ul><li>Red<ul><li>1 x 1: 2</li><li>1 x 2: 1</li><li>2 x 3: 1</li></ul></li>"
