@@ -331,8 +331,7 @@ function testOneImg(img, fn, expected, testCnt) {
             }
         }
     } else {
-        console.error(`Test ${testCnt} expected ${JSON.stringify(expected)}, 
-            got ${JSON.stringify(rects)}`);
+        errCnt++;
     }
     if (errCnt > 0) {
         console.error(`Test ${testCnt} expected ${JSON.stringify(expected)}, 
