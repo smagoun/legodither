@@ -6,16 +6,45 @@ const TESTBOM_RED = [255, 0, 0, 255];   // ■
 const TESTBOM_BLUE = [0, 0, 255, 255];  // □
 
 /**
- * Create a new mock ImageInfo using the width/height constants
+ * Create a new mock ImageInfo with the pixels set to the values in the imgSpec string.
+ * imgSpec contains a human-readable text representation of the pixels in the image using
+ * special characters to represent red pixels (■) and blue pixels (□). Other than these
+ * characters, imgSpec may only contain whitespace.
  * 
+ * Example imgSpec representation of a 4x2 image composed of two lines, one of all red
+ * pixels and one of all blue pixels:
+ * ■ ■ ■ ■
+ * □ □ □ □
+ * 
+ * @param {*} imgSpec String representation of the pixels in the image
  * @param {*} width Width of the image to create. Defaults to TESTBOM_IMG_WIDTH
  * @param {*} height Height of the image to create. Defaults to TESTBOM_IMG_HEIGHT
  */
-function newTestImage(width = TESTBOM_IMG_WIDTH, height = TESTBOM_IMG_HEIGHT) {
+function newTestImage(imgSpec, width = TESTBOM_IMG_WIDTH, height = TESTBOM_IMG_HEIGHT) {
     const imageData = {};
     imageData.data = new Array(width * height * TESTBOM_IMG_PIXELSTRIDE);
     const img = new ImageInfo(width, height, width * TESTBOM_IMG_PIXELSTRIDE,
         TESTBOM_IMG_PIXELSTRIDE, imageData);
+
+    imgSpec = imgSpec.replace(/\s+/g, '');  // Remove all whitespace
+    if ((imgSpec.length) != (width * height)) {
+        console.error(`Broken test: imgSpec string the wrong length (expected ${width*height}, got ${imgSpec.length})`);
+        return undefined;
+    }
+    let index = 0;
+    let chars = Array.from(imgSpec);
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            let char = chars[index++];
+            if (char === '■') {
+                img.setPixel(x, y, TESTBOM_RED);
+            } else if(char === '□') {
+                img.setPixel(x, y, TESTBOM_BLUE);
+            } else {
+                console.error(`Broken test: invalid character ${char} in imgSpec string`);
+            }
+        }
+    }
     return img;
 }
 
@@ -26,135 +55,81 @@ function newTestImage(width = TESTBOM_IMG_WIDTH, height = TESTBOM_IMG_HEIGHT) {
 function generateTestImages() {
     let images = [];
     let img;
+    let imgSpec;
     let name;
 
     name = "Line that's all the same color"
-    // ■ ■ ■ ■
-    img = newTestImage(TESTBOM_IMG_WIDTH, 1);
-    for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {   
-        img.setPixel(i, 0, TESTBOM_RED);
-    }
+    imgSpec = `■ ■ ■ ■`;
+    img = newTestImage(imgSpec, TESTBOM_IMG_WIDTH, 1);
     images.push({name: name, image: img});
 
     name = "Line with multiple colors"
-    // ■ ■ □ □
-    img = newTestImage(TESTBOM_IMG_WIDTH, 1);
-    img.setPixel(0, 0, TESTBOM_RED);
-    img.setPixel(1, 0, TESTBOM_RED);
-    img.setPixel(2, 0, TESTBOM_BLUE);
-    img.setPixel(3, 0, TESTBOM_BLUE);
+    imgSpec = `■ ■ □ □`;
+    img = newTestImage(imgSpec, TESTBOM_IMG_WIDTH, 1);
     images.push({name: name, image: img});
 
     name = "Line whose last pixel is its own color"
-    // ■ ■ ■ □
-    img = newTestImage(TESTBOM_IMG_WIDTH, 1);
-    img.setPixel(0, 0, TESTBOM_RED);
-    img.setPixel(1, 0, TESTBOM_RED);
-    img.setPixel(2, 0, TESTBOM_RED);
-    img.setPixel(3, 0, TESTBOM_BLUE);
+    imgSpec = `■ ■ ■ □`;
+    img = newTestImage(imgSpec, TESTBOM_IMG_WIDTH, 1);
     images.push({name: name, image: img});
 
     name = "Alternating colors"
-    // ■ □ ■ □
-    img = newTestImage(TESTBOM_IMG_WIDTH, 1);
-    img.setPixel(0, 0, TESTBOM_RED);
-    img.setPixel(1, 0, TESTBOM_BLUE);
-    img.setPixel(2, 0, TESTBOM_RED);
-    img.setPixel(3, 0, TESTBOM_BLUE);
+    imgSpec = `■ □ ■ □`;
+    img = newTestImage(imgSpec, TESTBOM_IMG_WIDTH, 1);
     images.push({name: name, image: img});
 
     name = "4x4 grid of one color";
-    // ■ ■ ■ ■
-    // ■ ■ ■ ■
-    // ■ ■ ■ ■
-    // ■ ■ ■ ■
-    img = newTestImage();
-    for (let j = 0; j < TESTBOM_IMG_HEIGHT; j++) {
-        for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {
-            img.setPixel(i, j, TESTBOM_RED);
-        }
-    }
+    imgSpec = `
+    ■ ■ ■ ■
+    ■ ■ ■ ■
+    ■ ■ ■ ■
+    ■ ■ ■ ■`;
+    img = newTestImage(imgSpec);
     images.push({name: name, image: img});
 
     name = "4x2 on top, 4x2 on bottom"
-    // ■ ■ ■ ■
-    // ■ ■ ■ ■
-    // □ □ □ □
-    // □ □ □ □
-    img = newTestImage();
-    for (let j = 0; j < TESTBOM_IMG_HEIGHT; j++) {
-        for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {
-            img.setPixel(i, j, (j>1) ? TESTBOM_BLUE: TESTBOM_RED);
-        }
-    }
+    imgSpec = `
+    ■ ■ ■ ■
+    ■ ■ ■ ■
+    □ □ □ □
+    □ □ □ □`;
+    img = newTestImage(imgSpec);
     images.push({name: name, image: img});
 
     name = "Right triangle with corner at top left"
-    // ■ ■ ■ ■
-    // ■ ■ ■ □
-    // ■ ■ □ □
-    // ■ □ □ □
-    img = newTestImage();
-    for (let j = 0; j < TESTBOM_IMG_HEIGHT; j++) {
-        for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {
-            img.setPixel(i, j, ((TESTBOM_IMG_WIDTH-j-i) > 0) ? TESTBOM_RED : TESTBOM_BLUE);
-        }
-    }
+    imgSpec = `
+    ■ ■ ■ ■
+    ■ ■ ■ □
+    ■ ■ □ □
+    ■ □ □ □`;
+    img = newTestImage(imgSpec);
     images.push({name: name, image: img});
 
     name = "Right triangle with corner at top right"
-    // □ □ □ □
-    // ■ □ □ □
-    // ■ ■ □ □
-    // ■ ■ ■ □
-    img = newTestImage();
-    for (let j = 0; j < TESTBOM_IMG_HEIGHT; j++) {
-        for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {
-            img.setPixel(i, j, (j > i) ? TESTBOM_RED : TESTBOM_BLUE);
-        }
-    }
+    imgSpec = `
+    □ □ □ □
+    ■ □ □ □
+    ■ ■ □ □
+    ■ ■ ■ □`;
+    img = newTestImage(imgSpec);
     images.push({name: name, image: img});
 
     name = "Line that's all the same color"
-    // ■ ■ ■ ■
-    // □ □ □ □
-    // □ □ □ □
-    // □ □ □ □
-    img = newTestImage();
-    for (let j = 0; j < TESTBOM_IMG_HEIGHT; j++) {
-        let color = (j === 0) ? TESTBOM_RED : TESTBOM_BLUE;
-        for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {
-            img.setPixel(i, j, color);
-       }
-    }
+    imgSpec = `
+    ■ ■ ■ ■
+    □ □ □ □
+    □ □ □ □
+    □ □ □ □`;
+    img = newTestImage(imgSpec);
     images.push({name: name, image: img});
 
     name = "DCT-ish image"
-    // ■ ■ □ ■
-    // ■ ■ □ ■
-    // □ □ ■ □
-    // ■ ■ □ ■
-    img = newTestImage();
-    // Top left cube
-    img.setPixel(0, 0, TESTBOM_RED);
-    img.setPixel(1, 0, TESTBOM_RED);
-    img.setPixel(0, 1, TESTBOM_RED);
-    img.setPixel(1, 1, TESTBOM_RED);
-    // Top right cube
-    img.setPixel(2, 0, TESTBOM_BLUE);
-    img.setPixel(3, 0, TESTBOM_RED);
-    img.setPixel(2, 1, TESTBOM_BLUE);
-    img.setPixel(3, 1, TESTBOM_RED);
-    // Bottom left cube
-    img.setPixel(0, 2, TESTBOM_BLUE);
-    img.setPixel(1, 2, TESTBOM_BLUE);
-    img.setPixel(0, 3, TESTBOM_RED);
-    img.setPixel(1, 3, TESTBOM_RED);
-    // Bottom right cube
-    img.setPixel(2, 2, TESTBOM_RED);
-    img.setPixel(3, 2, TESTBOM_BLUE);
-    img.setPixel(2, 3, TESTBOM_BLUE);
-    img.setPixel(3, 3, TESTBOM_RED);
+    imgSpec = `
+    ■ ■ □ ■
+    ■ ■ □ ■
+    □ □ ■ □
+    ■ ■ □ ■`;
+    img = newTestImage(imgSpec);
     images.push({name: name, image: img});
 
     return images;
