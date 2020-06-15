@@ -461,6 +461,159 @@ function testFindRectsExpanding() {
     }
 }
 
+function testFindRectsLowCPSFirst() {
+    let fn = findRectsLowCPSFirst;
+    let errCnt = 0;
+    let testCnt = 0;
+    let expected;
+    let testName;
+
+    let iter = generateTestImages().values();
+    let info;
+
+    testName = "Line that's all the same color"
+    // ■ ■ ■ ■
+    info = iter.next().value;
+    if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
+    expected = [];
+    // In our test data, a 3x1 is cheaper per-stud ($0.0233/stud) than a 4x1 $(0.025/stud)
+    // so the 3x1 will be placed before we try a 4x1
+    expected.push({x: 0, y: 0, width: 3, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_RED});
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
+
+    testName = "Line with multiple colors"
+    // ■ ■ □ □
+    info = iter.next().value;
+    if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
+    expected = [];
+    expected.push({x: 0, y: 0, width: 2, height: 1, color: TESTBOM_RED});
+    expected.push({x: 2, y: 0, width: 2, height: 1, color: TESTBOM_BLUE});
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
+
+    testName = "Line whose last pixel is its own color"
+    // ■ ■ ■ □
+    info = iter.next().value;
+    if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
+    expected = [];
+    expected.push({x: 0, y: 0, width: 3, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
+
+    testName = "Alternating colors"
+    // ■ □ ■ □
+    info = iter.next().value;
+    if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
+    expected = [];
+    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
+
+    testName = "4x4 grid of one color"
+    // ■ ■ ■ ■
+    // ■ ■ ■ ■
+    // ■ ■ ■ ■
+    // ■ ■ ■ ■
+    info = iter.next().value;
+    if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
+    expected = [];
+    expected.push({x: 0, y: 0, width: 4, height: 4, color: TESTBOM_RED});
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
+
+    testName = "4x2 on top, 4x2 on bottom"
+    // ■ ■ ■ ■
+    // ■ ■ ■ ■
+    // □ □ □ □
+    // □ □ □ □
+    info = iter.next().value;
+    if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
+    expected = [];
+    expected.push({x: 0, y: 0, width: 4, height: 2, color: TESTBOM_RED});
+    expected.push({x: 0, y: 2, width: 4, height: 2, color: TESTBOM_BLUE});
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
+
+    testName = "Right triangle with corner at top left"
+    // ■ ■ ■ ■
+    // ■ ■ ■ □
+    // ■ ■ □ □
+    // ■ □ □ □
+    info = iter.next().value;
+    if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
+    expected = [];
+    expected.push({x: 0, y: 0, width: 2, height: 3, color: TESTBOM_RED});
+    expected.push({x: 3, y: 1, width: 1, height: 3, color: TESTBOM_BLUE});
+    expected.push({x: 2, y: 0, width: 1, height: 2, color: TESTBOM_RED});
+    expected.push({x: 2, y: 2, width: 1, height: 2, color: TESTBOM_BLUE});
+    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 0, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 1, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);    
+
+    testName = "Right triangle with corner at top right"
+    // □ □ □ □
+    // ■ □ □ □
+    // ■ ■ □ □
+    // ■ ■ ■ □
+    info = iter.next().value;
+    if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
+    expected = [];
+    expected.push({x: 2, y: 0, width: 2, height: 3, color: TESTBOM_BLUE});
+    expected.push({x: 0, y: 1, width: 1, height: 3, color: TESTBOM_RED});
+    expected.push({x: 1, y: 0, width: 1, height: 2, color: TESTBOM_BLUE});
+    expected.push({x: 1, y: 2, width: 1, height: 2, color: TESTBOM_RED});
+    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
+
+    testName = "Line that's all the same color"
+    // ■ ■ ■ ■
+    // □ □ □ □
+    // □ □ □ □
+    // □ □ □ □
+    info = iter.next().value;
+    if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
+    expected = [];
+    expected.push({x: 0, y: 1, width: 4, height: 2, color: TESTBOM_BLUE});
+    expected.push({x: 0, y: 0, width: 3, height: 1, color: TESTBOM_RED});
+    expected.push({x: 0, y: 3, width: 3, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
+
+    testName = "DCT-ish image"
+    // ■ ■ □ ■
+    // ■ ■ □ ■
+    // □ □ ■ □
+    // ■ ■ □ ■
+    info = iter.next().value;
+    if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
+    expected = [];
+    // Top-left square
+    expected.push({x: 0, y: 0, width: 2, height: 2, color: TESTBOM_RED});
+    // Top-right square
+    expected.push({x: 2, y: 0, width: 1, height: 2, color: TESTBOM_BLUE});
+    expected.push({x: 3, y: 0, width: 1, height: 2, color: TESTBOM_RED});
+    // Bottom-left square
+    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 0, y: 3, width: 2, height: 1, color: TESTBOM_RED});
+    // Bottom-right square
+    expected.push({x: 2, y: 2, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 2, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
+
+
+    if (errCnt === 0) {
+        console.log(`${fn.name}: ${testCnt}/${testCnt} tests passed!`);
+    } else {
+        console.warn(`${fn.name}: tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
+    }
+}
+
 function testFindBricks() {
     let testCnt = 0;
     let errCnt = 0;
@@ -682,4 +835,5 @@ testGenerateBOM();
 testFindRectsSinglePixels();
 testFindRectsSingleLine();
 testFindRectsExpanding();
+testFindRectsLowCPSFirst();
 testFindBricks();

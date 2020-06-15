@@ -435,6 +435,112 @@ function findRectsExpanding(img) {
 }
 
 /**
+ * Find the rectangles of the same color.
+ * 
+ * Greedy algorithm that tries to place bricks with the lowest cost-per-stud first.
+ * For example assume:
+ * A 1x1 brick costs $0.06 ($0.06 per stud)
+ * A 2x1 brick costs $0.07 ($0.035 per stud)
+ * A 3x1 brick costs $0.07 ($0.02333 per stud)
+ * A 4x1 brick costs $0.12 ($0.03 per stud)
+ * 
+ * When filling a 4x1 rectangle, this will first place a 3x1 since that is cheapest. Then
+ * it will place a 1x1 to fill the remaining space.
+ * 
+ * Since this already takes cost into account and only creates rectangles that match the
+ * size of a brick, this routine effectively makes findBestCostBricks() a NOOP.
+ * 
+ * Returns an array of rectangles: {x, y, width, height, color}
+ * 
+ * @param {*} img 
+ */
+
+function findRectsLowCPSFirst(img) {
+    let rects = [];
+    // Keeps track of which pixels have been assigned to a rect
+    // TODO: Convert to a bitfield to save memory
+    let mapped = new Array(img.width * img.height).fill(0);
+    let sortedByCost = new Array();
+    let tmpColor = [0, 0, 0, 0];
+
+    // Prioritize bricks by price-per-stud
+    for (const [width, heights] of brickCost.entries()) {
+        if (heights === undefined) {
+            continue;   // This is necessary because the array isn't really sparse; entries will return brickCost[5] :( 
+        }
+        for (const [height, cost] of heights.entries()) {
+            let studs = width * height;
+            if (studs === 0 || cost === undefined) {
+                continue;
+            }
+            let cps = cost / studs;
+            // console.log(`${width} x ${height}: ${cost}: cps: ${cps}`);
+            sortedByCost.push([cps, width, height]);
+            if (width != height) {
+                sortedByCost.push([cps, height, width]);
+            }
+        }
+    }
+    // Sort by cost-per-stud. If 2 different-sized bricks have the same cps, prefer the larger brick.
+    // Epsilon of 0.001 is arbitrary
+    sortedByCost.sort((a, b) => Math.abs(a[0] - b[0]) < 0.001 ? b[1]*b[2] - a[1]*a[2] : a[0] - b[0]);
+
+    // Iterate over bricks, top left to bottom right. Try to place the biggest bricks first
+    for (let i = 0; i < sortedByCost.length; i++) {
+        let brickW = sortedByCost[i][1];
+        let brickH = sortedByCost[i][2];
+        for (let y = 0; y <= (img.height - brickH); y++) {
+            for (let x = 0; x <= (img.width - brickW); x++) {
+                if (mapped[y * img.width + x] === 0) {
+                    // Pixel hasn't been mapped yet
+                    // Check whether the neighboring pixels are the same color
+                    let currColor = [0, 0, 0, 0];
+                    img.getPixel(x, y, currColor);
+                    let rightEdge = x + brickW;
+                    let bottomEdge = y + brickH;
+
+                    // If all pixels in the brick are the same color and the brick doesn't 
+                    // overlap another brick, we can place it
+                    let obstructions = false;
+                    for (let yyy = y; yyy < bottomEdge && !obstructions; yyy++) {
+                        for (let xxx = x; xxx < rightEdge && !obstructions; xxx++) {
+                            let tmpIndex = (yyy * img.width) + xxx;
+                            if (mapped[tmpIndex] != 0) {
+                                // console.log(`Can't place ${brickW}x${brickH} at ${x},${y} because it overlaps pixel at ${xxx},${yyy}`);
+                                obstructions = true;
+                            } else {
+                                img.getPixel(xxx, yyy, tmpColor);
+                                if (!Color.sameColor(currColor, tmpColor)) {
+                                    // console.log(`Can't place ${brickW}x${brickH} at ${x},${y} because of difference color at ${xxx},${yyy}`);
+                                    obstructions = true;
+                                }
+                            }
+                        }
+                    }
+                    if (!obstructions) {
+                        // Place the brick
+                        // console.log(`Placing ${brickW}x${brickH} at ${x},${y}`);
+                        rects.push({x: x, y: y, width: brickW, height: brickH, color: currColor});
+                        for (let yyy = y; yyy < bottomEdge && yyy < img.height; yyy++) {
+                            for (let xxx = x; xxx < rightEdge && xxx < img.width; xxx++) {
+                                let tmpIndex = (yyy * img.width) + xxx;
+                                mapped[tmpIndex]++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for (let i = 0; i < mapped.length; i++) {
+        if (mapped[i] != 1) {
+            console.error(`Error: pixel index ${i} mapped ${mapped[i]} times (expected 1)`);
+        }
+    }
+    return rects;
+}
+
+/**
  * Calculate the bill of materials for an image by calculating the set of bricks required
  * using the specified algorithm.
  * 
@@ -451,6 +557,7 @@ function calculateBOM(img, algorithm) {
         case "singlePixels":    rects = findRectsSinglePixels(img); break;
         case "singleLine":      rects = findRectsSingleLine(img);   break;
         case "expandingRects":  rects = findRectsExpanding(img);    break;
+        case "lowCPSFirst":     rects = findRectsLowCPSFirst(img);  break;
         default:
             alert("Invalid BOM algorithm: " + algorithm);
     }
