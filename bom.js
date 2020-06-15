@@ -217,14 +217,14 @@ function findBestCostBricks(width, height, color, x, y) {
         cached = {cost: minCost, bricks: minCostBricks};
         brickCostMap[width][height] = cached;
     }
-        // Return a copy rather than the cached brick so we can set x/y coords
+    // Return a copy rather than the cached brick so we can set x/y coords
     let ret = {};
-        ret.cost = cached.cost;
-        ret.bricks = [];
-        for (brick of cached.bricks) {
-            let retbrick = new Brick(brick.width, brick.height, brick.price, brick.color, brick.x + x, brick.y + y);
-            ret.bricks.push(retbrick);
-        }
+    ret.cost = cached.cost;
+    ret.bricks = [];
+    for (brick of cached.bricks) {
+        let retbrick = new Brick(brick.width, brick.height, brick.price, brick.color, brick.x + x, brick.y + y);
+        ret.bricks.push(retbrick);
+    }
     return ret;
 }
 
