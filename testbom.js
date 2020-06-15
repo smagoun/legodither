@@ -211,7 +211,7 @@ function testFindRectsSinglePixels() {
     for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {   
         expected.push({x: i, y: 0, width: 1, height: 1, color: TESTBOM_RED})
     }
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line with multiple colors"
     // ■ ■ □ □
@@ -222,7 +222,7 @@ function testFindRectsSinglePixels() {
     expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_RED});
     expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
     expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line whose last pixel is its own color"
     // ■ ■ ■ □
@@ -233,7 +233,7 @@ function testFindRectsSinglePixels() {
     expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_RED});
     expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_RED});
     expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Alternating colors"
     // ■ □ ■ □
@@ -244,7 +244,7 @@ function testFindRectsSinglePixels() {
     expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
     expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_RED});
     expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     // Bail here even though there are more test cases defined; they don't cover much new ground
 
@@ -272,7 +272,7 @@ function testFindRectsSingleLine() {
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
     expected.push({x: 0, y: 0, width: TESTBOM_IMG_WIDTH, height: 1, color: TESTBOM_RED});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line with multiple colors"
     // ■ ■ □ □
@@ -281,7 +281,7 @@ function testFindRectsSingleLine() {
     expected = [];
     expected.push({x: 0, y: 0, width: 2, height: 1, color: TESTBOM_RED});
     expected.push({x: 2, y: 0, width: 2, height: 1, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line whose last pixel is its own color"
     // ■ ■ ■ □
@@ -290,7 +290,7 @@ function testFindRectsSingleLine() {
     expected = [];
     expected.push({x: 0, y: 0, width: 3, height: 1, color: TESTBOM_RED});
     expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Alternating colors"
     // ■ □ ■ □
@@ -301,7 +301,7 @@ function testFindRectsSingleLine() {
     expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
     expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_RED});
     expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     // Bail here even though there are more test cases defined; they don't cover much new ground
 
@@ -312,7 +312,7 @@ function testFindRectsSingleLine() {
     }
 }
 
-function testOneImg(img, fn, expected, testCnt) {
+function testOneImg(img, fn, testName, expected, testCnt) {
     let rects = fn(img);
     let errCnt = 0;
     if (rects.length === expected.length) {
@@ -334,7 +334,7 @@ function testOneImg(img, fn, expected, testCnt) {
         errCnt++;
     }
     if (errCnt > 0) {
-        console.error(`Test ${testCnt} expected ${JSON.stringify(expected)}, 
+        console.error(`${fn.name} test ${testCnt}: "${testName}" expected ${JSON.stringify(expected)}, 
             got ${JSON.stringify(rects)}`);
     }
     return errCnt;
@@ -356,7 +356,7 @@ function testFindRectsExpanding() {
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
     expected.push({x: 0, y: 0, width: TESTBOM_IMG_WIDTH, height: 1, color: TESTBOM_RED});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line with multiple colors"
     // ■ ■ □ □
@@ -365,7 +365,7 @@ function testFindRectsExpanding() {
     expected = [];
     expected.push({x: 0, y: 0, width: 2, height: 1, color: TESTBOM_RED});
     expected.push({x: 2, y: 0, width: 2, height: 1, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line whose last pixel is its own color"
     // ■ ■ ■ □
@@ -374,7 +374,7 @@ function testFindRectsExpanding() {
     expected = [];
     expected.push({x: 0, y: 0, width: 3, height: 1, color: TESTBOM_RED});
     expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Alternating colors"
     // ■ □ ■ □
@@ -385,7 +385,7 @@ function testFindRectsExpanding() {
     expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
     expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_RED});
     expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "4x4 grid of one color"
     // ■ ■ ■ ■
@@ -396,7 +396,7 @@ function testFindRectsExpanding() {
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
     expected.push({x: 0, y: 0, width: 4, height: 4, color: TESTBOM_RED});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "4x2 on top, 4x2 on bottom"
     // ■ ■ ■ ■
@@ -408,7 +408,7 @@ function testFindRectsExpanding() {
     expected = [];
     expected.push({x: 0, y: 0, width: 4, height: 2, color: TESTBOM_RED});
     expected.push({x: 0, y: 2, width: 4, height: 2, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Right triangle with corner at top left"
     // ■ ■ ■ ■
@@ -425,7 +425,7 @@ function testFindRectsExpanding() {
     expected.push({x: 2, y: 2, width: 1, height: 2, color: TESTBOM_BLUE});
     expected.push({x: 0, y: 3, width: 1, height: 1, color: TESTBOM_RED});
     expected.push({x: 1, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Right triangle with corner at top right"
     // □ □ □ □
@@ -442,7 +442,7 @@ function testFindRectsExpanding() {
     expected.push({x: 2, y: 2, width: 2, height: 1, color: TESTBOM_BLUE});
     expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_RED});
     expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line that's all the same color"
     // ■ ■ ■ ■
@@ -454,7 +454,7 @@ function testFindRectsExpanding() {
     expected = [];
     expected.push({x: 0, y: 0, width: 4, height: 1, color: TESTBOM_RED});
     expected.push({x: 0, y: 1, width: 4, height: 3, color: TESTBOM_BLUE});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "DCT-ish image"
     // ■ ■ □ ■
@@ -476,7 +476,7 @@ function testFindRectsExpanding() {
     expected.push({x: 0, y: 3, width: 2, height: 1, color: TESTBOM_RED});
     expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
     expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_RED});
-    errCnt += testOneImg(info.image, fn, expected, ++testCnt);
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
 
     if (errCnt === 0) {
