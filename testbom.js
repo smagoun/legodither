@@ -316,7 +316,7 @@ function testOneImg(img, fn, expected, testCnt) {
     let rects = fn(img);
     let errCnt = 0;
     if (rects.length === expected.length) {
-        for (let i = 0; i < rects.length; i++) {
+        for (let i = 0; i < rects.length && errCnt === 0; i++) {
             const a = rects[i];
             const b = expected[i];
             if (a.x != b.x || a.y != b.y || a.width != b.width || a.height != b.height) {
