@@ -141,6 +141,14 @@ function generateTestImages() {
     img = newTestImage(imgSpec);
     images.push({name: name, image: img});
 
+    name = "Backward L"
+    imgSpec = `
+    □ □ ■ □
+    □ □ ■ □
+    ■ ■ ■ □
+    □ □ □ □`;
+    img = newTestImage(imgSpec);
+    images.push({name: name, image: img});
 
     return images;
 }
@@ -480,6 +488,21 @@ function testFindRectsExpanding() {
     expected.push({x: 2, y: 3, width: 2, height: 1, color: TESTBOM_BLUE});
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
+    testName = "Backward L"
+    // □ □ ■ □
+    // □ □ ■ □
+    // ■ ■ ■ □
+    // □ □ □ □
+    info = iter.next().value;
+    if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
+    expected = [];
+    expected.push({x: 0, y: 0, width: 2, height: 2, color: TESTBOM_BLUE});
+    expected.push({x: 2, y: 0, width: 1, height: 3, color: TESTBOM_RED});
+    expected.push({x: 3, y: 0, width: 1, height: 4, color: TESTBOM_BLUE});
+    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_RED});
+    expected.push({x: 0, y: 3, width: 3, height: 1, color: TESTBOM_BLUE});
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
+
     if (errCnt === 0) {
         console.log(`${fn.name}: ${testCnt}/${testCnt} tests passed!`);
     } else {
@@ -648,6 +671,22 @@ function testFindRectsLowCPSFirst() {
     expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_RED});
     expected.push({x: 0, y: 1, width: 1, height: 1, color: TESTBOM_RED});
     expected.push({x: 1, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
+
+    testName = "Backward L"
+    // □ □ ■ □
+    // □ □ ■ □
+    // ■ ■ ■ □
+    // □ □ □ □
+    info = iter.next().value;
+    if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
+    expected = [];
+    expected.push({x: 2, y: 0, width: 1, height: 3, color: TESTBOM_RED});
+    expected.push({x: 3, y: 0, width: 1, height: 3, color: TESTBOM_BLUE});
+    expected.push({x: 0, y: 3, width: 3, height: 1, color: TESTBOM_BLUE});
+    expected.push({x: 0, y: 0, width: 2, height: 2, color: TESTBOM_BLUE});
+    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_RED});
+    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     if (errCnt === 0) {
