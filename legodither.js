@@ -80,11 +80,11 @@ var currPalette = null;
  * @param {*} type 
  */
 function getResizingFilter(type) {
-    let func = derezBox;
+    let func = resizeBox;
     switch (type) {
-        case "box":             func = derezBox;                break;
-        case "nearestNeighbor": func = derezNearestNeighbor;    break;
-        case "bilinear":        func = derezBilinear;           break;
+        case "box":             func = resizeBox;                break;
+        case "nearestNeighbor": func = resizeNearestNeighbor;    break;
+        case "bilinear":        func = resizeBilinear;           break;
         default:
             alert("Unknown resizing filter " + type);
     }
@@ -187,7 +187,7 @@ function drawLego() {
     renderStats(srcCanvas.width, srcCanvas.height, 'orig');
 
     // Calculate the size of the lego canvas by using the same clipping/scaling
-    // rules as in the derez function
+    // rules as in the resize function
     let clipWidth = srcCanvas.width - (srcCanvas.width % scaleFactor);
     let clipHeight = srcCanvas.height - (srcCanvas.height % scaleFactor);
     let bricksX = Math.round(clipWidth / scaleFactor);

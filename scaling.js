@@ -4,7 +4,7 @@
  * 
  * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
  */
-function derezNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
+function resizeNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
     let srcImg = getSrcImage(srcCanvas, scaleFactor);
     let destImg = getDestImage(srcCanvas, destCanvas, scaleFactor);
 
@@ -35,7 +35,7 @@ function derezNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
  * 
  * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
  */
-function derezBox(srcCanvas, destCanvas, scaleFactor = 2) {
+function resizeBox(srcCanvas, destCanvas, scaleFactor = 2) {
     let srcImg = getSrcImage(srcCanvas, scaleFactor);
     let destImg = getDestImage(srcCanvas, destCanvas, scaleFactor);
 
@@ -95,7 +95,7 @@ function derezBox(srcCanvas, destCanvas, scaleFactor = 2) {
  * 
  * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
  */
-function derezBilinear(srcCanvas, destCanvas, scaleFactor = 2) {
+function resizeBilinear(srcCanvas, destCanvas, scaleFactor = 2) {
     let srcImg = getSrcImage(srcCanvas, scaleFactor);
     let destImg = getDestImage(srcCanvas, destCanvas, scaleFactor);
 
