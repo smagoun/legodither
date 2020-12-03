@@ -5,11 +5,8 @@
  * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
  */
 function resizeNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
-    let srcImg = getSrcImage(srcCanvas, scaleFactor);
-    let destImg = getDestImage(srcCanvas, destCanvas, scaleFactor);
-
-    destCanvas.setAttribute("width", destImg.width);
-    destCanvas.setAttribute("height", destImg.height);
+    let srcImg = ImageInfo.fromCanvas(srcCanvas);
+    let destImg = ImageInfo.fromCanvas(destCanvas);
     
     let nearestPixel = [0, 0, 0, 0];
     for (let dy = 0; dy < destImg.height; dy++) {
@@ -36,11 +33,8 @@ function resizeNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
  * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
  */
 function resizeBox(srcCanvas, destCanvas, scaleFactor = 2) {
-    let srcImg = getSrcImage(srcCanvas, scaleFactor);
-    let destImg = getDestImage(srcCanvas, destCanvas, scaleFactor);
-
-    destCanvas.setAttribute("width", destImg.width);
-    destCanvas.setAttribute("height", destImg.height);
+    let srcImg = ImageInfo.fromCanvas(srcCanvas);
+    let destImg = ImageInfo.fromCanvas(destCanvas);
 
     let radius = scaleFactor / 2;   // distance from center to edge of dest pixel, in pixels of the src img
 
@@ -52,9 +46,11 @@ function resizeBox(srcCanvas, destCanvas, scaleFactor = 2) {
         let dbottomY = dcenterY + radius;
 
         let rowTop = Math.floor(dtopY + 0.5);
+        // TODO: Handle case where rowbottom is off the bottom of the image
         let rowBottom = Math.floor(dbottomY - 0.5);
 
         for (let dx = 0; dx < destImg.width; dx++) {
+            // TODO: Handle case where left or right are off the edge of the image
             let dcenterX = (dx + 0.5) * scaleFactor; // center of the dest pixel on the src img
             let dleftX = dcenterX - radius;     // left edge of the dest pixel on the src img
             let drightX = dcenterX + radius;    // right edge of the dest pixel on the src img
@@ -96,11 +92,8 @@ function resizeBox(srcCanvas, destCanvas, scaleFactor = 2) {
  * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
  */
 function resizeBilinear(srcCanvas, destCanvas, scaleFactor = 2) {
-    let srcImg = getSrcImage(srcCanvas, scaleFactor);
-    let destImg = getDestImage(srcCanvas, destCanvas, scaleFactor);
-
-    destCanvas.setAttribute("width", destImg.width);
-    destCanvas.setAttribute("height", destImg.height);
+    let srcImg = ImageInfo.fromCanvas(srcCanvas);
+    let destImg = ImageInfo.fromCanvas(destCanvas);
 
     let box = [
         [0, 0, 0, 0],

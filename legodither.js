@@ -127,6 +127,64 @@ function getNextCanvas() {
 }
 
 /**
+ * Wrapper for calculateDestSize() that updates the values in the 
+ * scale/x/y input elements. 
+ * 
+ * @param {Number} factor 
+ * @param {Number} width 
+ * @param {Number} height 
+ */
+function updateSize(factor, width, height) {
+    let srcCanvas = document.getElementById("originalCanvas");
+    let {scaleFactor, destWidth, destHeight} = calculateDestSize(
+        srcCanvas.width, srcCanvas.height, factor, width, height);
+    console.log(`Calculated scale factor ${scaleFactor}, width: ${destWidth}, height: ${destHeight}`);
+    document.getElementById("outputWidth").value = destWidth;
+    document.getElementById("outputHeight").value = destHeight;
+    document.getElementById("scaleInput").value = scaleFactor;
+}
+
+/**
+ * Calculate destination image size + scale factor from the source image.
+ * Exactly one of scaleFactor, destWidth, and destHeight should be non-zero;
+ * this value will be used to calculate the other parameters.
+ * 
+ * @param {Number} srcWidth 
+ * @param {Number} srcHeight 
+ * @param {Number} scaleFactor 
+ * @param {Number} destWidth 
+ * @param {Number} destHeight 
+ * @returns 3-tuple of calculated (scaleFactor, destWidth, destHeight)
+ */
+function calculateDestSize(srcWidth, srcHeight, scaleFactor, destWidth, destHeight) {
+    console.assert((srcWidth !== 0 && srcHeight !== 0),
+        `src dimensions must not be 0: ${srcWidth}x${srcHeight}`);
+    console.assert(scaleFactor !== 0 || destWidth !== 0 || destHeight !== 0,
+        `One of scaleFactor/destWidth/destHeight must be non-zero`);
+    console.assert(
+        (scaleFactor !== 0 && destWidth   === 0 && destHeight === 0) ||
+        (destWidth   !== 0 && scaleFactor === 0 && destHeight === 0) ||
+        (destHeight  !== 0 && scaleFactor === 0 && destWidth  === 0),
+        `Exacly one of factor/destWidth/destHeight can be non-zero`);
+    // TODO: getDestImage() used to clip the source image, do we have to do that??
+    if (scaleFactor) {
+        //clipWidth = srcWidth - (srcWidth % scaleFactor);
+        //clipHeight = srcHeight - (srcHeight % scaleFactor);
+        destWidth = Math.round(srcWidth / scaleFactor);
+        destHeight = Math.round(srcHeight / scaleFactor);
+    } else if (destWidth) {
+        scaleFactor = srcWidth / destWidth;
+        //clipHeight = srcHeight - (srcHeight % scaleFactor);
+        destHeight = Math.round(srcHeight / scaleFactor);
+    } else if (destHeight) {
+        scaleFactor = srcHeight / destHeight;
+        //clipWidth = srcWidth - (srcWidth % scaleFactor);
+        destWidth = Math.round(srcWidth / scaleFactor);
+    }
+    return { scaleFactor, destWidth, destHeight };
+}
+
+/**
  * Read the source image and draw a lego-ized version of it into the lego canvas.
  * 
  * Uses a pair of additional canvases as scratch space. Swaps between them depending
@@ -141,7 +199,11 @@ function drawLego() {
     setupScratch(scratchACanvas, scratchBCanvas);
     let outputCanvas = document.getElementById("legoCanvas");
 
+    // Invariant: destination img w/h and scale factor are always synced
     let scaleFactor = Number(document.getElementById("scaleInput").value);
+    let destWidth = Number(document.getElementById("outputWidth").value);
+    let destHeight = Number(document.getElementById("outputHeight").value);
+
     let sharpenFactor = Number(document.getElementById("sharpenInput").value);
 
     let ditherType = document.getElementById("ditheringSelect").value;
@@ -175,7 +237,12 @@ function drawLego() {
     let r = document.getElementById("resizeSelect");
     let resizeFilterName = r.options[r.selectedIndex].value;
     let resize = getResizingFilter(resizeFilterName);
-    resize(getCurrCanvas(), getNextCanvas(), scaleFactor);
+    // Set output image size. Use curr/next vars to avoid accidental canvas-swapping
+    let currCanvas = getCurrCanvas();
+    let destCanvas = getNextCanvas();
+    destCanvas.setAttribute("width", destWidth);
+    destCanvas.setAttribute("height", destHeight);
+    resize(currCanvas, destCanvas, scaleFactor);
 
     unsharpMask(getCurrCanvas(), getNextCanvas(), sharpenFactor);
 
@@ -185,14 +252,7 @@ function drawLego() {
     renderScaled(getCurrCanvas(), outputCanvas, Math.round(scaleFactor));
 
     renderStats(srcCanvas.width, srcCanvas.height, 'orig');
-
-    // Calculate the size of the lego canvas by using the same clipping/scaling
-    // rules as in the resize function
-    let clipWidth = srcCanvas.width - (srcCanvas.width % scaleFactor);
-    let clipHeight = srcCanvas.height - (srcCanvas.height % scaleFactor);
-    let bricksX = Math.round(clipWidth / scaleFactor);
-    let bricksY = Math.round(clipHeight / scaleFactor);
-    renderStats(bricksX, bricksY, 'lego');
+    renderStats(destWidth, destHeight, 'lego');
 
     drawPalette(palette);
 
@@ -326,70 +386,6 @@ function copyImage(srcCanvas, destCanvas) {
     destCanvas.setAttribute("width", srcCanvas.width);
     destCanvas.setAttribute("height", srcCanvas.height);
     destContext.putImageData(srcContext.getImageData(0, 0, srcCanvas.width, srcCanvas.height), 0, 0);
-}
-
-/**
- * Create a canvas that is scaled down from the source by an integer scaling factor,
- * and return the corresponding ImageInfo. Clips the original canvas size if necessary
- * to ensure the source dimensions are an integer multiple of the destination.
- * 
- * @param {*} srcCanvas 
- * @param {*} destCanvas 
- * @param {*} scaleFactor 
- */
-function getDestImage(srcCanvas, destCanvas, scaleFactor) {
-    let clipWidth = 0, clipHeight = 0;
-    // If scaleFactor is an int, ensure that the dimensions of the original are evenly divisible 
-    // by the dimensions of the scaled canvas. To do this, clip odd-sized images, ensuring that we 
-    // discard roughly an even amount of each edge if necessary. Backwards-compatibility for
-    // integer-only implementation.
-    if (Math.floor(scaleFactor) === scaleFactor) {
-        clipWidth = srcCanvas.width - (srcCanvas.width % scaleFactor);
-        clipHeight = srcCanvas.height - (srcCanvas.height % scaleFactor);
-    } else {
-        clipWidth = srcCanvas.width;
-        clipHeight = srcCanvas.height;
-    }
-
-    let scaledWidth = Math.floor(clipWidth / scaleFactor);
-    let scaledHeight = Math.floor(clipHeight / scaleFactor);
-    console.log("scaled output image: " + scaledWidth + "x" + scaledHeight);
-
-    let destContext = destCanvas.getContext("2d");
-    let destImgData = destContext.getImageData(0, 0, scaledWidth, scaledHeight);
-    let dest = new ImageInfo(scaledWidth, scaledHeight, destImgData.width * pixelStride, 
-        pixelStride, destImgData)
-    return dest;
-}
-
-/**
- * Create an ImageInfo from a canvas. Scales the image down by the given integer scale factor.
- * Clips the image in the canvas if necessary to ensure its dimensions are an even multiple
- * of the corresponding scaled-down image.
- * 
- * @param {*} canvas 
- * @param {*} scaleFactor 
- */
-function getSrcImage(canvas, scaleFactor) {
-    let offsetX = 0, offsetY = 0, clipWidth = 0, clipHeight = 0;
-    // If scaleFactor is an int, ensure that the dimensions of the original are evenly divisible 
-    // by the dimensions of the scaled canvas. To do this, clip odd-sized images, ensuring that we 
-    // discard roughly an even amount of each edge if necessary. Backwards-compatibility for
-    // integer-only implementation.
-    if (Math.floor(scaleFactor) === scaleFactor) {
-        clipWidth = canvas.width - (canvas.width % scaleFactor);
-        clipHeight = canvas.height - (canvas.height % scaleFactor);
-        offsetX = Math.floor((canvas.width - clipWidth) / 2);
-        offsetY = Math.floor((canvas.height - clipHeight) / 2);
-    } else {
-        clipWidth = canvas.width;
-        clipHeight = canvas.height;
-    }
-
-    let context = canvas.getContext("2d");
-    let imgData = context.getImageData(offsetX, offsetY, clipWidth, clipHeight);
-    let ret = new ImageInfo(clipWidth, clipHeight, clipWidth * pixelStride, pixelStride, imgData);
-    return ret;
 }
 
 /**

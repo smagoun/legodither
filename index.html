@@ -53,6 +53,7 @@
                     canvas.setAttribute("height", height);
                     context = canvas.getContext('2d');
                     context.drawImage(original, 0, 0, this.width, this.height, 0, 0, width, height);
+                    updateSize(document.getElementById("scaleInput").value, 0, 0);
 
                     updateKernel();
                     resetLevels();
@@ -61,7 +62,10 @@
             };
         </script>
         <label for="scaleInput">Shrink factor:</label>
-        <input type="number" id="scaleInput" min="1" max="64" value="2" step="0.1" onchange="drawLego()">
+        <input type="number" id="scaleInput" min="1" max="64" value="2" step="0.1" onchange="updateSize(this.value, 0, 0); drawLego()">
+
+        <input type="number" id="outputWidth" min="1" max="500" value="150" step="1" onchange="updateSize(0, this.value, 0); drawLego()">
+        <input type="number" id="outputHeight" min="1" max="500" value="75"  step="1" onchange="updateSize(0, 0, this.value); drawLego()">
 
         <label for="resizeSelect">Resizing Filter:</label>
         <select id="resizeSelect" onchange="drawLego()">
