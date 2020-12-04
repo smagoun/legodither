@@ -472,6 +472,11 @@ function updateKernel() {
                       "-1/9", "8/9+1", "-1/9",
                       "-1/9", "-1/9", "-1/9"];
             break;
+        case "3x3gaussian":
+            kernel = ["1/16", "2/16", "1/16", 
+                      "2/16", "4/16", "2/16",
+                      "1/16", "2/16", "1/16"];
+            break;
         default:
             alert("Unknown convolution kernel " + kernelName);
             break;
