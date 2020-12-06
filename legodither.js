@@ -236,13 +236,13 @@ function drawLego() {
     // we need the blur for nearest-neighbor (and others?)
     let r = document.getElementById("resizeSelect");
     let resizeFilterName = r.options[r.selectedIndex].value;
-    let resize = getResizingFilter(resizeFilterName);
+    let resizeFn = getResizingFilter(resizeFilterName);
     // Set output image size. Use curr/next vars to avoid accidental canvas-swapping
     let currCanvas = getCurrCanvas();
     let destCanvas = getNextCanvas();
     destCanvas.setAttribute("width", destWidth);
     destCanvas.setAttribute("height", destHeight);
-    resize(currCanvas, destCanvas, scaleFactor);
+    resizeWrapper(resizeFn, currCanvas, destCanvas, scaleFactor);
 
     unsharpMask(getCurrCanvas(), getNextCanvas(), sharpenFactor);
 

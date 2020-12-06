@@ -28,10 +28,11 @@
 <script src="drawbricks.js"></script>
 <script src="editor.js"></script>
 <script src="testbom.js"></script>
+<script src="testscaling.js"></script>
 <link rel="stylesheet" type="text/css" href="legodither.css">
 
 </head>
-<body>
+<body onload="runScalingTests()">
 
     <form>
         <input type="file" accept="image/*" id="inputImg" onchange="loadFile(event, 'original')">

@@ -1,13 +1,28 @@
+
+/**
+ * Wrapper for resizing functions that extracts an ImageInfo from the 
+ * src/dest canvases and passes it them to the resize function.
+ * 
+ * @param {Function} fn Resizing function. First 3 inputs are be src/dest ImageInfo and scaleFactor
+ * @param {HTMLCanvasElement} srcCanvas 
+ * @param {HTMLCanvasElement} destCanvas 
+ * @param {number} scaleFactor 
+ */
+function resizeWrapper(fn, srcCanvas, destCanvas, scaleFactor = 2) {
+    let srcImg = ImageInfo.fromCanvas(srcCanvas);
+    let destImg = ImageInfo.fromCanvas(destCanvas);
+    fn(srcImg, destImg, scaleFactor);
+    let destContext = destCanvas.getContext("2d");
+    destContext.putImageData(destImg.imageData, 0, 0);
+}
+
 /**
  * Reduce the resolution of the source image and render it into the destination image
  * using a nearest-neighbor algorithm.
  * 
  * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
  */
-function resizeNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
-    let srcImg = ImageInfo.fromCanvas(srcCanvas);
-    let destImg = ImageInfo.fromCanvas(destCanvas);
-    
+function resizeNearestNeighbor(srcImg, destImg, scaleFactor = 2) {
     let nearestPixel = [0, 0, 0, 0];
     for (let dy = 0; dy < destImg.height; dy++) {
         nearestY = Math.floor((dy + 0.5) * scaleFactor);
@@ -23,8 +38,6 @@ function resizeNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
             destImg.setPixel(dx, dy, nearestPixel);
         }
     }
-    let destContext = destCanvas.getContext("2d");
-    destContext.putImageData(destImg.imageData, 0, 0);
 }
 
 /**
@@ -32,10 +45,7 @@ function resizeNearestNeighbor(srcCanvas, destCanvas, scaleFactor = 2) {
  * 
  * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
  */
-function resizeBox(srcCanvas, destCanvas, scaleFactor = 2) {
-    let srcImg = ImageInfo.fromCanvas(srcCanvas);
-    let destImg = ImageInfo.fromCanvas(destCanvas);
-
+function resizeBox(srcImg, destImg, scaleFactor = 2) {
     let radius = scaleFactor / 2;   // distance from center to edge of dest pixel, in pixels of the src img
 
     let pixel = [0, 0, 0, 0];
@@ -81,8 +91,6 @@ function resizeBox(srcCanvas, destCanvas, scaleFactor = 2) {
             destImg.setPixel(dx, dy, output);
         }
     }
-    let destContext = destCanvas.getContext("2d");
-    destContext.putImageData(destImg.imageData, 0, 0);
 }
 
 /**
@@ -91,10 +99,7 @@ function resizeBox(srcCanvas, destCanvas, scaleFactor = 2) {
  * 
  * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
  */
-function resizeBilinear(srcCanvas, destCanvas, scaleFactor = 2) {
-    let srcImg = ImageInfo.fromCanvas(srcCanvas);
-    let destImg = ImageInfo.fromCanvas(destCanvas);
-
+function resizeBilinear(srcImg, destImg, scaleFactor = 2) {
     let box = [
         [0, 0, 0, 0],
         [0, 0, 0, 0],
@@ -133,6 +138,4 @@ function resizeBilinear(srcCanvas, destCanvas, scaleFactor = 2) {
             destImg.setPixel(dx, dy, outputPixel);
         }
     }
-    let destContext = destCanvas.getContext("2d");
-    destContext.putImageData(destImg.imageData, 0, 0);
 }
