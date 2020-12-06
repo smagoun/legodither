@@ -111,101 +111,64 @@ function testResize(fn, srcData, srcWidth, srcHeight, scaleFactor, expectedData)
     }*/
 }
 
+function testResizeBlack(fn, scaleFactor, expectedImg) {
+    testResize(fn, BLACK_8x8, 8, 8, scaleFactor, expectedImg);
+}
+function testResizeWhite(fn, scaleFactor, expectedImg) {
+    testResize(fn, WHITE_8x8, 8, 8, scaleFactor, expectedImg);
+}
+function testResizeCheckers(fn, scaleFactor, expectedImg) {
+    testResize(fn, CHECKERBOARD_BW_8x8, 8, 8, scaleFactor, expectedImg);
+}
+function testResizeSmiley(fn, scaleFactor, expectedImg) {
+    testResize(fn, SMILEY_COLOR_8x8, 8, 8, scaleFactor, expectedImg);
+}
+
 /**
  * Identity resize; should be a NOP
  */
 function testResizeBoxBlack1x() {
-    let fn = resizeBox;
-    let srcImg = BLACK_8x8;
-    let srcWidth = 8, srcHeight = 8;
-    let expectedImg = BLACK_8x8;
-    let scaleFactor = 1;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeBlack(resizeBox, 1, BLACK_8x8);
 }
-
 function testResizeBoxBlack1_5x() {
-    let fn = resizeBox;
-    let srcImg = BLACK_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(5 * 5).fill(BLACK);
-    let scaleFactor = 1.5;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeBlack(resizeBox, 1.5, expectedImg);
 }
-
 function testResizeBoxBlack2x() {
-    let fn = resizeBox;
-    let srcImg = BLACK_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(4 * 4).fill(BLACK);
-    let scaleFactor = 2;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeBlack(resizeBox, 2, expectedImg);
 }
-
 function testResizeBoxBlack3x() {
-    let fn = resizeBox;
-    let srcImg = BLACK_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(3 * 3).fill(BLACK);
-    let scaleFactor = 2 + 2/3;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeBlack(resizeBox, 2 + 2/3, expectedImg);
 }
 
 /**
  * Identity resize; should be a NOP
  */
 function testResizeBoxWhite1x() {
-    let fn = resizeBox;
-    let srcImg = WHITE_8x8;
-    let srcWidth = 8, srcHeight = 8;
-    let expectedImg = WHITE_8x8;
-    let scaleFactor = 1;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeWhite(resizeBox, 1, WHITE_8x8);
 }
-
 function testResizeBoxWhite1_5x() {
-    let fn = resizeBox;
-    let srcImg = WHITE_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(5 * 5).fill(WHITE);
-    let scaleFactor = 1.5;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeWhite(resizeBox, 1.5, expectedImg);
 }
-
 function testResizeBoxWhite2x() {
-    let fn = resizeBox;
-    let srcImg = WHITE_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(4 * 4).fill(WHITE);
-    let scaleFactor = 2;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeWhite(resizeBox, 2, expectedImg);
 }
-
 function testResizeBoxWhite3x() {
-    let fn = resizeBox;
-    let srcImg = WHITE_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(3 * 3).fill(WHITE);
-    let scaleFactor = 2 + 2/3;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeWhite(resizeBox, 2 + 2/3, expectedImg);
 }
-
 
 /**
  * Identity resize; should be a NOP
  */
 function testResizeBoxCheckers1x() {
-    let fn = resizeBox;
-    let srcImg = CHECKERBOARD_BW_8x8;
-    let srcWidth = 8, srcHeight = 8;
-    let expectedImg = CHECKERBOARD_BW_8x8;
-    let scaleFactor = 1;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeCheckers(resizeBox, 1, CHECKERBOARD_BW_8x8);
 }
-
 function testResizeBoxCheckers1_5x() {
-    let fn = resizeBox;
-    let srcImg = CHECKERBOARD_BW_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = [
         DK_GR, DK_GR, GRAY, LT_GR, LT_GR,
         DK_GR, DK_GR, GRAY, LT_GR, LT_GR,
@@ -213,23 +176,13 @@ function testResizeBoxCheckers1_5x() {
         LT_GR, LT_GR, GRAY, DK_GR, DK_GR,
         LT_GR, LT_GR, GRAY, DK_GR, DK_GR,
     ]
-    let scaleFactor = 1.6;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeCheckers(resizeBox, 1.6, expectedImg);
 }
-
 function testResizeBoxCheckers2x() {
-    let fn = resizeBox;
-    let srcImg = CHECKERBOARD_BW_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(4 * 4).fill(GRAY);
-    let scaleFactor = 2;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeCheckers(resizeBox, 2, expectedImg);
 }
-
 function testResizeBoxCheckers3x() {
-    let fn = resizeBox;
-    let srcImg = CHECKERBOARD_BW_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(3 * 3).fill(GRAY);
     // Corners in the dest are slightly biased since they overlap an odd
     // # of pixels in the src image
@@ -237,26 +190,17 @@ function testResizeBoxCheckers3x() {
     expectedImg[2] = LT_GR;
     expectedImg[6] = LT_GR;
     expectedImg[8] = DK_GR;
-    let scaleFactor = 2 + 2/3;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeCheckers(resizeBox, 2 + 2/3, expectedImg);
 }
 
 /**
  * Identity resize; should be a NOP
  */
 function testResizeBoxSmiley1x() {
-    let fn = resizeBox;
-    let srcImg = SMILEY_COLOR_8x8;
-    let srcWidth = 8, srcHeight = 8;
-    let expectedImg = SMILEY_COLOR_8x8;
-    let scaleFactor = 1;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeSmiley(resizeBox, 1, SMILEY_COLOR_8x8);
 }
 
 function testResizeBoxSmiley1_5x() {
-    let fn = resizeBox;
-    let srcImg = SMILEY_COLOR_8x8;
-    let srcWidth = 8, srcHeight = 8;
     const YELLOW_1 = [71.718,  71.718,  39.843,  255];
     const YELLOW_2 = [95.625,  95.625,  0,       255];
     const YELLOW_3 = [119.531, 119.531, 0,       255];
@@ -273,14 +217,10 @@ function testResizeBoxSmiley1_5x() {
         YELLOW_1, YELLOW_3, YELLOW_2, YELLOW_8, YELLOW_1,
         BLUE_1,   YELLOW_1, YELLOW_2, YELLOW_1, BLUE_1,
     ];
-    let scaleFactor = 1.6;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeSmiley(resizeBox, 1.6, expectedImg);
 }
 
 function testResizeBoxSmiley2x() {
-    let fn = resizeBox;
-    let srcImg = SMILEY_COLOR_8x8;
-    let srcWidth = 8, srcHeight = 8;
     const DK_YELLOW = [127.5, 127.5, 0, 255];
     const MED_BLUE = [0, 0, 191.25, 255];
     let expectedImg = new Array(4 * 4).fill(DK_YELLOW);
@@ -288,14 +228,10 @@ function testResizeBoxSmiley2x() {
     expectedImg[3] = MED_BLUE;
     expectedImg[12] = MED_BLUE;
     expectedImg[15] = MED_BLUE;
-    let scaleFactor = 2;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeSmiley(resizeBox, 2, expectedImg);
 }
 
 function testResizeBoxSmiley3x() {
-    let fn = resizeBox;
-    let srcImg = SMILEY_COLOR_8x8;
-    let srcWidth = 8, srcHeight = 8;
     const YELLOW_1 = [127.5,   127.5,   0,        255];
     const YELLOW_2 = [119.531, 119.531, 0,        255];
     const YELLOW_3 = [151.406, 151.406, 0,        255];
@@ -308,104 +244,54 @@ function testResizeBoxSmiley3x() {
         YELLOW_2, YELLOW_3, YELLOW_4,
         BLUE_1,   YELLOW_5, BLUE_2,
     ];
-    let scaleFactor = 2 + 2/3;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeSmiley(resizeBox, 2 + 2/3, expectedImg);
 }
 
 /**
  * Identity resize; should be a NOP
  */
 function testResizeNNBlack1x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = BLACK_8x8;
-    let srcWidth = 8, srcHeight = 8;
-    let expectedImg = BLACK_8x8;
-    let scaleFactor = 1;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeBlack(resizeNearestNeighbor, 1, BLACK_8x8);
 }
-
 function testResizeNNBlack1_5x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = BLACK_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(5 * 5).fill(BLACK);
-    let scaleFactor = 1.5;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeBlack(resizeNearestNeighbor, 1.5, expectedImg);
 }
-
 function testResizeNNBlack2x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = BLACK_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(4 * 4).fill(BLACK);
-    let scaleFactor = 2;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeBlack(resizeNearestNeighbor, 2, expectedImg);
 }
-
 function testResizeNNBlack3x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = BLACK_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(3 * 3).fill(BLACK);
-    let scaleFactor = 2 + 2/3;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeBlack(resizeNearestNeighbor, 2 + 2/3, expectedImg);
 }
 
 /**
  * Identity resize; should be a NOP
  */
 function testResizeNNWhite1x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = WHITE_8x8;
-    let srcWidth = 8, srcHeight = 8;
-    let expectedImg = WHITE_8x8;
-    let scaleFactor = 1;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeWhite(resizeNearestNeighbor, 1, WHITE_8x8);
 }
-
 function testResizeNNWhite1_5x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = WHITE_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(5 * 5).fill(WHITE);
-    let scaleFactor = 1.5;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeWhite(resizeNearestNeighbor, 1.5, expectedImg);
 }
-
 function testResizeNNWhite2x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = WHITE_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(4 * 4).fill(WHITE);
-    let scaleFactor = 2;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeWhite(resizeNearestNeighbor, 2, expectedImg);
 }
-
 function testResizeNNWhite3x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = WHITE_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(3 * 3).fill(WHITE);
-    let scaleFactor = 2 + 2/3;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeWhite(resizeNearestNeighbor, 2 + 2/3, expectedImg);
 }
 
 /**
  * Identity resize; should be a NOP
  */
 function testResizeNNCheckers1x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = CHECKERBOARD_BW_8x8;
-    let srcWidth = 8, srcHeight = 8;
-    let expectedImg = CHECKERBOARD_BW_8x8;
-    let scaleFactor = 1;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeCheckers(resizeNearestNeighbor, 1, CHECKERBOARD_BW_8x8);
 }
-
 function testResizeNNCheckers1_5x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = CHECKERBOARD_BW_8x8;
-    let srcWidth = 8, srcHeight = 8;
     // Src pixels are 0, 2, 4, 5, 7 along both axes: (0,0), (2,2)...(7,7)
     let expectedImg = [
         BLACK, BLACK, BLACK, WHITE, WHITE,
@@ -413,52 +299,35 @@ function testResizeNNCheckers1_5x() {
         BLACK, BLACK, BLACK, WHITE, WHITE,
         WHITE, WHITE, WHITE, BLACK, BLACK,
         WHITE, WHITE, WHITE, BLACK, BLACK,
-    ]
-    let scaleFactor = 1.6;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    ];
+    testResizeCheckers(resizeNearestNeighbor, 1.6, expectedImg);
 }
 
 function testResizeNNCheckers2x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = CHECKERBOARD_BW_8x8;
-    let srcWidth = 8, srcHeight = 8;
     // All black since we're sampling at exactly the frequency of the checkers
     // Src pixels are odd numbers: (1,1), (1,3)...(5,7), (7,7)
     let expectedImg = new Array(4 * 4).fill(BLACK);
-    let scaleFactor = 2;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeCheckers(resizeNearestNeighbor, 2, expectedImg);
 }
 
 function testResizeNNCheckers3x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = CHECKERBOARD_BW_8x8;
-    let srcWidth = 8, srcHeight = 8;
     let expectedImg = new Array(3 * 3).fill(BLACK);
     // Src pixels are at 1/4/6 along each axis: (1,1), (4,4), (6,6)
     expectedImg[1] = WHITE;
     expectedImg[2] = WHITE;
     expectedImg[3] = WHITE;
     expectedImg[6] = WHITE;
-    let scaleFactor = 2 + 2/3;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeCheckers(resizeNearestNeighbor, 2 + 2/3, expectedImg);
 }
 
 /**
  * Identity resize; should be a NOP
  */
 function testResizeNNSmiley1x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = SMILEY_COLOR_8x8;
-    let srcWidth = 8, srcHeight = 8;
-    let expectedImg = SMILEY_COLOR_8x8;
-    let scaleFactor = 1;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeSmiley(resizeNearestNeighbor, 1, SMILEY_COLOR_8x8);
 }
 
 function testResizeNNSmiley1_5x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = SMILEY_COLOR_8x8;
-    let srcWidth = 8, srcHeight = 8;
     // Src pixels are 0, 2, 4, 5, 7 along both axes: (0,0), (2,2)...(7,7)
     let expectedImg = [
         BLUE,  BLACK,  BLACK,  BLACK,  BLUE,
@@ -467,14 +336,10 @@ function testResizeNNSmiley1_5x() {
         BLACK, BLACK,  BLACK,  YELLOW, BLACK,
         BLUE,  BLACK,  BLACK,  BLACK,  BLUE,
     ];
-    let scaleFactor = 1.6;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeSmiley(resizeNearestNeighbor, 1.6, expectedImg);
 }
 
 function testResizeNNSmiley2x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = SMILEY_COLOR_8x8;
-    let srcWidth = 8, srcHeight = 8;
     // Src pixels are odd numbers: (1,1), (1,3)...(5,7), (7,7)
     let expectedImg = [
         BLACK,  YELLOW, YELLOW, BLUE,
@@ -482,22 +347,17 @@ function testResizeNNSmiley2x() {
         YELLOW, BLACK,  YELLOW, BLACK,
         BLUE,   BLACK,  BLACK,  BLUE,
     ];
-    let scaleFactor = 2;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeSmiley(resizeNearestNeighbor, 2, expectedImg);
 }
 
 function testResizeNNSmiley3x() {
-    let fn = resizeNearestNeighbor;
-    let srcImg = SMILEY_COLOR_8x8;
-    let srcWidth = 8, srcHeight = 8;
     // Src pixels are at 1/4/6 along each axis: (1,1), (4,4), (6,6)
     let expectedImg = [
         BLACK,  YELLOW, BLACK,
         YELLOW, YELLOW, YELLOW,
         BLACK,  YELLOW, BLACK,
     ];
-    let scaleFactor = 2 + 2/3;
-    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+    testResizeSmiley(resizeNearestNeighbor, 2 + 2/3, expectedImg);
 }
 
 function runScalingTests() {
