@@ -206,8 +206,7 @@ function testResizeBoxCheckers1_5x() {
     let fn = resizeBox;
     let srcImg = CHECKERBOARD_BW_8x8;
     let srcWidth = 8, srcHeight = 8;
-    let expectedImg = new Array(5 * 5).fill(GRAY);
-    expectedImg = [
+    let expectedImg = [
         DK_GR, DK_GR, GRAY, LT_GR, LT_GR,
         DK_GR, DK_GR, GRAY, LT_GR, LT_GR,
         GRAY,  GRAY,  GRAY, GRAY,  GRAY,
@@ -313,6 +312,194 @@ function testResizeBoxSmiley3x() {
     testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
 }
 
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeNNBlack1x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = BLACK_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    let expectedImg = BLACK_8x8;
+    let scaleFactor = 1;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+function testResizeNNBlack1_5x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = BLACK_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    let expectedImg = new Array(5 * 5).fill(BLACK);
+    let scaleFactor = 1.5;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+function testResizeNNBlack2x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = BLACK_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    let expectedImg = new Array(4 * 4).fill(BLACK);
+    let scaleFactor = 2;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+function testResizeNNBlack3x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = BLACK_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    let expectedImg = new Array(3 * 3).fill(BLACK);
+    let scaleFactor = 2 + 2/3;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeNNWhite1x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = WHITE_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    let expectedImg = WHITE_8x8;
+    let scaleFactor = 1;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+function testResizeNNWhite1_5x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = WHITE_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    let expectedImg = new Array(5 * 5).fill(WHITE);
+    let scaleFactor = 1.5;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+function testResizeNNWhite2x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = WHITE_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    let expectedImg = new Array(4 * 4).fill(WHITE);
+    let scaleFactor = 2;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+function testResizeNNWhite3x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = WHITE_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    let expectedImg = new Array(3 * 3).fill(WHITE);
+    let scaleFactor = 2 + 2/3;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeNNCheckers1x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = CHECKERBOARD_BW_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    let expectedImg = CHECKERBOARD_BW_8x8;
+    let scaleFactor = 1;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+function testResizeNNCheckers1_5x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = CHECKERBOARD_BW_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    // Src pixels are 0, 2, 4, 5, 7 along both axes: (0,0), (2,2)...(7,7)
+    let expectedImg = [
+        BLACK, BLACK, BLACK, WHITE, WHITE,
+        BLACK, BLACK, BLACK, WHITE, WHITE,
+        BLACK, BLACK, BLACK, WHITE, WHITE,
+        WHITE, WHITE, WHITE, BLACK, BLACK,
+        WHITE, WHITE, WHITE, BLACK, BLACK,
+    ]
+    let scaleFactor = 1.6;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+function testResizeNNCheckers2x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = CHECKERBOARD_BW_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    // All black since we're sampling at exactly the frequency of the checkers
+    // Src pixels are odd numbers: (1,1), (1,3)...(5,7), (7,7)
+    let expectedImg = new Array(4 * 4).fill(BLACK);
+    let scaleFactor = 2;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+function testResizeNNCheckers3x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = CHECKERBOARD_BW_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    let expectedImg = new Array(3 * 3).fill(BLACK);
+    // Src pixels are at 1/4/6 along each axis: (1,1), (4,4), (6,6)
+    expectedImg[1] = WHITE;
+    expectedImg[2] = WHITE;
+    expectedImg[3] = WHITE;
+    expectedImg[6] = WHITE;
+    let scaleFactor = 2 + 2/3;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeNNSmiley1x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = SMILEY_COLOR_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    let expectedImg = SMILEY_COLOR_8x8;
+    let scaleFactor = 1;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+function testResizeNNSmiley1_5x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = SMILEY_COLOR_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    // Src pixels are 0, 2, 4, 5, 7 along both axes: (0,0), (2,2)...(7,7)
+    let expectedImg = [
+        BLUE,  BLACK,  BLACK,  BLACK,  BLUE,
+        BLACK, BLACK,  BLACK,  YELLOW, BLACK,
+        BLACK, YELLOW, YELLOW, BLACK,  BLACK,
+        BLACK, BLACK,  BLACK,  YELLOW, BLACK,
+        BLUE,  BLACK,  BLACK,  BLACK,  BLUE,
+    ];
+    let scaleFactor = 1.6;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+function testResizeNNSmiley2x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = SMILEY_COLOR_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    // Src pixels are odd numbers: (1,1), (1,3)...(5,7), (7,7)
+    let expectedImg = [
+        BLACK,  YELLOW, YELLOW, BLUE,
+        YELLOW, YELLOW, YELLOW, BLACK,
+        YELLOW, BLACK,  YELLOW, BLACK,
+        BLUE,   BLACK,  BLACK,  BLUE,
+    ];
+    let scaleFactor = 2;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
+function testResizeNNSmiley3x() {
+    let fn = resizeNearestNeighbor;
+    let srcImg = SMILEY_COLOR_8x8;
+    let srcWidth = 8, srcHeight = 8;
+    // Src pixels are at 1/4/6 along each axis: (1,1), (4,4), (6,6)
+    let expectedImg = [
+        BLACK,  YELLOW, BLACK,
+        YELLOW, YELLOW, YELLOW,
+        BLACK,  YELLOW, BLACK,
+    ];
+    let scaleFactor = 2 + 2/3;
+    testResize(fn, srcImg, srcWidth, srcHeight, scaleFactor, expectedImg);
+}
+
 function runScalingTests() {
     testResizeBoxBlack1x();
     testResizeBoxBlack1_5x();
@@ -333,4 +520,25 @@ function runScalingTests() {
     testResizeBoxSmiley1_5x();
     testResizeBoxSmiley2x();
     testResizeBoxSmiley3x();
+
+    testResizeNNBlack1x();
+    testResizeNNBlack1_5x();
+    testResizeNNBlack2x();
+    testResizeNNBlack3x();
+
+    testResizeNNWhite1x();
+    testResizeNNWhite1_5x();
+    testResizeNNWhite2x();
+    testResizeNNWhite3x();
+
+    testResizeNNCheckers1x();
+    testResizeNNCheckers1_5x();
+    testResizeNNCheckers2x();
+    testResizeNNCheckers3x();
+
+    testResizeNNSmiley1x();
+    testResizeNNSmiley1_5x();
+    testResizeNNSmiley2x();
+    testResizeNNSmiley3x();
+
 }
