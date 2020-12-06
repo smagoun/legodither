@@ -28,6 +28,12 @@ const CHECKERBOARD_BW_8x8 = [
     BLACK, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK, WHITE,
     WHITE, BLACK, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK,
 ];
+
+// Single line down the left edge for testing whether filters are wrapping
+// from right edge to left
+const LINE_BW_8x8 = new Array(64).fill(WHITE);
+for (let y = 0; y < 64; y+=8) { LINE_BW_8x8[y] = BLACK};
+
 const SMILEY_COLOR_8x8 = [
     BLUE,  BLUE,   BLACK,  BLACK,  BLACK,  BLACK,  BLUE,   BLUE,
     BLUE,  BLACK,  YELLOW, YELLOW, YELLOW, YELLOW, BLACK,  BLUE,
@@ -123,6 +129,9 @@ function testResizeCheckers(fn, scaleFactor, expectedImg) {
 function testResizeSmiley(fn, scaleFactor, expectedImg) {
     testResize(fn, SMILEY_COLOR_8x8, 8, 8, scaleFactor, expectedImg);
 }
+function testResizeLine(fn, scaleFactor, expectedImg) {
+    testResize(fn, LINE_BW_8x8, 8, 8, scaleFactor, expectedImg);
+}
 
 /**
  * Identity resize; should be a NOP
@@ -191,6 +200,28 @@ function testResizeBoxCheckers3x() {
     expectedImg[6] = LT_GR;
     expectedImg[8] = DK_GR;
     testResizeCheckers(resizeBox, 2 + 2/3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeBoxLine1x() {
+    testResizeLine(resizeBox, 1, LINE_BW_8x8);
+}
+function testResizeBoxLine1_5x() {
+    let expectedImg = new Array(5 * 5).fill(WHITE);
+    for (let y = 0; y < 25; y+=5) { expectedImg[y] = [ 95.625, 95.625, 95.625, 255] }
+    testResizeLine(resizeBox, 1.5, expectedImg);
+}
+function testResizeBoxLine2x() {
+    let expectedImg = new Array(4 * 4).fill(WHITE);
+    for (let y = 0; y < 16; y+=4) { expectedImg[y] = GRAY }
+    testResizeLine(resizeBox, 2, expectedImg);
+}
+function testResizeBoxLine3x() {
+    let expectedImg = new Array(3 * 3).fill(WHITE);
+    for (let y = 0; y < 9; y+=3) { expectedImg[y] = [ 159.375, 159.375, 159.375, 255] }
+    testResizeLine(resizeBox, 2 + 2/3, expectedImg);
 }
 
 /**
@@ -323,6 +354,32 @@ function testResizeNNCheckers3x() {
 /**
  * Identity resize; should be a NOP
  */
+function testResizeNNLine1x() {
+    testResizeLine(resizeNearestNeighbor, 1, LINE_BW_8x8);
+}
+function testResizeNNLine1_5x() {
+    // Src pixels are 0, 2, 4, 5, 7 along both axes: (0,0), (2,2)...(7,7)
+    let expectedImg = new Array(5 * 5).fill(WHITE);
+    for (let y = 0; y < 25; y+=5) { expectedImg[y] = BLACK }
+    testResizeLine(resizeNearestNeighbor, 1.5, expectedImg);
+}
+function testResizeNNLine2x() {
+    // All white since we don't sample the first column
+    // Src pixels are odd numbers: (1,1), (1,3)...(5,7), (7,7)
+    let expectedImg = new Array(4 * 4).fill(WHITE);
+    testResizeLine(resizeNearestNeighbor, 2, expectedImg);
+}
+function testResizeNNLine3x() {
+    // All white since we don't sample the first column
+    // Src pixels are at 1/4/6 along each axis: (1,1), (4,4), (6,6)
+    let expectedImg = new Array(3 * 3).fill(WHITE);
+    for (let y = 0; y < 9; y+=3) { expectedImg[y] = WHITE }
+    testResizeLine(resizeNearestNeighbor, 2 + 2/3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
 function testResizeNNSmiley1x() {
     testResizeSmiley(resizeNearestNeighbor, 1, SMILEY_COLOR_8x8);
 }
@@ -376,6 +433,11 @@ function runScalingTests() {
     testResizeBoxCheckers2x();
     testResizeBoxCheckers3x();
 
+    testResizeBoxLine1x();
+    testResizeBoxLine1_5x();
+    testResizeBoxLine2x();
+    testResizeBoxLine3x();
+
     testResizeBoxSmiley1x();
     testResizeBoxSmiley1_5x();
     testResizeBoxSmiley2x();
@@ -395,6 +457,11 @@ function runScalingTests() {
     testResizeNNCheckers1_5x();
     testResizeNNCheckers2x();
     testResizeNNCheckers3x();
+
+    testResizeNNLine1x();
+    testResizeNNLine1_5x();
+    testResizeNNLine2x();
+    testResizeNNLine3x();
 
     testResizeNNSmiley1x();
     testResizeNNSmiley1_5x();
