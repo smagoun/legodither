@@ -55,12 +55,12 @@ function resizeBox(srcImg, destImg, scaleFactor = 2) {
         let dtopY = dcenterY - radius;
         let dbottomY = dcenterY + radius;
 
-        let rowTop = Math.floor(dtopY + 0.5);
-        // TODO: Handle case where rowbottom is off the bottom of the image
-        let rowBottom = Math.floor(dbottomY - 0.5);
+        let rowTop = Math.floor(dtopY);
+        let fracTop = 1.0 - (dtopY - rowTop);   // Fraction of the top row to use
+        let rowBottom = Math.ceil(dbottomY);
+        let fracBottom = 1.0 - (rowBottom - dbottomY); // Fraction of the bottom row to use
 
         for (let dx = 0; dx < destImg.width; dx++) {
-            // TODO: Handle case where left or right are off the edge of the image
             let dcenterX = (dx + 0.5) * scaleFactor; // center of the dest pixel on the src img
             let dleftX = dcenterX - radius;     // left edge of the dest pixel on the src img
             let drightX = dcenterX + radius;    // right edge of the dest pixel on the src img
@@ -72,16 +72,25 @@ function resizeBox(srcImg, destImg, scaleFactor = 2) {
             output[3] = 0;
             // upper left = dleftX, dtopY
             // bottom right = drightX, dbottomY
-            let colLeft = Math.floor(dleftX + 0.5);
-            let colRight = Math.floor(drightX - 0.5);
-            for (let y = rowTop; y <= rowBottom; y++) {
-                for (let x = colLeft; x <= colRight; x++) {
+            let colLeft = Math.floor(dleftX);
+            let fracLeft = 1.0 - (dleftX - colLeft);
+            let colRight = Math.ceil(drightX);
+            let fracRight = 1.0 - (colRight - drightX);
+            for (let y = rowTop; y < rowBottom; y++) {
+                for (let x = colLeft; x < colRight; x++) {
                     srcImg.getPixel(x, y, pixel);
-                    output[0] += pixel[0];
-                    output[1] += pixel[1];
-                    output[2] += pixel[2];
-                    output[3] += pixel[3];
-                    boxSize++;
+                    // Calculate fraction (weight) of the pixel to use in the box
+                    let weight = 1.0;
+                    if (y == rowTop)        weight = weight * fracTop;
+                    if (y == rowBottom - 1) weight = weight * fracBottom;
+                    if (x == colLeft)       weight = weight * fracLeft;
+                    if (x == colRight - 1)  weight = weight * fracRight;
+
+                    output[0] += pixel[0] * weight;
+                    output[1] += pixel[1] * weight;
+                    output[2] += pixel[2] * weight;
+                    output[3] += pixel[3] * weight;
+                    boxSize += weight;
                 }
             }
             output[0] = output[0] / boxSize;
