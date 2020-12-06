@@ -84,7 +84,7 @@ function testResize(fn, srcData, srcWidth, srcHeight, scaleFactor, expectedData)
     for (let i = 0; i < (destWidth * destHeight * pixelStride); i++) {
         // Can't test for equality due to floating point math
         // TODO: Should it be invariant that resize functions only return integers?
-        if (Math.abs(destImgData.data[i] - expectedImgData.data[i]) > EPSILON) {
+        if (Number.isNaN(destImgData.data[i]) || Math.abs(destImgData.data[i] - expectedImgData.data[i]) > EPSILON) {
             console.error(`expected and dest do not match at index ${i}: d: ${destImgData.data[i]}, e: ${expectedImgData.data[i]}`);
         }
     }
