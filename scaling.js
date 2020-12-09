@@ -116,25 +116,37 @@ function resizeBilinear(srcImg, destImg, scaleFactor = 2) {
         [0, 0, 0, 0]
     ];
     for (let dy = 0; dy < destImg.height; dy++) {
-        nearestY = (dy + 0.5) *  scaleFactor;
-        nearestYInt = Math.floor(nearestY);
-        deltaY = nearestY - nearestYInt;
+        // dcenterX/Y are the center of the dest pixel on the src image
+        // x1,y1 is the upper-left of the origin pixel in the 2x2 box of source pixels
+        // we'll used for the filter. x2,y2 is the upper-left of the pixel at
+        // 1,1 in the 2x2 box of source pixels.
+        dcenterY = (dy + 0.5) * scaleFactor;
+        y1 = Math.floor(dcenterY - 0.5);
         for (let dx = 0; dx < destImg.width; dx++) {
-            nearestX = (dx + 0.5) * scaleFactor;
-            nearestXInt = Math.floor(nearestX);
-            deltaX = nearestX - nearestXInt;
+            dcenterX = (dx + 0.5) * scaleFactor;
+            x1 = Math.floor(dcenterX - 0.5);
 
-            // Weighted sum; order must match order of pixels in 'box'
+            let x2 = x1 + 1;
+            let y2 = y1 + 1;
+            // Ensure we don't read past the edge of the image
+            if (x2 == srcImg.width)  { x2 = x1; }
+            if (y2 == srcImg.height) { y2 = y1; }
+
+            // Interpolation:
+            // Find the distance from the dest pixel center to each of the edges
+            // of the 2x2 box. Weight the src pixels accordingly
+            let wx = 1.0 - (dcenterX - x1 - 0.5);
+            let wy = 1.0 - (dcenterY - y1 - 0.5);
             let weights = [
-                (1 - deltaX) * (1 - deltaY),    // 0, 0
-                deltaX * (1 - deltaY),          // 1, 0
-                (1 - deltaX) * deltaY,          // 0, 1
-                deltaX * deltaY,                // 1, 1
+                wx * wy,
+                (1.0 - wx) * wy,
+                wx * (1.0 - wy),
+                (1.0 - wx) * (1.0 - wy),
             ];
-            srcImg.getPixel(nearestXInt, nearestYInt, box[0]);
-            srcImg.getPixel(nearestXInt + 1, nearestYInt, box[1]);
-            srcImg.getPixel(nearestXInt, nearestYInt + 1, box[2]);
-            srcImg.getPixel(nearestXInt + 1, nearestYInt + 1, box[3]);
+            srcImg.getPixel(x1, y1, box[0]);
+            srcImg.getPixel(x2, y1, box[1]);
+            srcImg.getPixel(x1, y2, box[2]);
+            srcImg.getPixel(x2, y2, box[3]);
 
             // Sum the weighted values of each pixel to find the output pixel
             let outputPixel = [0, 0, 0, 255];   // Ignore alpha for now
