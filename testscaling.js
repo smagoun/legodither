@@ -417,6 +417,165 @@ function testResizeNNSmiley3x() {
     testResizeSmiley(resizeNearestNeighbor, 2 + 2/3, expectedImg);
 }
 
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeBilinearBlack1x() {
+    testResizeBlack(resizeBilinear, 1, BLACK_8x8);
+}
+function testResizeBilinearBlack1_5x() {
+    let expectedImg = new Array(5 * 5).fill(BLACK);
+    testResizeBlack(resizeBilinear, 1.5, expectedImg);
+}
+function testResizeBilinearBlack2x() {
+    let expectedImg = new Array(4 * 4).fill(BLACK);
+    testResizeBlack(resizeBilinear, 2, expectedImg);
+}
+function testResizeBilinearBlack3x() {
+    let expectedImg = new Array(3 * 3).fill(BLACK);
+    testResizeBlack(resizeBilinear, 2 + 2/3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeBilinearWhite1x() {
+    testResizeWhite(resizeBilinear, 1, WHITE_8x8);
+}
+function testResizeBilinearWhite1_5x() {
+    let expectedImg = new Array(5 * 5).fill(WHITE);
+    testResizeWhite(resizeBilinear, 1.5, expectedImg);
+}
+function testResizeBilinearWhite2x() {
+    let expectedImg = new Array(4 * 4).fill(WHITE);
+    testResizeWhite(resizeBilinear, 2, expectedImg);
+}
+function testResizeBilinearWhite3x() {
+    let expectedImg = new Array(3 * 3).fill(WHITE);
+    testResizeWhite(resizeBilinear, 2 + 2/3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeBilinearCheckers1x() {
+    testResizeCheckers(resizeBilinear, 1, CHECKERBOARD_BW_8x8);
+}
+
+function testResizeBilinearCheckers1_5x() {
+    // Src pixels are 0, 2, 4, 5, 7 along both axes: (0,0), (2,2)...(7,7)
+    const GRAY_1 = [107.1, 107.1, 107.1, 255];
+    const GRAY_2 = [86.7,  86.7,  86.7,  255];
+    const GRAY_3 = [45.9,  45.9,  45.9,  255];
+    const GRAY_4 = [168.3, 168.3, 168.3, 255];
+    const GRAY_5 = [147.9, 147.9, 147.9, 255];
+    const GRAY_6 = [209.1, 209.1, 209.1, 255];
+    let expectedImg = [
+        GRAY_1, GRAY_2, GRAY, GRAY_4, GRAY_5,
+        GRAY_2, GRAY_3, GRAY, GRAY_6, GRAY_4,
+        GRAY,   GRAY,   GRAY, GRAY,   GRAY,
+        GRAY_4, GRAY_6, GRAY, GRAY_3, GRAY_2,
+        GRAY_5, GRAY_4, GRAY, GRAY_2, GRAY_1,
+    ];
+    testResizeCheckers(resizeBilinear, 1.5, expectedImg);
+}
+
+function testResizeBilinearCheckers2x() {
+    // Same as box filter at this scaling factor
+    let expectedImg = new Array(4 * 4).fill(GRAY);
+    testResizeCheckers(resizeBilinear, 2, expectedImg);
+}
+
+function testResizeBilinearCheckers3x() {
+    let expectedImg = new Array(3 * 3).fill(GRAY);
+    // Src pixels are at 1/4/6 along each axis: (1,1), (4,4), (6,6)
+    const DK = [70.833,  70.833,  70.833,  255];
+    const LT = [184.167, 184.167, 184.167, 255];
+    expectedImg[0] = DK;
+    expectedImg[2] = LT;
+    expectedImg[6] = LT;
+    expectedImg[8] = DK;
+    testResizeCheckers(resizeBilinear, 2 + 2/3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeBilinearLine1x() {
+    testResizeLine(resizeBilinear, 1, LINE_BW_8x8);
+}
+function testResizeBilinearLine1_5x() {
+    let expectedImg = new Array(5 * 5).fill(WHITE);
+    // dest pixel is centered at 0.8, so dest pixel goes from 0.3-1.3 on the src
+    // (70% of x=0) + (30% of x=1) ==> (.7*0 + .3*255) = 76.5
+    for (let y = 0; y < 25; y+=5) { expectedImg[y] = [76.5, 76.5, 76.5, 255] }
+    testResizeLine(resizeBilinear, 1.5, expectedImg);
+}
+function testResizeBilinearLine2x() {
+     // Same as box filter at this scaling factor
+     let expectedImg = new Array(4 * 4).fill(WHITE);
+    // 50% of x=0 and 50% of x=1
+    for (let y = 0; y < 16; y+=4) { expectedImg[y] = GRAY }
+    testResizeLine(resizeBilinear, 2, expectedImg);
+}
+function testResizeBilinearLine3x() {
+    let expectedImg = new Array(3 * 3).fill(WHITE);
+    // dest pixel is centered at 1.333, so dest pixel goes from 0.833 - 1.833
+    // on the src. (16.7% of x=0) + (83.3% of x=1) ==> (.167*0 + .833*255) = 212.5
+    for (let y = 0; y < 9; y+=3) { expectedImg[y] = [212.5, 212.5, 212.5, 255] }
+    testResizeLine(resizeBilinear, 2 + 2/3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeBilinearSmiley1x() {
+    testResizeSmiley(resizeBilinear, 1, SMILEY_COLOR_8x8);
+}
+
+function testResizeBilinearSmiley1_5x() {
+    const YELLOW_1 = [68.85,  68.85,  17.85,  255];
+    const YELLOW_2 = [76.5,   76.5,   0,      255];
+    const YELLOW_3 = [45.9,   45.9,   0,      255];
+    const YELLOW_4 = [140.25, 140.25, 0,      255];
+    const YELLOW_5 = [252.45, 252.45, 0,      255];
+    const YELLOW_6 = [191.25, 191.25, 0,      255];
+    const YELLOW_7 = [25.5,   25.5,   0,      255];
+    const BLUE_1 =   [0,      0,      232.05, 255];
+    let expectedImg = [
+        BLUE_1,   YELLOW_1, YELLOW_2, YELLOW_1, BLUE_1,
+        YELLOW_1, YELLOW_3, YELLOW_4, YELLOW_5, YELLOW_1,
+        YELLOW_2, YELLOW_4, YELLOW_6, YELLOW_4, YELLOW_2,
+        YELLOW_1, YELLOW_3, YELLOW_7, YELLOW_5, YELLOW_1,
+        BLUE_1,   YELLOW_1, YELLOW_2, YELLOW_1, BLUE_1,
+    ];
+    testResizeSmiley(resizeBilinear, 1.6, expectedImg);
+}
+
+function testResizeBilinearSmiley2x() {
+    // Same as box filter at this scaling factor
+    const DK_YELLOW = [127.5, 127.5, 0,      255];
+    const MED_BLUE =  [0,     0,     191.25, 255];
+    let expectedImg = new Array(4 * 4).fill(DK_YELLOW);
+    expectedImg[0] = MED_BLUE;
+    expectedImg[3] = MED_BLUE;
+    expectedImg[12] = MED_BLUE;
+    expectedImg[15] = MED_BLUE;
+    testResizeSmiley(resizeBilinear, 2, expectedImg);
+}
+
+function testResizeBilinearSmiley3x() {
+    const YELLOW_1 = [212.5,  212.5,  0,      255];
+    const YELLOW_2 = [191.25, 191.25, 0,      255];
+    const BLUE_1 =   [0,      0,      77.916, 255];
+    let expectedImg = [
+        BLUE_1,   YELLOW_1, BLUE_1,
+        YELLOW_1, YELLOW_2, YELLOW_1,
+        BLUE_1,   YELLOW_1, BLUE_1,
+    ];
+    testResizeSmiley(resizeBilinear, 2 + 2/3, expectedImg);
+}
+
 function runScalingTests() {
     testResizeBoxBlack1x();
     testResizeBoxBlack1_5x();
@@ -468,4 +627,28 @@ function runScalingTests() {
     testResizeNNSmiley2x();
     testResizeNNSmiley3x();
 
+    testResizeBilinearBlack1x();
+    testResizeBilinearBlack1_5x();
+    testResizeBilinearBlack2x();
+    testResizeBilinearBlack3x();
+
+    testResizeBilinearWhite1x();
+    testResizeBilinearWhite1_5x();
+    testResizeBilinearWhite2x();
+    testResizeBilinearWhite3x();
+
+    testResizeBilinearCheckers1x();
+    testResizeBilinearCheckers1_5x();
+    testResizeBilinearCheckers2x();
+    testResizeBilinearCheckers3x();
+
+    testResizeBilinearLine1x();
+    testResizeBilinearLine1_5x();
+    testResizeBilinearLine2x();
+    testResizeBilinearLine3x();
+
+    testResizeBilinearSmiley1x();
+    testResizeBilinearSmiley1_5x();
+    testResizeBilinearSmiley2x();
+    testResizeBilinearSmiley3x();
 }
