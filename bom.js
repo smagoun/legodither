@@ -72,6 +72,9 @@ function renderBOM(cost, bom, palette) {
 function generateBOM(bom, palette) {
     bomSimplified = {};     // 3-level associative array of Bricks grouped by color then size
     // Group the bricks by color then size
+    if (palette == undefined) {
+        return ("");
+    }
     for (brick of bom) {
         const color = palette.getColorName(brick.color);
         let width = brick.width;
