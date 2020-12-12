@@ -20,6 +20,8 @@ const YELLOW = [255, 255, 0, 255];
 const BLACK_8x8 = new Array(64).fill(BLACK);
 const WHITE_8x8 = new Array(64).fill(WHITE);
 
+const BLACK_7x5 = new Array(35).fill(BLACK);
+
 const CHECKERBOARD_BW_8x8 = [
     BLACK, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK, WHITE,
     WHITE, BLACK, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK,
@@ -31,10 +33,21 @@ const CHECKERBOARD_BW_8x8 = [
     WHITE, BLACK, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK,
 ];
 
+const CHECKERBOARD_BW_7x5 = [
+    BLACK, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK,
+    WHITE, BLACK, WHITE, BLACK, WHITE, BLACK, WHITE,
+    BLACK, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK,
+    WHITE, BLACK, WHITE, BLACK, WHITE, BLACK, WHITE,
+    BLACK, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK,
+];
+
 // Single line down the left edge for testing whether filters are wrapping
 // from right edge to left
 const LINE_BW_8x8 = new Array(64).fill(WHITE);
-for (let y = 0; y < 64; y+=8) { LINE_BW_8x8[y] = BLACK};
+for (let y = 0; y < 64; y+=8) { LINE_BW_8x8[y] = BLACK} ;
+
+const LINE_BW_7x5 = new Array(35).fill(WHITE);
+for (let y = 0; y < 35; y += 7) { LINE_BW_7x5[y] = BLACK };
 
 const SMILEY_COLOR_8x8 = [
     BLUE,  BLUE,   BLACK,  BLACK,  BLACK,  BLACK,  BLUE,   BLUE,
@@ -103,6 +116,9 @@ function testResize(fn, srcData, srcWidth, srcHeight, scaleFactor, expectedData)
     canvas.setAttribute("width", destWidth);
     canvas.setAttribute("height", destHeight);
     document.body.appendChild(canvas);
+    let spacer = document.createElement("span");
+    spacer.textContent = " ";
+    document.body.appendChild(spacer);
 
     // Copy to offscreen image, then copy back to the canvas
     // in order to scale without blurring/interpolation
@@ -122,17 +138,26 @@ function testResize(fn, srcData, srcWidth, srcHeight, scaleFactor, expectedData)
 function testResizeBlack8x8(fn, scaleFactor, expectedImg) {
     testResize(fn, BLACK_8x8, 8, 8, scaleFactor, expectedImg);
 }
+function testResizeBlack7x5(fn, scaleFactor, expectedImg) {
+    testResize(fn, BLACK_7x5, 7, 5, scaleFactor, expectedImg);
+}
 function testResizeWhite8x8(fn, scaleFactor, expectedImg) {
     testResize(fn, WHITE_8x8, 8, 8, scaleFactor, expectedImg);
 }
 function testResizeCheckers8x8(fn, scaleFactor, expectedImg) {
     testResize(fn, CHECKERBOARD_BW_8x8, 8, 8, scaleFactor, expectedImg);
 }
+function testResizeCheckers7x5(fn, scaleFactor, expectedImg) {
+    testResize(fn, CHECKERBOARD_BW_7x5, 7, 5, scaleFactor, expectedImg);
+}
 function testResizeSmiley8x8(fn, scaleFactor, expectedImg) {
     testResize(fn, SMILEY_COLOR_8x8, 8, 8, scaleFactor, expectedImg);
 }
 function testResizeLine8x8(fn, scaleFactor, expectedImg) {
     testResize(fn, LINE_BW_8x8, 8, 8, scaleFactor, expectedImg);
+}
+function testResizeLine7x5(fn, scaleFactor, expectedImg) {
+    testResize(fn, LINE_BW_7x5, 7, 5, scaleFactor, expectedImg);
 }
 
 /**
@@ -152,6 +177,25 @@ function testResizeBoxBlack8x8_2x() {
 function testResizeBoxBlack8x8_3x() {
     let expectedImg = new Array(3 * 3).fill(BLACK);
     testResizeBlack8x8(resizeBox, 3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeBoxBlack7x5_1x() {
+    testResizeBlack7x5(resizeBox, 1, BLACK_7x5);
+}
+function testResizeBoxBlack7x5_1_5x() {
+    let expectedImg = new Array(5 * 3).fill(BLACK);
+    testResizeBlack7x5(resizeBox, 1.5, expectedImg);
+}
+function testResizeBoxBlack7x5_2x() {
+    let expectedImg = new Array(4 * 3).fill(BLACK);
+    testResizeBlack7x5(resizeBox, 2, expectedImg);
+}
+function testResizeBoxBlack7x5_3x() {
+    let expectedImg = new Array(2 * 2).fill(BLACK);
+    testResizeBlack7x5(resizeBox, 3, expectedImg);
 }
 
 /**
@@ -207,6 +251,34 @@ function testResizeBoxCheckers8x8_3x() {
 /**
  * Identity resize; should be a NOP
  */
+function testResizeBoxCheckers7x5_1x() {
+    testResizeCheckers7x5(resizeBox, 1, CHECKERBOARD_BW_7x5);
+}
+function testResizeBoxCheckers7x5_1_5x() {
+    let GRAY_1 = [116.571, 116.571, 116.571, 255];
+    let GRAY_2 = [123.857, 123.857, 123.857, 255];
+    let GRAY_3 = [138.429, 138.429, 138.429, 255];
+    let expectedImg = [
+        GRAY_1, GRAY_2, GRAY_3, GRAY_2, GRAY_1,
+        GRAY_1, GRAY_2, GRAY_3, GRAY_2, GRAY_1,
+        GRAY_1, GRAY_2, GRAY_3, GRAY_2, GRAY_1,
+    ]
+    testResizeCheckers7x5(resizeBox, 1.5, expectedImg);
+}
+function testResizeBoxCheckers7x5_2x() {
+    let GRAY_1 = [123.857, 123.857, 123.857, 255];
+    let expectedImg = new Array(4 * 3).fill(GRAY_1);
+    testResizeCheckers7x5(resizeBox, 2, expectedImg);
+}
+function testResizeBoxCheckers7x5_3x() {
+    let GRAY_1 = [123.857, 123.857, 123.857, 255];
+    let expectedImg = new Array(2 * 2).fill(GRAY_1);
+    testResizeCheckers7x5(resizeBox, 3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
 function testResizeBoxLine8x8_1x() {
     testResizeLine8x8(resizeBox, 1, LINE_BW_8x8);
 }
@@ -224,6 +296,28 @@ function testResizeBoxLine8x8_3x() {
     let expectedImg = new Array(3 * 3).fill(WHITE);
     for (let y = 0; y < 9; y+=3) { expectedImg[y] = [ 159.375, 159.375, 159.375, 255] }
     testResizeLine8x8(resizeBox, 3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeBoxLine7x5_1x() {
+    testResizeLine7x5(resizeBox, 1, LINE_BW_7x5);
+}
+function testResizeBoxLine7x5_1_5x() {
+    let expectedImg = new Array(5 * 3).fill(WHITE);
+    for (let y = 0; y < 15; y+=5) { expectedImg[y] = [72.857, 72.857, 72.857, 255] }
+    testResizeLine7x5(resizeBox, 1.5, expectedImg);
+}
+function testResizeBoxLine7x5_2x() {
+    let expectedImg = new Array(4 * 3).fill(WHITE);
+    for (let y = 0; y < 12; y+=4) { expectedImg[y] = [109.285, 109.285, 109.285, 255] }
+    testResizeLine7x5(resizeBox, 2, expectedImg);
+}
+function testResizeBoxLine7x5_3x() {
+    let expectedImg = new Array(2 * 2).fill(WHITE);
+    for (let y = 0; y < 4; y+=2) { expectedImg[y] = [182.143, 182.143, 182.143, 255] }
+    testResizeLine7x5(resizeBox, 3, expectedImg);
 }
 
 /**
@@ -584,6 +678,11 @@ function runScalingTests() {
     testResizeBoxBlack8x8_2x();
     testResizeBoxBlack8x8_3x();
 
+    testResizeBoxBlack7x5_1x();
+    testResizeBoxBlack7x5_1_5x();
+    testResizeBoxBlack7x5_2x();
+    testResizeBoxBlack7x5_3x();
+
     testResizeBoxWhite8x8_1x();
     testResizeBoxWhite8x8_1_5x();
     testResizeBoxWhite8x8_2x();
@@ -594,10 +693,20 @@ function runScalingTests() {
     testResizeBoxCheckers8x8_2x();
     testResizeBoxCheckers8x8_3x();
 
+    testResizeBoxCheckers7x5_1x();
+    testResizeBoxCheckers7x5_1_5x();
+    testResizeBoxCheckers7x5_2x();
+    testResizeBoxCheckers7x5_3x();
+
     testResizeBoxLine8x8_1x();
     testResizeBoxLine8x8_1_5x();
     testResizeBoxLine8x8_2x();
     testResizeBoxLine8x8_3x();
+
+    testResizeBoxLine7x5_1x();
+    testResizeBoxLine7x5_1_5x();
+    testResizeBoxLine7x5_2x();
+    testResizeBoxLine7x5_3x();
 
     testResizeBoxSmiley8x8_1x();
     testResizeBoxSmiley8x8_1_5x();
