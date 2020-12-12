@@ -6,12 +6,13 @@
  * @param {Function} fn Resizing function. First 3 inputs are be src/dest ImageInfo and scaleFactor
  * @param {HTMLCanvasElement} srcCanvas 
  * @param {HTMLCanvasElement} destCanvas 
- * @param {number} scaleFactor 
  */
-function resizeWrapper(fn, srcCanvas, destCanvas, scaleFactor = 2) {
+function resizeWrapper(fn, srcCanvas, destCanvas) {
     let srcImg = ImageInfo.fromCanvas(srcCanvas);
     let destImg = ImageInfo.fromCanvas(destCanvas);
-    fn(srcImg, destImg, scaleFactor);
+    let xscale = srcImg.width / destImg.width;
+    let yscale = srcImg.height / destImg.height;
+    fn(srcImg, destImg, xscale, yscale);
     let destContext = destCanvas.getContext("2d");
     destContext.putImageData(destImg.imageData, 0, 0);
 }
@@ -20,17 +21,20 @@ function resizeWrapper(fn, srcCanvas, destCanvas, scaleFactor = 2) {
  * Reduce the resolution of the source image and render it into the destination image
  * using a nearest-neighbor algorithm.
  * 
- * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
+ * @param {ImageInfo} srcImg
+ * @param {ImageInfo} destImg
+ * @param {Number} xscale 1 / scale factor. 2 = downsample in x by 50%, 4 = downsample by 75%...
+ * @param {Number} yscale 1 / scale factor. 2 = downsample in y by 50%, 4 = downsample by 75%...
  */
-function resizeNearestNeighbor(srcImg, destImg, scaleFactor = 2) {
+function resizeNearestNeighbor(srcImg, destImg, xscale, yscale) {
     let nearestPixel = [0, 0, 0, 0];
     for (let dy = 0; dy < destImg.height; dy++) {
-        nearestY = Math.floor((dy + 0.5) * scaleFactor);
+        nearestY = Math.floor((dy + 0.5) * yscale);
         if (nearestY >= srcImg.height) {   // Clamp source to edge of image
             nearestY = srcImg.height - 1;
         }
         for (let dx = 0; dx < destImg.width; dx++) {
-            nearestX = Math.floor((dx + 0.5) * scaleFactor);
+            nearestX = Math.floor((dx + 0.5) * xscale);
             if (nearestX >= srcImg.width) {    // Clamp to edge of image
                 nearestX = srcImg.width - 1;
             }
@@ -43,17 +47,21 @@ function resizeNearestNeighbor(srcImg, destImg, scaleFactor = 2) {
 /**
  * Reduce the resolution of the source image and render it into the destination image.
  * 
- * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
+ * @param {ImageInfo} srcImg
+ * @param {ImageInfo} destImg
+ * @param {Number} xscale 1 / scale factor. 2 = downsample in x by 50%, 4 = downsample by 75%...
+ * @param {Number} yscale 1 / scale factor. 2 = downsample in y by 50%, 4 = downsample by 75%...
  */
-function resizeBox(srcImg, destImg, scaleFactor = 2) {
-    let radius = scaleFactor / 2;   // distance from center to edge of dest pixel, in pixels of the src img
+function resizeBox(srcImg, destImg, xscale, yscale) {
+    let yradius = yscale / 2;   // distance from center to edge of dest pixel, in pixels of the src img
+    let xradius = xscale / 2;   // distance from center to edge of dest pixel, in pixels of the src img
 
     let pixel = [0, 0, 0, 0];
     let output = [0, 0, 0, 0];
     for (let dy = 0; dy < destImg.height; dy++) {
-        let dcenterY = (dy + 0.5) * scaleFactor;
-        let dtopY = dcenterY - radius;
-        let dbottomY = dcenterY + radius;
+        let dcenterY = (dy + 0.5) * yscale;
+        let dtopY = dcenterY - yradius;
+        let dbottomY = dcenterY + yradius;
 
         let rowTop = Math.floor(dtopY);
         let fracTop = 1.0 - (dtopY - rowTop);   // Fraction of the top row to use
@@ -61,9 +69,9 @@ function resizeBox(srcImg, destImg, scaleFactor = 2) {
         let fracBottom = 1.0 - (rowBottom - dbottomY); // Fraction of the bottom row to use
 
         for (let dx = 0; dx < destImg.width; dx++) {
-            let dcenterX = (dx + 0.5) * scaleFactor; // center of the dest pixel on the src img
-            let dleftX = dcenterX - radius;     // left edge of the dest pixel on the src img
-            let drightX = dcenterX + radius;    // right edge of the dest pixel on the src img
+            let dcenterX = (dx + 0.5) * xscale; // center of the dest pixel on the src img
+            let dleftX = dcenterX - xradius;     // left edge of the dest pixel on the src img
+            let drightX = dcenterX + xradius;    // right edge of the dest pixel on the src img
 
             let boxSize = 0;
             output[0] = 0;
@@ -106,9 +114,12 @@ function resizeBox(srcImg, destImg, scaleFactor = 2) {
  * Reduce the resolution of the source image and render it into the destination image
  * using a bilinear interpolation algorithm.
  * 
- * @param scaleFactor {*} 1 / scale factor. 2 = downsample by 50%, 4 = downsample by 75%...
+ * @param {ImageInfo} srcImg
+ * @param {ImageInfo} destImg
+ * @param {Number} xscale 1 / scale factor. 2 = downsample in x by 50%, 4 = downsample by 75%...
+ * @param {Number} yscale 1 / scale factor. 2 = downsample in y by 50%, 4 = downsample by 75%...
  */
-function resizeBilinear(srcImg, destImg, scaleFactor = 2) {
+function resizeBilinear(srcImg, destImg, xscale, yscale) {
     let box = [
         [0, 0, 0, 0],
         [0, 0, 0, 0],
@@ -120,10 +131,10 @@ function resizeBilinear(srcImg, destImg, scaleFactor = 2) {
         // x1,y1 is the upper-left of the origin pixel in the 2x2 box of source pixels
         // we'll used for the filter. x2,y2 is the upper-left of the pixel at
         // 1,1 in the 2x2 box of source pixels.
-        dcenterY = (dy + 0.5) * scaleFactor;
+        dcenterY = (dy + 0.5) * yscale;
         y1 = Math.floor(dcenterY - 0.5);
         for (let dx = 0; dx < destImg.width; dx++) {
-            dcenterX = (dx + 0.5) * scaleFactor;
+            dcenterX = (dx + 0.5) * xscale;
             x1 = Math.floor(dcenterX - 0.5);
 
             let x2 = x1 + 1;

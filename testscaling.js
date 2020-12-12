@@ -72,8 +72,9 @@ function testResize(fn, srcData, srcWidth, srcHeight, scaleFactor, expectedData)
     // Resize, ensuring that the scale factor is compatible w/ image dimensions
     // TODO: resize() functions should't need a scale factor at all since they
     // already know src + dest dimensions
-    let adjScaleFactor = srcWidth / destWidth;
-    fn(srcImgInfo, destImgInfo, adjScaleFactor);
+    let xscale = srcWidth / destWidth;
+    let yscale = srcHeight / destHeight;
+    fn(srcImgInfo, destImgInfo, xscale, yscale);
 
     // Convert our human-friendly(ish) test data to single array of pixel data
     let expectedImgData = {};

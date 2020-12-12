@@ -242,7 +242,7 @@ function drawLego() {
     let destCanvas = getNextCanvas();
     destCanvas.setAttribute("width", destWidth);
     destCanvas.setAttribute("height", destHeight);
-    resizeWrapper(resizeFn, currCanvas, destCanvas, scaleFactor);
+    resizeWrapper(resizeFn, currCanvas, destCanvas);
 
     unsharpMask(getCurrCanvas(), getNextCanvas(), sharpenFactor);
 
