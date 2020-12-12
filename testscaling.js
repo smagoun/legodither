@@ -65,9 +65,13 @@ function testResize(fn, srcData, srcWidth, srcHeight, scaleFactor, expectedData)
     let srcLineStride = srcWidth * PIXEL_STRIDE;
     // Convert our human-friendly(ish) test data to single array of pixel data
     let srcImgData = {};
-    srcImgData.data = [];
-    for (let i = 0; i < srcData.length; i++) {
-        srcImgData.data = srcImgData.data.concat(srcData[i]);
+    srcImgData.data = new Array(srcData.length * PIXEL_STRIDE);
+    for (let i = 0, j = 0; i < srcData.length; i++) {
+        // Don't use array.concat or array.push, they don't scale
+        srcImgData.data[j++] = srcData[i][0];
+        srcImgData.data[j++] = srcData[i][1];
+        srcImgData.data[j++] = srcData[i][2];
+        srcImgData.data[j++] = srcData[i][3];
     }
     let srcImgInfo = new ImageInfo(srcWidth, srcHeight, srcLineStride, 
         PIXEL_STRIDE, srcImgData);
@@ -91,9 +95,13 @@ function testResize(fn, srcData, srcWidth, srcHeight, scaleFactor, expectedData)
 
     // Convert our human-friendly(ish) test data to single array of pixel data
     let expectedImgData = {};
-    expectedImgData.data = [];
-    for (let i = 0; i < expectedData.length; i++) {
-        expectedImgData.data = expectedImgData.data.concat(expectedData[i]);
+    expectedImgData.data = new Array(expectedData.length * PIXEL_STRIDE);
+    for (let i = 0, j = 0; i < expectedData.length; i++) {
+        // Don't use array.concat or array.push, they don't scale
+        expectedImgData.data[j++] = expectedData[i][0];
+        expectedImgData.data[j++] = expectedData[i][1];
+        expectedImgData.data[j++] = expectedData[i][2];
+        expectedImgData.data[j++] = expectedData[i][3];
     }
 
     // Compare
