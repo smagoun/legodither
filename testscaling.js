@@ -161,6 +161,16 @@ function testResizeLine7x5(fn, scaleFactor, expectedImg) {
 }
 
 /**
+ * During testing, this scaling factor resulted box filter trying to
+ * look at 501st column, thanks to vagaries of floating-point math
+ */
+function testResizeBox500x375_21x16() {
+    let srcImg = new Array(500 * 375).fill(BLACK);
+    let expectedImg = new Array(21 * 16).fill(BLACK);
+    testResize(resizeBox, srcImg, 500, 375, (500 / 21), expectedImg);
+}
+
+/**
  * Identity resize; should be a NOP
  */
 function testResizeBoxBlack8x8_1x() {
@@ -673,6 +683,8 @@ function testResizeBilinearSmiley8x8_3x() {
 }
 
 function runScalingTests() {
+    testResizeBox500x375_21x16();
+
     testResizeBoxBlack8x8_1x();
     testResizeBoxBlack8x8_1_5x();
     testResizeBoxBlack8x8_2x();

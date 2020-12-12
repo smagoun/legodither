@@ -63,10 +63,10 @@ function resizeBox(srcImg, destImg, xscale, yscale) {
         let dtopY = dcenterY - yradius;
         let dbottomY = dcenterY + yradius;
 
-        let rowTop = Math.floor(dtopY);
-        let fracTop = 1.0 - (dtopY - rowTop);   // Fraction of the top row to use
-        let rowBottom = Math.ceil(dbottomY);
-        let fracBottom = 1.0 - (rowBottom - dbottomY); // Fraction of the bottom row to use
+        let rowTop = Math.max(Math.floor(dtopY), 0);
+        let fracTop = Math.min(1.0 - (dtopY - rowTop), 1.0);   // Fraction of the top row to use
+        let rowBottom = Math.min(Math.ceil(dbottomY), srcImg.height);
+        let fracBottom = Math.min(1.0 - (rowBottom - dbottomY), 1.0); // Fraction of the bottom row to use
 
         for (let dx = 0; dx < destImg.width; dx++) {
             let dcenterX = (dx + 0.5) * xscale; // center of the dest pixel on the src img
@@ -80,10 +80,10 @@ function resizeBox(srcImg, destImg, xscale, yscale) {
             output[3] = 0;
             // upper left = dleftX, dtopY
             // bottom right = drightX, dbottomY
-            let colLeft = Math.floor(dleftX);
-            let fracLeft = 1.0 - (dleftX - colLeft);
-            let colRight = Math.ceil(drightX);
-            let fracRight = 1.0 - (colRight - drightX);
+            let colLeft = Math.max(Math.floor(dleftX), 0);
+            let fracLeft = Math.min(1.0 - (dleftX - colLeft));
+            let colRight = Math.min(Math.ceil(drightX), srcImg.width);
+            let fracRight = Math.min(1.0 - (colRight - drightX));
             for (let y = rowTop; y < rowBottom; y++) {
                 for (let x = colLeft; x < colRight; x++) {
                     srcImg.getPixel(x, y, pixel);
