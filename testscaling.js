@@ -2,6 +2,8 @@
 // value is arbitrary, chosen experimentally
 const EPSILON = 0.001
 
+const PIXEL_STRIDE = 4;
+
 // Pixel colors are RGBA
 // TODO: Convert image processing to Uint8Array? Loses precision though
 const BLACK = [0,   0,   0,   255];
@@ -46,9 +48,8 @@ const SMILEY_COLOR_8x8 = [
 ]
 
 function testResize(fn, srcData, srcWidth, srcHeight, scaleFactor, expectedData) {
-    let pixelStride = 4;
     // Prepare source image
-    let srcLineStride = srcWidth * pixelStride;
+    let srcLineStride = srcWidth * PIXEL_STRIDE;
     // Convert our human-friendly(ish) test data to single array of pixel data
     let srcImgData = {};
     srcImgData.data = [];
@@ -56,17 +57,17 @@ function testResize(fn, srcData, srcWidth, srcHeight, scaleFactor, expectedData)
         srcImgData.data = srcImgData.data.concat(srcData[i]);
     }
     let srcImgInfo = new ImageInfo(srcWidth, srcHeight, srcLineStride, 
-        pixelStride, srcImgData);
+        PIXEL_STRIDE, srcImgData);
 
     // Prepare dest image. Dest image size should use the same rules
     // as in legodither.js:calculateDestSize()
     let destWidth = Math.round(srcWidth / scaleFactor);
     let destHeight = Math.round(srcHeight / scaleFactor);
-    let destLineStride = destWidth * pixelStride;
+    let destLineStride = destWidth * PIXEL_STRIDE;
     let destImgData = {};
-    destImgData.data = new Array(destWidth * destHeight * pixelStride).fill(0);
+    destImgData.data = new Array(destWidth * destHeight * PIXEL_STRIDE).fill(0);
     let destImgInfo = new ImageInfo(destWidth, destHeight, destLineStride,
-        pixelStride, destImgData);
+        PIXEL_STRIDE, destImgData);
 
     // Resize, ensuring that the scale factor is compatible w/ image dimensions
     // TODO: resize() functions should't need a scale factor at all since they
@@ -87,7 +88,7 @@ function testResize(fn, srcData, srcWidth, srcHeight, scaleFactor, expectedData)
     if (dLength != eLength) {
         console.error(`dest data size ${dLength} does not match expected ${eLength}`);
     }
-    for (let i = 0; i < (destWidth * destHeight * pixelStride); i++) {
+    for (let i = 0; i < (destWidth * destHeight * PIXEL_STRIDE); i++) {
         // Can't test for equality due to floating point math
         // TODO: Should it be invariant that resize functions only return integers?
         if (Number.isNaN(destImgData.data[i]) || Math.abs(destImgData.data[i] - expectedImgData.data[i]) > EPSILON) {
