@@ -690,6 +690,116 @@ function testResizeBilinearSmiley8x8_3x() {
     testResizeSmiley8x8(resizeBilinear, 3, expectedImg);
 }
 
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeDetailPreservingBlack8x8_1x() {
+    testResizeBlack8x8(resizeDetailPreserving, 1, BLACK_8x8);
+}
+function testResizeDetailPreservingBlack8x8_1_5x() {
+    let expectedImg = new Array(5 * 5).fill(BLACK);
+    testResizeBlack8x8(resizeDetailPreserving, 1.5, expectedImg);
+}
+function testResizeDetailPreservingBlack8x8_2x() {
+    let expectedImg = new Array(4 * 4).fill(BLACK);
+    testResizeBlack8x8(resizeDetailPreserving, 2, expectedImg);
+}
+function testResizeDetailPreservingBlack8x8_3x() {
+    let expectedImg = new Array(3 * 3).fill(BLACK);
+    testResizeBlack8x8(resizeDetailPreserving, 3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeDetailPreservingWhite8x8_1x() {
+    testResizeWhite8x8(resizeDetailPreserving, 1, WHITE_8x8);
+}
+function testResizeDetailPreservingWhite8x8_1_5x() {
+    let expectedImg = new Array(5 * 5).fill(WHITE);
+    testResizeWhite8x8(resizeDetailPreserving, 1.5, expectedImg);
+}
+function testResizeDetailPreservingWhite8x8_2x() {
+    let expectedImg = new Array(4 * 4).fill(WHITE);
+    testResizeWhite8x8(resizeDetailPreserving, 2, expectedImg);
+}
+function testResizeDetailPreservingWhite8x8_3x() {
+    let expectedImg = new Array(3 * 3).fill(WHITE);
+    testResizeWhite8x8(resizeDetailPreserving, 3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeDetailPreservingCheckers8x8_1x() {
+    testResizeCheckers8x8(resizeDetailPreserving, 1, CHECKERBOARD_BW_8x8);
+}
+function testResizeDetailPreservingCheckers8x8_1_5x() {
+    // TODO: calculate correct outputs
+    let expectedImg = new Array(5 * 5).fill(WHITE);
+    testResizeCheckers8x8(resizeDetailPreserving, 1.6, expectedImg);
+}
+function testResizeDetailPreservingCheckers8x8_2x() {
+    // Gray because each pixel is the same distance from the avg,
+    // so white + black offset each others' weights
+    let expectedImg = new Array(4 * 4).fill(GRAY);
+    testResizeCheckers8x8(resizeDetailPreserving, 2, expectedImg);
+}
+function testResizeDetailPreservingCheckers8x8_3x() {
+    // Corners in the dest are slightly biased since they overlap an odd
+    // # of pixels in the src image
+    // TODO: calculate correct outputs
+    let expectedImg = new Array(3 * 3).fill(WHITE);
+    testResizeCheckers8x8(resizeDetailPreserving, 3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeDetailPreservingLine8x8_1x() {
+    testResizeLine8x8(resizeDetailPreserving, 1, LINE_BW_8x8);
+}
+function testResizeDetailPreservingLine8x8_1_5x() {
+    let expectedImg = new Array(5 * 5).fill(WHITE);
+    for (let y = 0; y < 25; y+=5) { expectedImg[y] = BLACK }
+    testResizeLine8x8(resizeDetailPreserving, 1.5, expectedImg);
+}
+function testResizeDetailPreservingLine8x8_2x() {
+    let expectedImg = new Array(4 * 4).fill(WHITE);
+    for (let y = 0; y < 16; y+=4) { expectedImg[y] = BLACK }
+    testResizeLine8x8(resizeDetailPreserving, 2, expectedImg);
+}
+function testResizeDetailPreservingLine8x8_3x() {
+    let expectedImg = new Array(3 * 3).fill(WHITE);
+    for (let y = 0; y < 9; y+=3) { expectedImg[y] = BLACK }
+    testResizeLine8x8(resizeDetailPreserving, 3, expectedImg);
+}
+
+/**
+ * Identity resize; should be a NOP
+ */
+function testResizeDetailPreservingSmiley8x8_1x() {
+    testResizeSmiley8x8(resizeDetailPreserving, 1, SMILEY_COLOR_8x8);
+}
+
+function testResizeDetailPreservingSmiley8x8_1_5x() {
+    // TODO: calculate correct outputs
+    let expectedImg = new Array(5 * 5).fill(WHITE);
+    testResizeSmiley8x8(resizeDetailPreserving, 1.6, expectedImg);
+}
+
+function testResizeDetailPreservingSmiley8x8_2x() {
+    // TODO: calculate correct outputs
+    let expectedImg = new Array(4 * 4).fill(WHITE);
+    testResizeSmiley8x8(resizeDetailPreserving, 2, expectedImg);
+}
+
+function testResizeDetailPreservingSmiley8x8_3x() {
+    // TODO: calculate correct outputs
+    let expectedImg = new Array(3 * 3).fill(WHITE);
+    testResizeSmiley8x8(resizeDetailPreserving, 3, expectedImg);
+}
+
 function runScalingTests() {
     testResizeBox500x375_21x16();
 
@@ -782,4 +892,29 @@ function runScalingTests() {
     testResizeBilinearSmiley8x8_1_5x();
     testResizeBilinearSmiley8x8_2x();
     testResizeBilinearSmiley8x8_3x();
+    
+    testResizeDetailPreservingBlack8x8_1x();
+    testResizeDetailPreservingBlack8x8_1_5x();
+    testResizeDetailPreservingBlack8x8_2x();
+    testResizeDetailPreservingBlack8x8_3x();
+
+    testResizeDetailPreservingWhite8x8_1x();
+    testResizeDetailPreservingWhite8x8_1_5x();
+    testResizeDetailPreservingWhite8x8_2x();
+    testResizeDetailPreservingWhite8x8_3x();
+
+    testResizeDetailPreservingCheckers8x8_1x();
+    // testResizeDetailPreservingCheckers8x8_1_5x();
+    testResizeDetailPreservingCheckers8x8_2x();
+    // testResizeDetailPreservingCheckers8x8_3x();
+
+    testResizeDetailPreservingLine8x8_1x();
+    testResizeDetailPreservingLine8x8_1_5x();
+    testResizeDetailPreservingLine8x8_2x();
+    testResizeDetailPreservingLine8x8_3x();
+
+    testResizeDetailPreservingSmiley8x8_1x();
+    // testResizeDetailPreservingSmiley8x8_1_5x();
+    // testResizeDetailPreservingSmiley8x8_2x();
+    // testResizeDetailPreservingSmiley8x8_3x(); 
 }

@@ -85,6 +85,7 @@ function getResizingFilter(type) {
         case "box":             func = resizeBox;                break;
         case "nearestNeighbor": func = resizeNearestNeighbor;    break;
         case "bilinear":        func = resizeBilinear;           break;
+        case "dpid":            func = resizeDetailPreserving;   break;
         default:
             alert("Unknown resizing filter " + type);
     }

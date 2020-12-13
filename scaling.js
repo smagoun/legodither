@@ -171,3 +171,142 @@ function resizeBilinear(srcImg, destImg, xscale, yscale) {
         }
     }
 }
+
+/**
+ * Reduce the resolution of the source image and render it into the destination image
+ * using a detail-preserving algorithm adapted from Weber et al.:
+ * https://download.hrz.tu-darmstadt.de/media/FB20/GCC/dpid/Weber_2016_DPID.pdf
+ * 
+ * @param {ImageInfo} srcImg
+ * @param {ImageInfo} destImg
+ * @param {Number} xscale 1 / scale factor. 2 = downsample in x by 50%, 4 = downsample by 75%...
+ * @param {Number} yscale 1 / scale factor. 2 = downsample in y by 50%, 4 = downsample by 75%...
+ */
+function resizeDetailPreserving(srcImg, destImg, xscale, yscale) {
+    // Max Euclidean distance; 4 = # of channels (RGBA)
+    const VMAX = Math.sqrt(4 * (255 ** 2));
+
+    // Discrete 3x3 gaussian kernel
+    const KERNEL = [
+        [1, 2, 1],
+        [2, 4, 2],
+        [1, 2, 1],
+    ];
+
+    let yradius = yscale / 2;   // distance from center to edge of dest pixel, in pixels of the src img
+    let xradius = xscale / 2;   // distance from center to edge of dest pixel, in pixels of the src img
+
+    let pixel    = [0, 0, 0, 0];
+    let avgPixel = [0, 0, 0, 0];
+    let output   = [0, 0, 0, 0];
+
+    let lambda = 1.0;
+
+    // Calculate box-filtered image into an intermediate image
+    // Uses Array (not Uint8ClampedArray) for better storage of intermediate values
+    // TODO: Would Uint8ClampedArray work?
+    let avgImgData = { data: new Array(destImg.width * destImg.height * destImg.pixelStride) };
+    let avgImg = new ImageInfo(destImg.width, destImg.height, destImg.lineStride,
+        destImg.pixelStride, avgImgData);
+    resizeBox(srcImg, avgImg, xscale, yscale);
+
+    // Calculate guidance image
+    for (let dy = 0; dy < destImg.height; dy++) {
+        let dcenterY = (dy + 0.5) * yscale;
+        let dtopY = dcenterY - yradius;
+        let dbottomY = dcenterY + yradius;
+
+        let rowTop = Math.max(Math.floor(dtopY), 0);
+        let fracTop = Math.min(1.0 - (dtopY - rowTop), 1.0);   // Fraction of the top row to use
+        let rowBottom = Math.min(Math.ceil(dbottomY), srcImg.height);
+        let fracBottom = Math.min(1.0 - (rowBottom - dbottomY), 1.0); // Fraction of the bottom row to use
+
+        for (let dx = 0; dx < destImg.width; dx++) {
+            let dcenterX = (dx + 0.5) * xscale; // center of the dest pixel on the src img
+            let dleftX = dcenterX - xradius;     // left edge of the dest pixel on the src img
+            let drightX = dcenterX + xradius;    // right edge of the dest pixel on the src img
+
+            // Apply the 3x3 convolution kernel, ignoring pixels that are off
+            // the edge of the image
+            let r=0, g=0, b=0, a=0; // Accumulator pixel
+            let accD = 0;           // Accumulator for denominator of kernel
+            let xx = 0, yy = 0;
+            let kk = 0;
+            for (ky = 0; ky < 3; ky++) {
+                for (kx = 0; kx < 3; kx++) {
+                    xx = dx + kx - 1;   // Subtract one to center the kernel around dx/dy
+                    yy = dy + ky - 1;
+                    if (xx > 0 && yy > 0 && xx < avgImg.width && yy < avgImg.height) {
+                        kk = KERNEL[ky][kx];
+                        avgImg.getPixel(xx, yy, pixel);
+                        r += kk * pixel[0];
+                        g += kk * pixel[1];
+                        b += kk * pixel[2];
+                        a += kk * pixel[3];
+                        accD += kk;
+                    }
+                }
+            }
+
+            // Normalize
+            avgPixel = [r / accD, g / accD, b / accD, a / accD];
+
+            // Calculate the output image
+            let weight = 0;
+            let oF = 0;
+
+            output[0] = 0;
+            output[1] = 0;
+            output[2] = 0;
+            output[3] = 0;
+            // upper left = dleftX, dtopY
+            // bottom right = drightX, dbottomY
+            let colLeft = Math.max(Math.floor(dleftX), 0);
+            let fracLeft = Math.min(1.0 - (dleftX - colLeft));
+            let colRight = Math.min(Math.ceil(drightX), srcImg.width);
+            let fracRight = Math.min(1.0 - (colRight - drightX));
+            for (let y = rowTop; y < rowBottom; y++) {
+                for (let x = colLeft; x < colRight; x++) {
+                    srcImg.getPixel(x, y, pixel);
+                    if (lambda === 0) {
+                        weight = 1;
+                    } else {
+                        // Find Euclidean distance from the average
+                        // RGB only - ignore alpha
+                        let vr = (avgPixel[0] - pixel[0]) ** 2;
+                        let vg = (avgPixel[1] - pixel[1]) ** 2;
+                        let vb = (avgPixel[2] - pixel[2]) ** 2;
+                        let va = (avgPixel[3] - pixel[3]) ** 2;
+                        weight = Math.sqrt(vr + vg + vb + va);
+                        // Normalize to [0-1] and boost
+                        weight = weight / VMAX;
+                        weight = weight ** lambda;
+                    }
+
+                    // Calculate fraction (weight) of the pixel to use in the box
+                    if (y == rowTop)        weight = weight * fracTop;
+                    if (y == rowBottom - 1) weight = weight * fracBottom;
+                    if (x == colLeft)       weight = weight * fracLeft;
+                    if (x == colRight - 1)  weight = weight * fracRight;
+
+                    output[0] += pixel[0] * weight;
+                    output[1] += pixel[1] * weight;
+                    output[2] += pixel[2] * weight;
+                    output[3] += pixel[3] * weight;
+                    oF += weight;
+                }
+            }
+
+            if (oF === 0) {
+                // Result is same as box filter
+                destImg.setPixel(dx, dy, avgPixel);
+            } else {
+                output[0] = output[0] / oF;
+                output[1] = output[1] / oF;
+                output[2] = output[2] / oF;
+                output[3] = output[3] / oF;
+                destImg.setPixel(dx, dy, output);
+            }
+        }
+    }
+}
