@@ -316,6 +316,10 @@ function testOneImg(img, fn, testName, expected, testCnt) {
                 errCnt = 1;
                 break;
             }
+            if (a.color === undefined) {
+                errCnt = 1;
+                break;
+            }
             for (let j = 0; j < a.color.length; j++) {
                 if (a.color[j] != b.color[j]) {
                     errCnt = 1;
