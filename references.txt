@@ -64,3 +64,21 @@ https://pixinsight.com/doc/docs/InterpolationAlgorithms/InterpolationAlgorithms.
 
 Novel method for vectorization:
 https://arxiv.org/pdf/1403.0728.pdf
+
+Content-Adaptive Image Downscaling (Kopf, Shamir, Peers):
+Preserves edges. Note: iterative; relatively slow
+https://johanneskopf.de/publications/downscaling/
+https://johanneskopf.de/publications/downscaling/paper/pseudocode.pdf
+
+Perceptually Based Downscaling of Images (Öztireli, Gross):
+https://people.inf.ethz.ch/~cengizo/Files/Sig15PerceptualDownscaling.pdf
+
+Rapid, Detail-Preserving Image Downscaling (Weber et al.):
+https://download.hrz.tu-darmstadt.de/media/FB20/GCC/dpid/Weber_2016_DPID.pdf
+
+Spectral Remapping for Image Downscaling (Gastal, Oliveira):
+https://www.inf.ufrgs.br/~eslgastal/SpectralRemapping/Gastal_Oliveira_SIGGRAPH2017_Spectral_Remapping.pdf
+
+Mean shift filtering (for color quantization):
+https://stackoverflow.com/questions/4831813/image-segmentation-using-mean-shift-explained
+https://stackoverflow.com/questions/41072400/find-regions-of-similar-color-in-image
