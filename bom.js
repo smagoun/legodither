@@ -293,6 +293,43 @@ function findRectsSingleLine(img) {
 }
 
 /**
+ * Return a set of rectangles of the same color, potentially spanning multiple lines.
+ * Calls findRectsSingleLine(), then coalesces rectangles in adjacent rows with the 
+ * same x coordinate, width, and color.
+ * 
+ * Returns an array of rectangles: {x, y, width, height, color}
+ * 
+ * @param {ImageInfo} img
+ */
+function findRectsMultiLine(img) {
+    let rects = findRectsSingleLine(img);
+    let ret = [];
+    // Sort by x
+    rects.sort((a, b) => (a.x - b.x));
+    let newRect = null;
+    for (let i = 0; i < rects.length; i++) {
+        let rect = rects[i];
+        if (newRect == null) {
+            // First row of img
+            newRect = { x: rect.x, y: rect.y, width: rect.width, height: rect.height, color: rect.color }
+        } else if (newRect != null 
+                && rect.x === newRect.x
+                && rect.width === newRect.width
+                && rect.y === newRect.y + newRect.height
+                && Color.sameColor(rect.color, newRect.color)) {
+            // same color + same width: add them
+            newRect.height++
+        } else {
+            // Start a new rect
+            ret.push(newRect);
+            newRect = { x: rect.x, y: rect.y, width: rect.width, height: rect.height, color: rect.color }
+        }
+    }
+    ret.push(newRect);
+    return ret;
+}
+
+/**
  * Find the rectangles of the same color.
  * 
  * Greedy algorithm that looks for horizontal + vertical runs of a color.
@@ -457,7 +494,6 @@ function findRectsExpanding(img) {
  * 
  * @param {*} img 
  */
-
 function findRectsLowCPSFirst(img) {
     let rects = [];
     // Keeps track of which pixels have been assigned to a rect
@@ -559,6 +595,7 @@ function calculateBOM(img, algorithm) {
     switch(algorithm) {
         case "singlePixels":    rects = findRectsSinglePixels(img); break;
         case "singleLine":      rects = findRectsSingleLine(img);   break;
+        case "multiLine":       rects = findRectsMultiLine(img);    break;
         case "expandingRects":  rects = findRectsExpanding(img);    break;
         case "lowCPSFirst":     rects = findRectsLowCPSFirst(img);  break;
         default:
