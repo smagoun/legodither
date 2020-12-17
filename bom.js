@@ -46,6 +46,41 @@ brickCost[4][6] = 41;
 const brickCostMap = [];
 
 /**
+ * Represents a rectangle. Very similar to Brick; could be merged someday
+ */
+class Rect {
+    /**
+     * Create a new Rect
+     * 
+     * @param {number} x x coordinate of the corner closest to the origin
+     * @param {number} y y coordinate of the corner closest to the origin
+     * @param {number} width Width of the rectangle in pixels
+     * @param {number} height Height of the rectangle in pixels
+     * @param {Array} color RGBA color information 
+     */
+    constructor(x, y, width, height, color) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.color = color;
+    }
+
+    /**
+     * Return a shallow copy of the given Rect
+     * 
+     * @param {Rect} rect 
+     */
+    static copyRect(rect) {
+        if (rect instanceof Rect) {
+            return new Rect(rect.x, rect.y, rect.width, rect.height, rect.color);
+        } else {
+            return undefined;
+        }
+    }
+}
+
+/**
  * Render the Bill of Materials on the page
  * 
  * @param {Number} cost Total cost of the BOM in cents 
@@ -126,19 +161,15 @@ function generateBOM(bom, palette) {
  * Returns a tuple of total cost for bricks, and list of Bricks populated with color/price/location
  * information.
  * 
- * @param {*} x 
- * @param {*} y 
- * @param {*} width
- * @param {*} height 
- * @param {*} color 
+ * @param {Rect} rect
  */
-function findOptimalBricks(x, y, width, height, color) {
-    const {cost, bricks} = findBestCostBricks(width, height, color, 0, 0);
-    // console.log(`Best cost for ${width}x${height} is ${cost} with bricks ${bricks}`);
+function findOptimalBricks(rect) {
+    const {cost, bricks} = findBestCostBricks(rect.width, rect.height, rect.color, 0, 0);
+    // console.log(`Best cost for ${rect.width}x${rect.height} is ${cost} with bricks ${bricks}`);
     for (const brick of bricks) {
-        brick.color = color;
-        brick.x += x;
-        brick.y += y;
+        brick.color = rect.color;
+        brick.x += rect.x;
+        brick.y += rect.y;
     }
     return {
         cost: cost,
@@ -235,17 +266,17 @@ function findBestCostBricks(width, height, color, x, y) {
  * Return the set of rectangles of the same color in each line. For this
  * algorithm, these are just individual pixels
  * 
- * Returns an array of rectangles: {x, y, width, height, color}
+ * Returns an array of Rects
  * 
  * @param {ImageInfo} img
  */
 function findRectsSinglePixels(img) {
-    let rects = [];   // List of rectangles: width/height + x/y coords
+    let rects = [];   // List of Rects
     for (y = 0; y < img.height; y++) {
         for (x = 0; x < img.width; x++) {
             let color = [0, 0, 0, 0];
             img.getPixel(x, y, color);
-            rects.push({x: x, y: y, width: 1, height: 1, color: color});
+            rects.push(new Rect(x, y, 1, 1, color));
         }
     }
     return rects;
@@ -258,12 +289,12 @@ function findRectsSinglePixels(img) {
  * Does not support bricks that span multiple lines, either due to 
  * orientation or brick size (such as 2x4 bricks).
  * 
- * Returns an array of rectangles: {x, y, width, height, color}
+ * Returns an array of Rects
  * 
  * @param {ImageInfo} img
  */
 function findRectsSingleLine(img) {
-    let rects = [];   // List of rectangles: width/height + x/y coords
+    let rects = [];   // List of Rects
     let nextColor = [0, 0, 0, 0];
     let currColor = [0, 0, 0, 0];
     for (let y = 0; y < img.height; y++) {
@@ -276,7 +307,7 @@ function findRectsSingleLine(img) {
                 brickLength = 0;
                 currColor = [...nextColor];
             } else if (!Color.sameColor(currColor, nextColor)) {
-                rects.push({x: brickStart, y: y, width: brickLength, height: 1, color: currColor});
+                rects.push(new Rect(brickStart, y, brickLength, 1, currColor));
                 // console.log("New color end-of-run, placing brick (start, length, color): " + bricks);
                 brickStart = x;
                 brickLength = 0;
@@ -285,7 +316,7 @@ function findRectsSingleLine(img) {
             brickLength++;      // Consume the pixel
         }
         if (brickStart != -1) {
-            rects.push({x: brickStart, y: y, width: brickLength, height: 1, color: currColor});
+            rects.push(new Rect(brickStart, y, brickLength, 1, currColor));
             // console.log("Found end of line, placing brick (start, length, color): " + bricks);
         }
     }
@@ -297,7 +328,7 @@ function findRectsSingleLine(img) {
  * Calls findRectsSingleLine(), then coalesces rectangles in adjacent rows with the 
  * same x coordinate, width, and color.
  * 
- * Returns an array of rectangles: {x, y, width, height, color}
+ * Returns an array of Rects
  * 
  * @param {ImageInfo} img
  */
@@ -311,7 +342,7 @@ function findRectsMultiLine(img) {
         let rect = rects[i];
         if (newRect == null) {
             // First row of img
-            newRect = { x: rect.x, y: rect.y, width: rect.width, height: rect.height, color: rect.color }
+            newRect = Rect.copyRect(rect);
         } else if (newRect != null 
                 && rect.x === newRect.x
                 && rect.width === newRect.width
@@ -322,7 +353,7 @@ function findRectsMultiLine(img) {
         } else {
             // Start a new rect
             ret.push(newRect);
-            newRect = { x: rect.x, y: rect.y, width: rect.width, height: rect.height, color: rect.color }
+            newRect = Rect.copyRect(rect);
         }
     }
     ret.push(newRect);
@@ -347,12 +378,12 @@ function findRectsMultiLine(img) {
  * |_/                 \_|
  * |/                   \|
  * 
- * Returns an array of rectangles: {x, y, width, height, color}
+ * Returns an array of Rects
  * 
  * @param {*} img 
  */
 function findRectsExpanding(img) {
-    let rects = [];   // List of rectangles: width/height + x/y coords
+    let rects = [];   // List of Rects
 
     // Keeps track of which pixels have been assigned to a rect. Convert to a bitfield to save memory
     let mapped = new Array(img.width * img.height).fill(0);
@@ -462,7 +493,7 @@ function findRectsExpanding(img) {
                 }
                 let width = rightEdge - x + 1;
                 let height = bottomEdge - y + 1; 
-                rects.push({x: x, y: y, width: width, height: height, color: currColor});
+                rects.push(new Rect(x, y, width, height, currColor));
                 // console.log(`Found rectangle #${numRects++} of ${width}x${height}`);
             }
         }
@@ -490,7 +521,7 @@ function findRectsExpanding(img) {
  * Since this already takes cost into account and only creates rectangles that match the
  * size of a brick, this routine effectively makes findBestCostBricks() a NOOP.
  * 
- * Returns an array of rectangles: {x, y, width, height, color}
+ * Returns an array of Rects
  * 
  * @param {*} img 
  */
@@ -559,7 +590,7 @@ function findRectsLowCPSFirst(img) {
                     if (!obstructions) {
                         // Place the brick
                         // console.log(`Placing ${brickW}x${brickH} at ${x},${y}`);
-                        rects.push({x: x, y: y, width: brickW, height: brickH, color: currColor});
+                        rects.push(new Rect(x, y, brickW, brickH, currColor));
                         for (let yyy = y; yyy < bottomEdge && yyy < img.height; yyy++) {
                             for (let xxx = x; xxx < rightEdge && xxx < img.width; xxx++) {
                                 let tmpIndex = (yyy * img.width) + xxx;
@@ -603,7 +634,7 @@ function calculateBOM(img, algorithm) {
     }
     for (rect of rects) {
         // For each rectangle, find the minimum set of bricks required to implement it
-        const {cost, bricks} = findOptimalBricks(rect.x, rect.y, rect.width, rect.height, rect.color);
+        const {cost, bricks} = findOptimalBricks(rect);
         bom.push(...bricks);
         totalCost += cost;
     }

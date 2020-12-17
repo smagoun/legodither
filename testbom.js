@@ -174,7 +174,7 @@ function checkBricks(a, b) {
 
 function testFindOptimalBricks(x, y, width, height, color, expectedCost, expectedBricks) {
     ret = true;
-    const {cost, bricks} = findOptimalBricks(x, y, width, height, color);
+    const {cost, bricks} = findOptimalBricks(new Rect(x, y, width, height, color));
     if (cost != expectedCost) {
         console.error(`${width}x${height} cost: ${cost}, expected: ${expectedCost}`);
         ret = false;
@@ -202,7 +202,7 @@ function testFindRectsSinglePixels() {
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
     for (let i = 0; i < TESTBOM_IMG_WIDTH; i++) {   
-        expected.push({x: i, y: 0, width: 1, height: 1, color: TESTBOM_RED})
+        expected.push(new Rect(i, 0, 1, 1, TESTBOM_RED))
     }
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
@@ -211,10 +211,10 @@ function testFindRectsSinglePixels() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(2, 0, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line whose last pixel is its own color"
@@ -222,10 +222,10 @@ function testFindRectsSinglePixels() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(2, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Alternating colors"
@@ -233,10 +233,10 @@ function testFindRectsSinglePixels() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 0, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     // Bail here even though there are more test cases defined; they don't cover much new ground
@@ -264,7 +264,7 @@ function testFindRectsSingleLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: TESTBOM_IMG_WIDTH, height: 1, color: TESTBOM_RED});
+    expected.push(new Rect(0, 0, TESTBOM_IMG_WIDTH, 1, TESTBOM_RED));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line with multiple colors"
@@ -272,8 +272,8 @@ function testFindRectsSingleLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 2, height: 1, color: TESTBOM_RED});
-    expected.push({x: 2, y: 0, width: 2, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 2, 1, TESTBOM_RED));
+    expected.push(new Rect(2, 0, 2, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line whose last pixel is its own color"
@@ -281,8 +281,8 @@ function testFindRectsSingleLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 3, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 3, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Alternating colors"
@@ -290,10 +290,10 @@ function testFindRectsSingleLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 0, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     // Bail here even though there are more test cases defined; they don't cover much new ground
@@ -352,7 +352,7 @@ function testFindRectsMultiLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: TESTBOM_IMG_WIDTH, height: 1, color: TESTBOM_RED});
+    expected.push(new Rect(0, 0, TESTBOM_IMG_WIDTH, 1, TESTBOM_RED));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line with multiple colors"
@@ -360,8 +360,8 @@ function testFindRectsMultiLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 2, height: 1, color: TESTBOM_RED});
-    expected.push({x: 2, y: 0, width: 2, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 2, 1, TESTBOM_RED));
+    expected.push(new Rect(2, 0, 2, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line whose last pixel is its own color"
@@ -369,8 +369,8 @@ function testFindRectsMultiLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 3, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 3, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Alternating colors"
@@ -378,10 +378,10 @@ function testFindRectsMultiLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 0, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "4x4 grid of one color"
@@ -392,7 +392,7 @@ function testFindRectsMultiLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 4, height: 4, color: TESTBOM_RED});
+    expected.push(new Rect(0, 0, 4, 4, TESTBOM_RED));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "4x2 on top, 4x2 on bottom"
@@ -403,8 +403,8 @@ function testFindRectsMultiLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 4, height: 2, color: TESTBOM_RED});
-    expected.push({x: 0, y: 2, width: 4, height: 2, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 4, 2, TESTBOM_RED));
+    expected.push(new Rect(0, 2, 4, 2, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Right triangle with corner at top left"
@@ -415,13 +415,13 @@ function testFindRectsMultiLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 4, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 1, width: 3, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 3, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 3, width: 3, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 2, width: 2, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 3, y: 1, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 4, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 1, 3, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 2, 2, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 3, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 3, 3, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 2, 2, 1, TESTBOM_BLUE));
+    expected.push(new Rect(3, 1, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Right triangle with corner at top right"
@@ -432,13 +432,13 @@ function testFindRectsMultiLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 4, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 1, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 3, width: 3, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 1, width: 3, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 2, width: 2, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 4, 1, TESTBOM_BLUE));
+    expected.push(new Rect(0, 1, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 2, 2, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 3, 3, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 1, 3, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 2, 2, 1, TESTBOM_BLUE));
+    expected.push(new Rect(3, 3, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line that's all the same color"
@@ -449,8 +449,8 @@ function testFindRectsMultiLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 4, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 1, width: 4, height: 3, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 4, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 1, 4, 3, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "DCT-ish image"
@@ -462,17 +462,17 @@ function testFindRectsMultiLine() {
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
     // 1st 2 columns
-    expected.push({x: 0, y: 0, width: 2, height: 2, color: TESTBOM_RED});
-    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 3, width: 2, height: 1, color: TESTBOM_RED});
+    expected.push(new Rect(0, 0, 2, 2, TESTBOM_RED));
+    expected.push(new Rect(0, 2, 2, 1, TESTBOM_BLUE));
+    expected.push(new Rect(0, 3, 2, 1, TESTBOM_RED));
     // 3rd column
-    expected.push({x: 2, y: 0, width: 1, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 2, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(2, 0, 1, 2, TESTBOM_BLUE));
+    expected.push(new Rect(2, 2, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(2, 3, 1, 1, TESTBOM_BLUE));
     // Last column
-    expected.push({x: 3, y: 0, width: 1, height: 2, color: TESTBOM_RED});
-    expected.push({x: 3, y: 2, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push(new Rect(3, 0, 1, 2, TESTBOM_RED));
+    expected.push(new Rect(3, 2, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(3, 3, 1, 1, TESTBOM_RED));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Real estate sign"
@@ -483,14 +483,14 @@ function testFindRectsMultiLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 1, width: 4, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 2, width: 1, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 2, width: 3, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 3, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 2, y: 0, width: 2, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 3, width: 2, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(0, 1, 4, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 2, 1, 2, TESTBOM_BLUE));
+    expected.push(new Rect(1, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 2, 3, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 3, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(2, 0, 2, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 3, 2, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Backward L"
@@ -501,11 +501,11 @@ function testFindRectsMultiLine() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 2, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 2, width: 3, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 3, width: 4, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 0, width: 1, height: 2, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 3, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 2, 2, TESTBOM_BLUE));
+    expected.push(new Rect(0, 2, 3, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 3, 4, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 0, 1, 2, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 3, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     if (errCnt === 0) {
@@ -530,7 +530,7 @@ function testFindRectsExpanding() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: TESTBOM_IMG_WIDTH, height: 1, color: TESTBOM_RED});
+    expected.push(new Rect(0, 0, TESTBOM_IMG_WIDTH, 1, TESTBOM_RED));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line with multiple colors"
@@ -538,8 +538,8 @@ function testFindRectsExpanding() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 2, height: 1, color: TESTBOM_RED});
-    expected.push({x: 2, y: 0, width: 2, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 2, 1, TESTBOM_RED));
+    expected.push(new Rect(2, 0, 2, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line whose last pixel is its own color"
@@ -547,8 +547,8 @@ function testFindRectsExpanding() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 3, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 3, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Alternating colors"
@@ -556,10 +556,10 @@ function testFindRectsExpanding() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 0, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "4x4 grid of one color"
@@ -570,7 +570,7 @@ function testFindRectsExpanding() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 4, height: 4, color: TESTBOM_RED});
+    expected.push(new Rect(0, 0, 4, 4, TESTBOM_RED));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "4x2 on top, 4x2 on bottom"
@@ -581,8 +581,8 @@ function testFindRectsExpanding() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 4, height: 2, color: TESTBOM_RED});
-    expected.push({x: 0, y: 2, width: 4, height: 2, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 4, 2, TESTBOM_RED));
+    expected.push(new Rect(0, 2, 4, 2, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Right triangle with corner at top left"
@@ -593,13 +593,13 @@ function testFindRectsExpanding() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 3, height: 2, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 1, width: 1, height: 3, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_RED});
-    expected.push({x: 2, y: 2, width: 1, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 3, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 3, 2, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 1, 1, 3, TESTBOM_BLUE));
+    expected.push(new Rect(0, 2, 2, 1, TESTBOM_RED));
+    expected.push(new Rect(2, 2, 1, 2, TESTBOM_BLUE));
+    expected.push(new Rect(0, 3, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 3, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Right triangle with corner at top right"
@@ -610,13 +610,13 @@ function testFindRectsExpanding() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 4, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 1, width: 1, height: 3, color: TESTBOM_RED});
-    expected.push({x: 1, y: 1, width: 3, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 1, y: 2, width: 1, height: 2, color: TESTBOM_RED});
-    expected.push({x: 2, y: 2, width: 2, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 4, 1, TESTBOM_BLUE));
+    expected.push(new Rect(0, 1, 1, 3, TESTBOM_RED));
+    expected.push(new Rect(1, 1, 3, 1, TESTBOM_BLUE));
+    expected.push(new Rect(1, 2, 1, 2, TESTBOM_RED));
+    expected.push(new Rect(2, 2, 2, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 3, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 3, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line that's all the same color"
@@ -627,8 +627,8 @@ function testFindRectsExpanding() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 4, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 1, width: 4, height: 3, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 4, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 1, 4, 3, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "DCT-ish image"
@@ -640,17 +640,17 @@ function testFindRectsExpanding() {
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
     // First 2 rows
-    expected.push({x: 0, y: 0, width: 2, height: 2, color: TESTBOM_RED});
-    expected.push({x: 2, y: 0, width: 1, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 3, y: 0, width: 1, height: 2, color: TESTBOM_RED});
+    expected.push(new Rect(0, 0, 2, 2, TESTBOM_RED));
+    expected.push(new Rect(2, 0, 1, 2, TESTBOM_BLUE));
+    expected.push(new Rect(3, 0, 1, 2, TESTBOM_RED));
     // 3rd row
-    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 2, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 2, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 2, 2, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 2, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 2, 1, 1, TESTBOM_BLUE));
     // Last row
-    expected.push({x: 0, y: 3, width: 2, height: 1, color: TESTBOM_RED});
-    expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push(new Rect(0, 3, 2, 1, TESTBOM_RED));
+    expected.push(new Rect(2, 3, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(3, 3, 1, 1, TESTBOM_RED));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Real estate sign"
@@ -661,13 +661,13 @@ function testFindRectsExpanding() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 1, y: 0, width: 1, height: 4, color: TESTBOM_RED});
-    expected.push({x: 2, y: 0, width: 2, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 1, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 2, y: 1, width: 2, height: 2, color: TESTBOM_RED});
-    expected.push({x: 0, y: 2, width: 1, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 3, width: 2, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(1, 0, 1, 4, TESTBOM_RED));
+    expected.push(new Rect(2, 0, 2, 1, TESTBOM_BLUE));
+    expected.push(new Rect(0, 1, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(2, 1, 2, 2, TESTBOM_RED));
+    expected.push(new Rect(0, 2, 1, 2, TESTBOM_BLUE));
+    expected.push(new Rect(2, 3, 2, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Backward L"
@@ -678,11 +678,11 @@ function testFindRectsExpanding() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 2, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 0, width: 1, height: 3, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 4, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 3, width: 3, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 2, 2, TESTBOM_BLUE));
+    expected.push(new Rect(2, 0, 1, 3, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 4, TESTBOM_BLUE));
+    expected.push(new Rect(0, 2, 2, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 3, 3, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     if (errCnt === 0) {
@@ -709,8 +709,8 @@ function testFindRectsLowCPSFirst() {
     expected = [];
     // In our test data, a 3x1 is cheaper per-stud ($0.0233/stud) than a 4x1 $(0.025/stud)
     // so the 3x1 will be placed before we try a 4x1
-    expected.push({x: 0, y: 0, width: 3, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push(new Rect(0, 0, 3, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_RED));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line with multiple colors"
@@ -718,8 +718,8 @@ function testFindRectsLowCPSFirst() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 2, height: 1, color: TESTBOM_RED});
-    expected.push({x: 2, y: 0, width: 2, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 2, 1, TESTBOM_RED));
+    expected.push(new Rect(2, 0, 2, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line whose last pixel is its own color"
@@ -727,8 +727,8 @@ function testFindRectsLowCPSFirst() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 3, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 3, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Alternating colors"
@@ -736,10 +736,10 @@ function testFindRectsLowCPSFirst() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 0, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "4x4 grid of one color"
@@ -750,7 +750,7 @@ function testFindRectsLowCPSFirst() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 4, height: 4, color: TESTBOM_RED});
+    expected.push(new Rect(0, 0, 4, 4, TESTBOM_RED));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "4x2 on top, 4x2 on bottom"
@@ -761,8 +761,8 @@ function testFindRectsLowCPSFirst() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 4, height: 2, color: TESTBOM_RED});
-    expected.push({x: 0, y: 2, width: 4, height: 2, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 4, 2, TESTBOM_RED));
+    expected.push(new Rect(0, 2, 4, 2, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Right triangle with corner at top left"
@@ -773,13 +773,13 @@ function testFindRectsLowCPSFirst() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 0, width: 2, height: 3, color: TESTBOM_RED});
-    expected.push({x: 3, y: 1, width: 1, height: 3, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 0, width: 1, height: 2, color: TESTBOM_RED});
-    expected.push({x: 2, y: 2, width: 1, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 3, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 0, 2, 3, TESTBOM_RED));
+    expected.push(new Rect(3, 1, 1, 3, TESTBOM_BLUE));
+    expected.push(new Rect(2, 0, 1, 2, TESTBOM_RED));
+    expected.push(new Rect(2, 2, 1, 2, TESTBOM_BLUE));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 3, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 3, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);    
 
     testName = "Right triangle with corner at top right"
@@ -790,13 +790,13 @@ function testFindRectsLowCPSFirst() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 2, y: 0, width: 2, height: 3, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 1, width: 1, height: 3, color: TESTBOM_RED});
-    expected.push({x: 1, y: 0, width: 1, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 1, y: 2, width: 1, height: 2, color: TESTBOM_RED});
-    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(2, 0, 2, 3, TESTBOM_BLUE));
+    expected.push(new Rect(0, 1, 1, 3, TESTBOM_RED));
+    expected.push(new Rect(1, 0, 1, 2, TESTBOM_BLUE));
+    expected.push(new Rect(1, 2, 1, 2, TESTBOM_RED));
+    expected.push(new Rect(0, 0, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 3, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 3, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Line that's all the same color"
@@ -807,11 +807,11 @@ function testFindRectsLowCPSFirst() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 0, y: 1, width: 4, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 0, width: 3, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 3, width: 3, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 3, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(0, 1, 4, 2, TESTBOM_BLUE));
+    expected.push(new Rect(0, 0, 3, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 3, 3, 1, TESTBOM_BLUE));
+    expected.push(new Rect(3, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 3, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "DCT-ish image"
@@ -823,18 +823,18 @@ function testFindRectsLowCPSFirst() {
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
     // Top-left square
-    expected.push({x: 0, y: 0, width: 2, height: 2, color: TESTBOM_RED});
+    expected.push(new Rect(0, 0, 2, 2, TESTBOM_RED));
     // Top-right square
-    expected.push({x: 2, y: 0, width: 1, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 3, y: 0, width: 1, height: 2, color: TESTBOM_RED});
+    expected.push(new Rect(2, 0, 1, 2, TESTBOM_BLUE));
+    expected.push(new Rect(3, 0, 1, 2, TESTBOM_RED));
     // Bottom-left square
-    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 3, width: 2, height: 1, color: TESTBOM_RED});
+    expected.push(new Rect(0, 2, 2, 1, TESTBOM_BLUE));
+    expected.push(new Rect(0, 3, 2, 1, TESTBOM_RED));
     // Bottom-right square
-    expected.push({x: 2, y: 2, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 2, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push(new Rect(2, 2, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 2, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 3, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(3, 3, 1, 1, TESTBOM_RED));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Real estate sign"
@@ -845,14 +845,14 @@ function testFindRectsLowCPSFirst() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 1, y: 1, width: 3, height: 2, color: TESTBOM_RED});
-    expected.push({x: 0, y: 2, width: 1, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 0, width: 2, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 2, y: 3, width: 2, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 0, width: 1, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 1, y: 0, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 0, y: 1, width: 1, height: 1, color: TESTBOM_RED});
-    expected.push({x: 1, y: 3, width: 1, height: 1, color: TESTBOM_RED});
+    expected.push(new Rect(1, 1, 3, 2, TESTBOM_RED));
+    expected.push(new Rect(0, 2, 1, 2, TESTBOM_BLUE));
+    expected.push(new Rect(2, 0, 2, 1, TESTBOM_BLUE));
+    expected.push(new Rect(2, 3, 2, 1, TESTBOM_BLUE));
+    expected.push(new Rect(0, 0, 1, 1, TESTBOM_BLUE));
+    expected.push(new Rect(1, 0, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(0, 1, 1, 1, TESTBOM_RED));
+    expected.push(new Rect(1, 3, 1, 1, TESTBOM_RED));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     testName = "Backward L"
@@ -863,12 +863,12 @@ function testFindRectsLowCPSFirst() {
     info = iter.next().value;
     if (testName != info.name) console.error(`Test case mismatch: expected ${testName}, got ${info.name}`);
     expected = [];
-    expected.push({x: 2, y: 0, width: 1, height: 3, color: TESTBOM_RED});
-    expected.push({x: 3, y: 0, width: 1, height: 3, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 3, width: 3, height: 1, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 0, width: 2, height: 2, color: TESTBOM_BLUE});
-    expected.push({x: 0, y: 2, width: 2, height: 1, color: TESTBOM_RED});
-    expected.push({x: 3, y: 3, width: 1, height: 1, color: TESTBOM_BLUE});
+    expected.push(new Rect(2, 0, 1, 3, TESTBOM_RED));
+    expected.push(new Rect(3, 0, 1, 3, TESTBOM_BLUE));
+    expected.push(new Rect(0, 3, 3, 1, TESTBOM_BLUE));
+    expected.push(new Rect(0, 0, 2, 2, TESTBOM_BLUE));
+    expected.push(new Rect(0, 2, 2, 1, TESTBOM_RED));
+    expected.push(new Rect(3, 3, 1, 1, TESTBOM_BLUE));
     errCnt += testOneImg(info.image, fn, testName, expected, ++testCnt);
 
     if (errCnt === 0) {
