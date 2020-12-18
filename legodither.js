@@ -306,6 +306,7 @@ function renderStats(bricksX, bricksY, outputPrefix) {
 
 /**
  * Toggles the color at the given index in the color palette
+ * and redraw the image with the updated colors
  * 
  * @param {*} index 
  */
@@ -313,6 +314,7 @@ function toggleColor(index) {
     if (currPalette != null) {
         currPalette.toggleColor(index);
     }
+    drawLego();
 }
 
 /**
@@ -321,45 +323,67 @@ function toggleColor(index) {
  * @param {Palette} palette 
  */
 function drawPalette(palette) {
-    let displayWidth = 8;
-    let tableDiv = document.getElementById("paletteDisplay");
-    let newTable = document.createElement("table");
-    let body = newTable.createTBody();
-    let row, cell;
+    let outerDiv = document.getElementById("palette-wrapper");
+    let paletteDiv = genPalette(palette, false, "palette-checkbox", null, toggleColor);
+    outerDiv.replaceChild(paletteDiv, outerDiv.firstChild);
+}
+
+/**
+ * Generate a color palette, with options to use checkboxes or radio
+ * buttons to represent colors. Allows use as a palette or as a color picker.
+ * 
+ * @param {Palette} palette Palette of colors to be drawn
+ * @param {Boolean} isRadio Create radio buttons for colors if true, otherwise checkboxes
+ * @param {String} labelClass CSS class to apply to the input element for each color
+ * @param {*} radioName Name to give radio input elements. Ignored for checkboxes
+ * @param {*} onchangeFn Function to be called on a change event
+ * @returns HTML div with the color palette
+ */
+function genPalette(palette, isRadio, labelClass, radioName, onchangeFn) {
+    let newDiv = document.createElement("div");
+    let type = isRadio ? "radio" : "checkbox";
+    let checkedSet = false;
     if (palette != null) {
         let paletteList = palette.getPalette();
         for (let i = 0; i < paletteList.length; i++) {
-            if (i % displayWidth === 0) {
-                row = body.insertRow();
-            }
             let color = paletteList[i][0];
             let rgb = color.getRGBA();
             let enabled = paletteList[i][1];
-            cell = row.insertCell();
             // Wrap the checkbox in a label w/ an empty span. Hack to get custom
             // checkboxes in Safari
             let label = document.createElement("label");
-            label.setAttribute("class", "palette-checkbox");
+            label.setAttribute("class", labelClass);
             if (color.getName() != undefined) {
                 label.setAttribute("title", color.getName());
             }
             let span = document.createElement("span");
             span.setAttribute("style", "--checked-color: rgb(" + rgb[0] + ", "
                 + rgb[1] + ", " + rgb[2] + ")");
-            let cb = document.createElement("input");
-            cb.setAttribute("type", "checkbox");
-            cb.setAttribute("name", i);
-            cb.setAttribute("onchange", "toggleColor(" + i + "); drawLego();");
-            cb.setAttribute("class", "hidden-checkbox");
+            let elt = document.createElement("input");
+            elt.setAttribute("type", type);
+            let eltName = (isRadio) ? radioName : i;
+            elt.setAttribute("name", eltName);
+            elt.setAttribute("onchange", `${onchangeFn.name}(${i});`);
+            elt.setAttribute("class", "hidden-checkbox");
+            if (isRadio) {
+                if (!enabled) {
+                    elt.setAttribute("disabled", "true");
+                } else if (!checkedSet) {
+                    // Check the first enabled item
+                    elt.setAttribute("checked", "true");
+                    checkedSet = true;
+                }
+            } else {    // Checkbox
             if (enabled) {
-                cb.checked = true;
+                    elt.checked = true;
+                }
             }
-            label.appendChild(cb);
+            label.appendChild(elt);
             label.appendChild(span);
-            cell.appendChild(label);
+            newDiv.appendChild(label);
         }
     }
-    tableDiv.replaceChild(newTable, tableDiv.firstChild);
+    return newDiv;
 }
 
 /**

@@ -150,48 +150,19 @@ function getBrickCoords(event, scaleFactor) {
 }
 
 /**
- * Draws the widget for choosing pen color. Derived from drawPalette().
+ * Draws the widget for choosing pen color and selects the first enabled color
+ * in the palette as the current pen color.
  * 
  * @param {Palette} palette 
  */
 function drawPenColorChooser(palette) {
-    let penColorList = document.getElementById("penColorList");
-    let newDiv = document.createElement("div");
-    newDiv.setAttribute("class", "pencolor-dropdown");
-    let checkedSet = false;
-    if (palette != null) {
-        let paletteList = palette.getPalette();
-        for (let i = 0; i < paletteList.length; i++) {
-            let color = paletteList[i][0];
-            let rgb = color.getRGBA();
-            let enabled = paletteList[i][1];
-
-            let label = document.createElement("label");
-            label.setAttribute("class", "pencolor-radio");
-            let span = document.createElement("span");
-            if (color.getName() != undefined) {
-                span.textContent = color.getName();
-            }
-            span.setAttribute("style", "--checked-color: rgb(" + rgb[0] + ", "
-                + rgb[1] + ", " + rgb[2] + ")");
-            let elt = document.createElement("input");
-            elt.setAttribute("type", "radio");
-            elt.setAttribute("name", "penColor");
-            elt.setAttribute("onchange", "setPenColor(" + i + ")");
-            elt.setAttribute("class", "hidden-checkbox");
-            if (!enabled) {
-                elt.setAttribute("disabled", "true");
-            } else if (!checkedSet) {
-                elt.setAttribute("checked", "true");
-                checkedSet = true;
-                setPenColor(i);
-            }
-            label.appendChild(elt);
-            label.appendChild(span);
-            newDiv.appendChild(label);
-        }
-    }
-    penColorList.replaceChild(newDiv, penColorList.firstChild);
+    let outerDiv = document.getElementById("pencolor-wrapper");
+    console.log(outerDiv.firstChild, outerDiv.firstChild.nodeName)
+    let paletteDiv = genPalette(palette, true, "pencolor-radio", "pencolor", setPenColor);
+    paletteDiv.setAttribute("class", "pencolor-palette");
+    let firstChecked = paletteDiv.querySelector("input[checked]");
+    firstChecked.onchange();
+    outerDiv.replaceChild(paletteDiv, outerDiv.firstChild);
 }
 
 /**
