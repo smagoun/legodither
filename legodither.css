@@ -63,3 +63,22 @@
 .pencolor-radio input[type="radio"]:disabled + span::before {
     opacity: 0.5;
 }
+
+#bricklist > div {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(150px, 1fr));
+}
+#bricklist > div > div > ul {
+    margin-top: 5px;
+    padding-inline-start: 50px;
+    margin-block-end: 2em;
+}
+.bomcolor-box {
+    width: 24px;
+    height: 24px;
+    border: 1px solid;
+    background-color: var(--color);
+    margin-right: 0.5em;
+    box-sizing: border-box; /* for compatibility with .palette-checkbox */
+    float: left;
+}

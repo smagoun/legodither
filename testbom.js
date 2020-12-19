@@ -1064,7 +1064,12 @@ function testGenerateBOM() {
         new Brick(4, 1, 10, TESTBOM_BLUE, 8, 0)
     ];
     // Comparing HTML is not ideal, but far simpler than comparing DOM trees. Good enough for now.
-    expected = "<ul><li>Red<ul><li>1 x 2: 1</li><li>1 x 3: 1</li></ul></li><li>Blue<ul><li>1 x 4: 1</li><li>1 x 8: 1</li></ul></li></ul>";
+    expected = "<div>"
+    + "<div><span class=\"bomcolor-box\" style=\"--color: rgb(255, 0, 0)\"></span>"
+    + "Red<ul><li>1 x 2: 1</li><li>1 x 3: 1</li></ul></div>"
+    + "<div><span class=\"bomcolor-box\" style=\"--color: rgb(0, 0, 255)\"></span>"
+    + "Blue<ul><li>1 x 4: 1</li><li>1 x 8: 1</li></ul></div>"
+    + "</div>";
     ++testCnt;
     errCnt += testOneBOM(input, palette, expected);
 
@@ -1083,8 +1088,12 @@ function testGenerateBOM() {
         new Brick(1, 1, 6, TESTBOM_BLUE, 1, 3),
     ];
     // Comparing HTML is not ideal, but far simpler than comparing DOM trees. Good enough for now.
-    expected = "<ul><li>Red<ul><li>1 x 1: 2</li><li>1 x 2: 1</li><li>2 x 3: 1</li></ul></li>"
-        + "<li>Blue<ul><li>1 x 1: 1</li><li>1 x 2: 1</li><li>1 x 3: 1</li></ul></li></ul>";
+    expected = "<div>"
+    + "<div><span class=\"bomcolor-box\" style=\"--color: rgb(255, 0, 0)\"></span>"
+    + "Red<ul><li>1 x 1: 2</li><li>1 x 2: 1</li><li>2 x 3: 1</li></ul></div>"
+    + "<div><span class=\"bomcolor-box\" style=\"--color: rgb(0, 0, 255)\"></span>"
+    + "Blue<ul><li>1 x 1: 1</li><li>1 x 2: 1</li><li>1 x 3: 1</li></ul></div>"
+    + "</div>";    
     ++testCnt;
     errCnt += testOneBOM(input, palette, expected);
 

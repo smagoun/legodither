@@ -105,13 +105,16 @@ function renderBOM(cost, bom, palette) {
  * @param {*} palette 
  */
 function generateBOM(bom, palette) {
-    bomSimplified = {};     // 3-level associative array of Bricks grouped by color then size
     // Group the bricks by color then size
+    // bomSimplified structure: [id][Color, [height][width]], where 'id' is "r,g,b,a"
+    // (ID can be anything, just needs to be unique per-color. Would be nice to
+    // use a Color as the key, but JS doesn't like that)
+    bomSimplified = {};
     if (palette == undefined) {
         return ("");
     }
     for (brick of bom) {
-        const color = palette.getColorName(brick.color);
+        const color = new Color(brick.color, palette.getColorName(brick.color));
         let width = brick.width;
         let height = brick.height;
         if (height > width) {
@@ -120,35 +123,39 @@ function generateBOM(bom, palette) {
             width = height;
             height = tmp;
         }
-        if (bomSimplified[color] === undefined) {
-            bomSimplified[color] = [];
+        const id = color.getRGBA();
+        if (bomSimplified[id] === undefined) {
+            bomSimplified[id] = [color, []];
         }
-        if (bomSimplified[color][height] === undefined) {
-            bomSimplified[color][height] = [];
+        if (bomSimplified[id][1][height] === undefined) {
+            bomSimplified[id][1][height] = [];
         }
-        if (bomSimplified[color][height][width] === undefined) {
-            bomSimplified[color][height][width] = 1;
+        if (bomSimplified[id][1][height][width] === undefined) {
+            bomSimplified[id][1][height][width] = 1;
         } else {
-            bomSimplified[color][height][width] += 1;
+            bomSimplified[id][1][height][width] += 1;
         }
     }
     // Render the brick list
-    let bomList = document.createElement("ul");
+    let bomList = document.createElement("div");
     for (let [bomColor, bomHeights] of Object.entries(bomSimplified)) {
-        let elt = document.createElement("li");
-        let colorName = bomColor;
-        if (palette != null) {
-            colorName = palette.getColorName(bomColor);
-        }
+        let elt = document.createElement("div");
+        let colorBox = document.createElement("span");
+        colorBox.setAttribute("class", "bomcolor-box");
+        let rgba = bomHeights[0].getRGBA();
+        colorBox.setAttribute("style", "--color: rgb(" + rgba[0] + ", "
+            + rgba[1] + ", " + rgba[2] + ")");
+        let colorName = bomHeights[0].getName();
         elt.textContent = colorName;
         let ul = document.createElement("ul");
-        bomHeights.forEach(function (widths, height) { 
+        bomHeights[1].forEach(function (widths, height) { 
             widths.forEach(function (numBricks, width) {
                 let li = document.createElement("li");
                 li.textContent = `${height} x ${width}: ${numBricks}`;
                 ul.appendChild(li);
             });
         });
+        elt.prepend(colorBox);
         elt.appendChild(ul);
         bomList.appendChild(elt);
     }
@@ -201,7 +208,7 @@ function findOptimalBricks(rect) {
  * 
  * @param {*} width 
  * @param {*} height 
- * @param {*} color
+ * @param {Array} color RGBA color information
  * @param {*} x Top-left X coordinate of the rectangle
  * @param {*} y Top-left Y coordinate of the rectancle
  */
