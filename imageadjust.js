@@ -181,8 +181,11 @@ function contrast(canvas, factor) {
  * @param {*} factor
  */
 function unsharpMask(srcCanvas, destCanvas, factor) {
-    // TODO: don't steal the convolution filter for this
-    let kernel = getConvolutionKernel();
+    const kernel = [    // 3x3 Gaussian
+        [1, 2, 1],
+        [2, 4, 2],
+        [1, 2, 1],
+    ].map(x => x.map(y => y / 16));
 
     let srcImg = ImageInfo.fromCanvas(srcCanvas);
     destCanvas.setAttribute("width", srcCanvas.width);
@@ -201,8 +204,6 @@ function unsharpMask(srcCanvas, destCanvas, factor) {
                 destImg.setPixel(x, y, origPixel);
                 continue;
             }
-            // TODO: Use a gaussian blur to find the low-frequency data. For now
-            // borrow the convolution kernel. Could also use a box blur for this.
             let r=0, g=0, b=0, a=0;
             for (ky = -1; ky < 2; ky++) {
                 for (kx = -1; kx < 2; kx++) {

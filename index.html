@@ -56,7 +56,7 @@
                     context.drawImage(original, 0, 0, this.width, this.height, 0, 0, width, height);
                     updateSize(document.getElementById("scaleInput").value, 0, 0);
 
-                    updateKernel();
+                    //updateKernel();
                     resetLevels();
                     drawLego();
                 }
@@ -141,7 +141,7 @@
         <input type="range" id="contrastInput" min="-255" max="255" value="0" step="1" oninput="drawLego()">
         <input type="button" name="resetContrastBtn" value="Reset contrast" onclick="resetContrast(); drawLego()">
 
-
+        <!--
         <div id="convolutionKernelContainer">
             <label for="convolution0">Convolution kernel:</label>
             <select id="convolutionSelect" onchange="updateKernel(); drawLego();">
@@ -168,6 +168,7 @@
                 </tr>
             </table>
         </div>
+        -->
     </form>
     <div class="container">
         <div class="imgholder">
