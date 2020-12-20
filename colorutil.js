@@ -11,8 +11,8 @@ function rgb2hsl(pixel) {
     let g = pixel[1] / 255.0;
     let b = pixel[2] / 255.0;
 
-    let xmax = Math.max(r, g, b);
-    let xmin = Math.min(r, g, b);
+    let xmax = Math.max(Math.max(r, g), b);
+    let xmin = Math.min(Math.min(r, g), b);
 
     let lightness = (xmax + xmin) / 2;
     let chroma = xmax - xmin;
