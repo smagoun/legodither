@@ -226,11 +226,9 @@ function drawLego() {
     // TODO: Should probably split the level adjustment into 2. Adjust input levels
     // before applying destructive transformations (convolutions, scaling), and
     // apply output levels on rendering
-    adjustLevels(getCurrCanvas(), inputLevelsShadow, inputLevelsMidpoint, inputLevelsHighlight, outputLevelsShadow, outputLevelsHighlight);
-
-    brightness(getCurrCanvas(), brightnessAdjustment);
-    saturate(getCurrCanvas(), saturationAdjustment);
-    contrast(getCurrCanvas(), contrastAdjustment);
+    preprocess(getCurrCanvas(), inputLevelsShadow, inputLevelsMidpoint, inputLevelsHighlight,
+        outputLevelsShadow, outputLevelsHighlight, 
+        brightnessAdjustment, saturationAdjustment, contrastAdjustment);
 
     // Downsample the image using the selected algorithm
     // TODO: What is the ideal blur before downsizing? Box filter already blurs;

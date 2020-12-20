@@ -1,7 +1,8 @@
 /**
- * Adjust shadow/highlight levels for the image
+ * Adjust levels, brightness, saturation, and constrast. Intended to be run before
+ * downsampling.
  * 
- * TODO: Split this so that output levels are handled separately, later in the pipeline
+ * TODO: Split output levels to be handled separately, later in the pipeline
  * 
  * @param {*} canvas 
  * @param {*} inShadow 
@@ -9,15 +10,44 @@
  * @param {*} inHighlight 
  * @param {*} outShadow 
  * @param {*} outHighlight 
+ * @param {*} brightFactor Brightness adjustment from -255 to +255. 0 is default.
+ * @param {*} satFactor Saturation adjustment factor. 1.0 is default.
+ * @param {*} contrastFactor Contrast adjustment from -255 to +255. 0 is default.
  */
-function adjustLevels(canvas, inShadow, inMidpoint, inHighlight, outShadow, outHighlight) {
+function preprocess(canvas, inShadow, inMidpoint, inHighlight, outShadow, outHighlight, 
+        brightFactor, satFactor, contrastFactor) {
     let img = ImageInfo.fromCanvas(canvas);
     let pixel = [0, 0, 0, 0];
+    // From https://stackoverflow.com/questions/2976274/adjust-bitmap-image-brightness-contrast-using-c
+    let newContrast = (259.0 * (contrastFactor + 255.0)) / (255.0 * (259.0 - contrastFactor));
+    let lineStride = img.lineStride;
+    let pixelStride = img.pixelStride;
+    let xy = 0;
+    let data = img.data;
+    let gammaCorr = calcGammaCorrection(inMidpoint);
     for (let j = 0; j < img.height; j++) {
+        xy = j * lineStride;
         for (let i = 0; i < img.width; i++) {
-            img.getPixel(i, j, pixel);
-            adjustLevel(pixel, inShadow, inMidpoint, inHighlight, outShadow, outHighlight);
-            img.setPixel(i, j, pixel);
+            // Inline getPixel() for performance
+            pixel[0] = data[xy    ];
+            pixel[1] = data[xy + 1];
+            pixel[2] = data[xy + 2];
+            pixel[3] = data[xy + 3];
+            // Levels + saturation use HSL
+            rgb2hsl(pixel);
+            adjustLevel(pixel, inShadow, inHighlight, outShadow, outHighlight, gammaCorr);
+            // Saturation
+            pixel[1] = Math.min(pixel[1] * satFactor, 1.0);
+            hsl2rgb(pixel);
+            // Brightness is (pixel + brightFactor)
+            // Contrast is (newContrast * (pixel - 128) + 128)
+            // Inline setPixel() for performance; clamp() is necessary for performance
+            // too even though we're writing into a Uint8ClampedArray (tested on Chrome 87)
+            data[xy    ] = clamp((newContrast * (pixel[0] + brightFactor) - 128) + 128);
+            data[xy + 1] = clamp((newContrast * (pixel[1] + brightFactor) - 128) + 128);
+            data[xy + 2] = clamp((newContrast * (pixel[2] + brightFactor) - 128) + 128);
+            data[xy + 3] = clamp(pixel[3]);
+            xy += pixelStride;
         }
     }
     let context = canvas.getContext("2d");
@@ -25,25 +55,11 @@ function adjustLevels(canvas, inShadow, inMidpoint, inHighlight, outShadow, outH
 }
 
 /**
- * Adjust shadow/highlight levels for a pixel.
+ * Calculate gamma correction factor based on the new midpoint
  * 
- * Side effect: modifies pixel directly. Does not return a value.
- * 
- * TODO: Split this so that output levels are handled separately, later in the pipeline
- * 
- * ALgorithms from https://stackoverflow.com/questions/39510072/algorithm-for-adjustment-of-image-levels
- * 
- * @param {*} pixel RGB pixel
- * @param {*} inShadow 
- * @param {*} inHighlight 
- * @param {*} outShadow 
- * @param {*} outHighlight 
+ * @param {number} inMidpoint Midpoint ranges from 0.0 - 1.0
  */
-function adjustLevel(pixel, inShadow = 0.0, inMidpoint = 0.5, inHighlight = 1.0, outShadow = 0, outHighlight = 1.0) {
-    rgb2hsl(pixel);
-    let lightness = pixel[2];
-
-    // Calculate gamma
+function calcGammaCorrection(inMidpoint = 0.5) {
     let gamma = 1.0;
     let midNormal = inMidpoint;
     if (inMidpoint < 0.5) {
@@ -55,18 +71,34 @@ function adjustLevel(pixel, inShadow = 0.0, inMidpoint = 0.5, inHighlight = 1.0,
         gamma = 1 - midNormal;
         gamma = Math.max(gamma, 0.01);
     }
-    let gammaCorr = 1 / gamma;
+    return 1 / gamma;
+}
 
+/**
+ * Adjust shadow/highlight levels for a pixel.
+ * 
+ * Side effect: modifies pixel directly. Does not return a value.
+ * 
+ * TODO: Split this so that output levels are handled separately, later in the pipeline
+ * 
+ * ALgorithms from https://stackoverflow.com/questions/39510072/algorithm-for-adjustment-of-image-levels
+ * 
+ * @param {*} pixel HSLA pixel (must be converted from RGBA via rgb2hsl())
+ * @param {*} inShadow 
+ * @param {*} inHighlight 
+ * @param {*} outShadow 
+ * @param {*} outHighlight 
+ */
+function adjustLevel(pixel, inShadow = 0.0, inHighlight = 1.0, outShadow = 0, 
+        outHighlight = 1.0, gammaCorr = 1.0) {
+    let lightness = pixel[2];
     // Input levels
     let newLight = ((lightness - inShadow) / (inHighlight - inShadow));
     // Midpoint / gamma adjustment
     newLight = newLight ** gammaCorr;
-
     // Output levels
     newLight = newLight * (outHighlight - outShadow) + outShadow;
-    
     pixel[2] = newLight;
-    hsl2rgb(pixel);
 }
 
 function autoLevels() {
@@ -102,74 +134,6 @@ function autoLevels() {
     document.getElementById("inputLevelsHighlightInput").value=maxL;
     document.getElementById("outputLevelsShadowInput").value="0";
     document.getElementById("outputLevelsHighlightInput").value="1.0";
-}
-
-/**
- * Adjust the brightness of the image.
- * 
- * @param {*} canvas 
- * @param {*} factor Brightness adjustment from -255 to +255. 0 is default.
- */
-function brightness(canvas, factor) {
-    let img = ImageInfo.fromCanvas(canvas);
-    let pixel = [0, 0, 0, 0];
-    for (let j = 0; j < img.height; j++) {
-        for (let i = 0; i < img.width; i++) {
-            img.getPixel(i, j, pixel);
-            pixel[0] = clamp(pixel[0] + factor);
-            pixel[1] = clamp(pixel[1] + factor);
-            pixel[2] = clamp(pixel[2] + factor);
-            img.setPixel(i, j, pixel);
-        }
-    }
-    let context = canvas.getContext("2d");
-    context.putImageData(img.imageData, 0, 0);
-}
-
-/**
- * Adjust the saturation of the image.
- * 
- * @param {*} canvas 
- * @param {*} factor Saturation adjustment factor. 1.0 is default.
- */
-function saturate(canvas, factor) {
-    let img = ImageInfo.fromCanvas(canvas);
-    let pixel = [0, 0, 0, 0];
-    for (let j = 0; j < img.height; j++) {
-        for (let i = 0; i < img.width; i++) {
-            img.getPixel(i, j, pixel);
-            rgb2hsl(pixel);
-            pixel[1] = Math.min(pixel[1] * factor, 1.0);
-            hsl2rgb(pixel);
-            img.setPixel(i, j, pixel);
-        }
-    }
-    let context = canvas.getContext("2d");
-    context.putImageData(img.imageData, 0, 0);
-}
-
-/**
- * Adjust the contrast of the image.
- * 
- * @param {*} canvas 
- * @param {*} factor Contrast adjustment from -255 to +255. 0 is default.
- */
-function contrast(canvas, factor) {
-    // From https://stackoverflow.com/questions/2976274/adjust-bitmap-image-brightness-contrast-using-c
-    let newFactor = (259.0 * (factor + 255.0)) / (255.0 * (259.0 - factor));
-    let img = ImageInfo.fromCanvas(canvas);
-    let pixel = [0, 0, 0, 0];
-    for (let j = 0; j < img.height; j++) {
-        for (let i = 0; i < img.width; i++) {
-            img.getPixel(i, j, pixel);
-            pixel[0] = clamp((newFactor * (pixel[0] - 128) + 128));
-            pixel[1] = clamp((newFactor * (pixel[1] - 128) + 128));
-            pixel[2] = clamp((newFactor * (pixel[2] - 128) + 128));
-            img.setPixel(i, j, pixel);
-        }
-    }
-    let context = canvas.getContext("2d");
-    context.putImageData(img.imageData, 0, 0);
 }
 
 /**
