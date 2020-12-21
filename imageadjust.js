@@ -175,22 +175,28 @@ function unsharpMask(srcCanvas, destCanvas, factor) {
     let origPixel = [0, 0, 0, 0];
     let pixel = [0, 0, 0, 0];
     let newPixel = [0, 0, 0, 0];
-    for (y = 0; y < srcCanvas.height; y++) {
-        for (x = 0; x < srcCanvas.width; x++) {
+    let width = srcCanvas.width;
+    let height = srcCanvas.height;
+    let r=0, g=0, b=0, a=0;
+    let kk = 0;
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
             srcImg.getPixel(x, y, origPixel);
             // Don't apply convolutions to edge cases where the filter needs to look
             // outside image boundaries
-            if (x == 0 || y == 0 || x == (srcCanvas.width-1) || y == (srcCanvas.height-1)) {
+            // TODO: Instead, weight the mask so it only uses pixels inside the image
+            if (x == 0 || y == 0 || x == (width-1) || y == (height-1)) {
                 destImg.setPixel(x, y, origPixel);
                 continue;
             }
-            let r=0, g=0, b=0, a=0;
-            for (ky = -1; ky < 2; ky++) {
-                for (kx = -1; kx < 2; kx++) {
+            r=0, g=0, b=0, a=0;
+            for (let ky = -1; ky < 2; ky++) {
+                for (let kx = -1; kx < 2; kx++) {
                     srcImg.getPixel(x+kx, y+ky, pixel);
-                    r += kernel[ky + 1][kx + 1] * pixel[0];
-                    g += kernel[ky + 1][kx + 1] * pixel[1];
-                    b += kernel[ky + 1][kx + 1] * pixel[2];
+                    kk = kernel[ky + 1][kx + 1];
+                    r += kk * pixel[0];
+                    g += kk * pixel[1];
+                    b += kk * pixel[2];
                     a += pixel[3];  // Ignore alpha for now
                 }
             }
