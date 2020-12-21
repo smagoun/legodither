@@ -136,7 +136,7 @@ function getNextCanvas() {
  * @param {Number} height 
  */
 function updateSize(factor, width, height) {
-    let srcCanvas = document.getElementById("originalCanvas");
+    let srcCanvas = document.getElementById("scaledOrigCanvas");
     let {scaleFactor, destWidth, destHeight} = calculateDestSize(
         srcCanvas.width, srcCanvas.height, factor, width, height);
     console.log(`Calculated scale factor ${scaleFactor}, width: ${destWidth}, height: ${destHeight}`);
