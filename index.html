@@ -105,21 +105,21 @@
         <br>
 
         <label for="inputLevelsShadowInput">Input level (shadow):</label>
-        <input type="range" id="inputLevelsShadowInput" min="0" max="1" step="any" oninput="drawLego()">
+        <input type="range" id="inputLevelsShadowInput" min="0" max="1" step="any" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
 
         <label for="inputLevelsMidpointInput">Input level (midpoint):</label>
-        <input type="range" id="inputLevelsMidpointInput" min="0" max="1" step="any" oninput="drawLego()">
+        <input type="range" id="inputLevelsMidpointInput" min="0" max="1" step="any" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
 
         <label for="inputLevelsHighlightInput">Input level (highlight):</label>
-        <input type="range" id="inputLevelsHighlightInput" min="0" max="1" step="any" oninput="drawLego()">
+        <input type="range" id="inputLevelsHighlightInput" min="0" max="1" step="any" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
 
         <br>
 
         <label for="outputLevelsShadowInput">Output level (shadow):</label>
-        <input type="range" id="outputLevelsShadowInput" min="0" max="1" step="any" oninput="drawLego()">
+        <input type="range" id="outputLevelsShadowInput" min="0" max="1" step="any" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
 
         <label for="outputLevelsHighlightInput">Output level (highlight):</label>
-        <input type="range" id="outputLevelsHighlightInput" min="0" max="1" step="any" oninput="drawLego()">
+        <input type="range" id="outputLevelsHighlightInput" min="0" max="1" step="any" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
 
         <input type="button" name="resetLevelsBtn" value="Reset levels" onclick="resetLevels(); drawLego()">
         <input type="button" name="autoLevelsBtn" value="Auto levels" onclick="autoLevels(); drawLego()">
@@ -130,15 +130,15 @@
         <br>
 
         <label for="brightnessInput">Brightness:</label>
-        <input type="range" id="brightnessInput" min="-256" max="255" value="0" step="1" oninput="drawLego()">
+        <input type="range" id="brightnessInput" min="-256" max="255" value="0" step="1" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
         <input type="button" name="resetBrightnessBtn" value="Reset brightness" onclick="resetBrightness(); drawLego()">
 
         <label for="saturationInput">Saturation:</label>
-        <input type="range" id="saturationInput" min="0" max="8" value="1" step="any" oninput="drawLego()">
+        <input type="range" id="saturationInput" min="0" max="8" value="1" step="any" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
         <input type="button" name="resetSaturationBtn" value="Reset saturation" onclick="resetSaturation(); drawLego()">
 
         <label for="saturationInput">Contrast:</label>
-        <input type="range" id="contrastInput" min="-255" max="255" value="0" step="1" oninput="drawLego()">
+        <input type="range" id="contrastInput" min="-255" max="255" value="0" step="1" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
         <input type="button" name="resetContrastBtn" value="Reset contrast" onclick="resetContrast(); drawLego()">
 
         <!--

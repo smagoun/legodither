@@ -192,7 +192,7 @@ function calculateDestSize(srcWidth, srcHeight, scaleFactor, destWidth, destHeig
  * on the operation; some operations run in-place and others copy from one canvas
  * to another.
  */
-function drawLego() {
+function drawLego(drawBOM = true) {
     let t0 = performance.now();
     let srcCanvas = document.getElementById("originalCanvas");
     let scratchACanvas = document.getElementById("scratchACanvas");
@@ -255,7 +255,9 @@ function drawLego() {
 
     drawPalette(palette);
 
-    drawBricksAndBOM();
+    if (drawBOM) {
+        drawBricksAndBOM();
+    }
 
     // Attach editor
     attachEditor(outputCanvas, Math.round(scaleFactor));
