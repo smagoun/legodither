@@ -7,36 +7,40 @@
  * @param {*} pixel 
  */
 function rgb2hsl(pixel) {
-    let r = pixel[0] / 255.0;
-    let g = pixel[1] / 255.0;
-    let b = pixel[2] / 255.0;
+    let i_r = pixel[0];
+    let i_g = pixel[1];
+    let i_b = pixel[2];
+    let r; let g; let b; let hue; let sat;
 
-    let xmax = Math.max(Math.max(r, g), b);
-    let xmin = Math.min(Math.min(r, g), b);
+    // Calculate lightness using as much integer math as possible 
+    // so that we can efficiently precalculate gamma without running into
+    // tiny floating point differences
+    let xmax = Math.max(Math.max(i_r, i_g), i_b);
+    let xmin = Math.min(Math.min(i_r, i_g), i_b);
+    let lightness = (xmax + xmin) / 510.0;  // 2 * 255.0
 
-    let lightness = (xmax + xmin) / 2;
-    let chroma = xmax - xmin;
-    let hue;
-    let sat;
-
+    let chroma = (xmax - xmin) / 255.0;
     if (chroma === 0) {
         hue = 0;
         sat = 0;
     } else {
+        r = i_r / 255.0;
+        g = i_g / 255.0;
+        b = i_b / 255.0;
         sat = chroma / (1 - Math.abs((2 * lightness) - 1));
         switch (xmax) {
-            case r:
+            case i_r:
                 // The ternary at the end is to handle the case where hue is negative
                 hue = ((g - b) / chroma) + (g < b ? 6 : 0);
                 break;
-            case g:
+            case i_g:
                 hue = 2 + ((b - r ) / chroma);
                 break;
-            case b:
+            case i_b:
                 hue = 4 + ((r - g) / chroma);
                 break;
             default:
-                alert("max isn't one of RGB!");
+                debugger
         }
         hue = hue * 60; // Convert to degrees
     }

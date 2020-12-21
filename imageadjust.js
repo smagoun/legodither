@@ -85,11 +85,11 @@ function createGammaCache(inShadow, inMidpoint, inHighlight) {
     let ret = new Map();
     let lightness = 0.0;
     let gammaCorr = calcGammaCorrection(inMidpoint);
-    for (let i = 0; i < 256; i++) {
-        for (let j = 0; j < 256; j++) {
-            lightness = (i/255.0 + j/255.0) / 2;
-            ret.set(lightness, ((lightness - inShadow) / (inHighlight - inShadow)) ** gammaCorr);
-        }
+    // Precompute the possible lightness values. Requires that the rgb2hsl() conversion
+    // uses ((i + j) / 255.0) instead of (i/255.0 + j/255.0), thanks to FP math
+    for (let i = 0; i < 511; i++) { // 255 + 255 == 510
+        lightness = i / 510.0; 
+        ret.set(lightness, ((lightness - inShadow) / (inHighlight - inShadow)) ** gammaCorr);
     }
     return ret;
 }
