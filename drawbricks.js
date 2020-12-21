@@ -6,27 +6,64 @@ const INST_STUD_WIDTH = 10;
 /**
  * Draw the bricks required for the mosaic
  * 
- * @param {*} bricks Array of Brick objects
- * @param {*} canvas 
- * @param {*} width Width of the image in bricks
- * @param {*} height Height of the image in bricks
+ * @param {*} e EventMessage from the main thread. e.data must contain a list of 
+ * bricks and an ImageInfo
  */
-function drawBricks(bricks, canvas, width, height) {
-    // Off-by-0.5 / off-by-1 shenanigans are because strokes render from the pixel center; 
-    // doing it this way lets a 1px line fully-occupy a pixel instead of being blurred across 
-    // 2 pixels
-    const canvasWidth = width * INST_STUD_WIDTH + 1;
-    const canvasHeight = height * INST_STUD_WIDTH + 1;
-    canvas.setAttribute("width", canvasWidth);
-    canvas.setAttribute("height", canvasHeight);
-    const ctx = canvas.getContext("2d");
+function drawBricks(e) {
+    let bricks = e.data.bom;
+    let imgInfo = e.data.imgInfo;
+    const INST_STUD_WIDTH = 10;
+    const BORDER_COLOR = [0, 0, 0, 255];
+
+    function setPixel(data, lineStride, pixelStride, x, y, pixel) {
+        let xy = (y * lineStride) + (x * pixelStride);
+        data[xy    ] = pixel[0];
+        data[xy + 1] = pixel[1];
+        data[xy + 2] = pixel[2];
+        data[xy + 3] = pixel[3];
+    }
 
     // Draw each brick
     for (const brick of bricks) {
-        const x = brick.x * INST_STUD_WIDTH;
-        const y = brick.y * INST_STUD_WIDTH;
-        ctx.strokeRect(x + 0.5, y + 0.5, brick.width * INST_STUD_WIDTH, brick.height * INST_STUD_WIDTH);
-        ctx.fillStyle = `rgb(${brick.color[0]}, ${brick.color[1]}, ${brick.color[2]})`;
-        ctx.fillRect(x + 1, y + 1, (brick.width * INST_STUD_WIDTH) - 1, (brick.height * INST_STUD_WIDTH) - 1);
+        let x = brick.x * INST_STUD_WIDTH;
+        let y = brick.y * INST_STUD_WIDTH;
+        for (let yy = 0; yy < brick.height; yy++, y += INST_STUD_WIDTH) {
+            x = brick.x * INST_STUD_WIDTH;
+            for (let xx = 0; xx < brick.width; xx++, x += INST_STUD_WIDTH) {
+                // Draw brick background
+                for (let i = 0; i < INST_STUD_WIDTH; i++) {
+                    for (let j = 0; j < INST_STUD_WIDTH; j++) {
+                        setPixel(imgInfo.imageData.data, imgInfo.lineStride, imgInfo.pixelStride, 
+                            x + j, y + i, brick.color);
+                    }
+                }
+                // Draw brick borders
+                if (yy == 0) {  // Top border
+                    for (let i = 0; i < INST_STUD_WIDTH; i++) {
+                        setPixel(imgInfo.imageData.data, imgInfo.lineStride, imgInfo.pixelStride,
+                            x + i, y, BORDER_COLOR);
+                    }
+                }
+                if (yy == (brick.height - 1)) { // Bottom border
+                    for (let i = 0; i < INST_STUD_WIDTH; i++) {
+                        setPixel(imgInfo.imageData.data, imgInfo.lineStride, imgInfo.pixelStride,
+                            x + i, y + INST_STUD_WIDTH - 1, BORDER_COLOR);
+                    }
+                }
+                if (xx == 0) {  // Left border
+                    for (let i = 0; i < INST_STUD_WIDTH; i++) {
+                        setPixel(imgInfo.imageData.data, imgInfo.lineStride, imgInfo.pixelStride,
+                            x, y + i, BORDER_COLOR);
+                    }
+                }
+                if (xx == brick.width - 1) {    // Right border
+                    for (let i = 0; i < INST_STUD_WIDTH; i++) {
+                        setPixel(imgInfo.imageData.data, imgInfo.lineStride, imgInfo.pixelStride,
+                            x + INST_STUD_WIDTH - 1, y + i, BORDER_COLOR);
+                    }
+                }
+            }
+        }
     }
+    postMessage({imgInfo: imgInfo});
 }

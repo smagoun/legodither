@@ -280,9 +280,23 @@ function drawBricksAndBOM() {
     let {cost, bom} = calculateBOM(img, bomAlgorithm);
     renderBOM(cost, bom, palette);
 
-    // Draw the bricks
+    // Draw the instructions using a web worker, since it takes awhile
     let instructionCanvas = document.getElementById("instructionCanvas");
-    drawBricks(bom, instructionCanvas, img.width, img.height);
+    instructionCanvas.setAttribute("width", img.width * INST_STUD_WIDTH);
+    instructionCanvas.setAttribute("height", img.height* INST_STUD_WIDTH);
+    let imgInfo = ImageInfo.fromCanvas(instructionCanvas);
+
+    // This bit of hilarity works around a browser security feature that prevents
+    // loading a web worker file URL, which is what we do in our dev env:
+    // TODO: Get a real web server
+    // (from https://stackoverflow.com/questions/21408510/chrome-cant-load-web-worker/33432215#33432215)
+    let worker = new Worker(URL.createObjectURL(new Blob([
+        "onmessage = " + drawBricks.toString() + ""], {type: 'text/javascript'})));
+    worker.onmessage = function (e) {
+        const ctx = instructionCanvas.getContext("2d");
+        ctx.putImageData(e.data.imgInfo.imageData, 0, 0);
+    }
+    worker.postMessage({bom: bom, imgInfo: imgInfo});
 }
 
 /**
