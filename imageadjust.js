@@ -24,7 +24,7 @@ function preprocess(canvas, inShadow, inMidpoint, inHighlight, outShadow, outHig
     let pixelStride = img.pixelStride;
     let xy = 0;
     let data = img.data;
-    let gammaCorr = calcGammaCorrection(inMidpoint);
+    let gammaCache = createGammaCache(inShadow, inMidpoint, inHighlight);
     for (let j = 0; j < img.height; j++) {
         xy = j * lineStride;
         for (let i = 0; i < img.width; i++) {
@@ -35,7 +35,7 @@ function preprocess(canvas, inShadow, inMidpoint, inHighlight, outShadow, outHig
             pixel[3] = data[xy + 3];
             // Levels + saturation use HSL
             rgb2hsl(pixel);
-            adjustLevel(pixel, inShadow, inHighlight, outShadow, outHighlight, gammaCorr);
+            adjustLevel(pixel, outShadow, outHighlight, gammaCache);
             // Saturation
             pixel[1] = Math.min(pixel[1] * satFactor, 1.0);
             hsl2rgb(pixel);
@@ -73,6 +73,26 @@ function calcGammaCorrection(inMidpoint = 0.5) {
     }
     return 1 / gamma;
 }
+/**
+ * Precompute gamma corrections for the given input levels
+ * 
+ * @param {*} inShadow 
+ * @param {*} inMidpoint 
+ * @param {*} inHighlight 
+ * @returns Map of corrections, keyed by HSL lightness value [0-1]
+ */
+function createGammaCache(inShadow, inMidpoint, inHighlight) {
+    let ret = new Map();
+    let lightness = 0.0;
+    let gammaCorr = calcGammaCorrection(inMidpoint);
+    for (let i = 0; i < 256; i++) {
+        for (let j = 0; j < 256; j++) {
+            lightness = (i/255.0 + j/255.0) / 2;
+            ret.set(lightness, ((lightness - inShadow) / (inHighlight - inShadow)) ** gammaCorr);
+        }
+    }
+    return ret;
+}
 
 /**
  * Adjust shadow/highlight levels for a pixel.
@@ -84,18 +104,14 @@ function calcGammaCorrection(inMidpoint = 0.5) {
  * ALgorithms from https://stackoverflow.com/questions/39510072/algorithm-for-adjustment-of-image-levels
  * 
  * @param {*} pixel HSLA pixel (must be converted from RGBA via rgb2hsl())
- * @param {*} inShadow 
- * @param {*} inHighlight 
  * @param {*} outShadow 
  * @param {*} outHighlight 
+ * @param {Map} gammaCache Precomputed gamma corrections
  */
-function adjustLevel(pixel, inShadow = 0.0, inHighlight = 1.0, outShadow = 0, 
-        outHighlight = 1.0, gammaCorr = 1.0) {
+function adjustLevel(pixel, outShadow = 0, outHighlight = 1.0, gammaCache) {
+    // Gamma-adjusted input levels
     let lightness = pixel[2];
-    // Input levels
-    let newLight = ((lightness - inShadow) / (inHighlight - inShadow));
-    // Midpoint / gamma adjustment
-    newLight = newLight ** gammaCorr;
+    let newLight = gammaCache.get(lightness);
     // Output levels
     newLight = newLight * (outHighlight - outShadow) + outShadow;
     pixel[2] = newLight;
