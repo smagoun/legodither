@@ -65,7 +65,7 @@ function hsl2rgb(pixel) {
     let hh = hue / 60;
     let x = c * (1 - Math.abs((hh % 2) - 1));
     let r, g, b;
-    hc = Math.ceil(hh);
+    let hc = Math.ceil(hh);
     switch (hc) {
         case 0:
         case 1: r=c, g=x, b=0;   break;
