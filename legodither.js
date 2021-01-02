@@ -295,13 +295,14 @@ function drawBricksAndBOM() {
  * @param {*} outputPrefix Prefix of the stats elements, such as 'lego' or 'orig'
  */
 function renderStats(bricksX, bricksY, outputPrefix) {
-    document.getElementById(outputPrefix + 'WidthBricks').textContent = bricksX;
-    document.getElementById(outputPrefix + 'HeightBricks').textContent = bricksY;
-    document.getElementById(outputPrefix + 'TotalBricks').textContent = (bricksX * bricksY);
-    document.getElementById(outputPrefix + 'WidthMM').textContent = bricksX * brickWidth;
-    document.getElementById(outputPrefix + 'HeightMM').textContent = bricksY * brickWidth;
-    document.getElementById(outputPrefix + 'WidthInch').textContent = mmToIn(bricksX * brickWidth);
-    document.getElementById(outputPrefix + 'HeightInch').textContent = mmToIn(bricksY * brickWidth);
+    let locale = "en";  // TODO: get from browser
+    document.getElementById(outputPrefix + 'WidthBricks').textContent   = Number(bricksX).toLocaleString(locale);
+    document.getElementById(outputPrefix + 'HeightBricks').textContent  = Number(bricksY).toLocaleString(locale);
+    document.getElementById(outputPrefix + 'TotalBricks').textContent   = Number(bricksX * bricksY).toLocaleString(locale);
+    document.getElementById(outputPrefix + 'WidthMM').textContent       = Number(bricksX * brickWidth).toLocaleString(locale);
+    document.getElementById(outputPrefix + 'HeightMM').textContent      = Number(bricksY * brickWidth).toLocaleString(locale);
+    document.getElementById(outputPrefix + 'WidthInch').textContent     = Number(mmToIn(bricksX * brickWidth)).toLocaleString(locale);
+    document.getElementById(outputPrefix + 'HeightInch').textContent    = Number(mmToIn(bricksY * brickWidth)).toLocaleString(locale);
 }
 
 /**
