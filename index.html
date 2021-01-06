@@ -147,19 +147,33 @@
                                     <option value="dpid">Detail-preserving (DPID)</option>
                                 </select>
                             </div>
+                            <div class="help-icon">
+                                <p class="help-content">
+                                    Each resizing filter uses a different technique for determining
+                                    which colors to put in the mosaic.
+                                </p>
+                            </div>
                         </div>
                         <div class="form-tr" id="ditherContainer">
                             <div class="form-td">
-                                <label class="" for="ditheringSelect">Dithering technique:</label>
+                                <label for="ditheringSelect">Dithering technique:</label>
                             </div>
                             <div class="form-td">
-                                <select class="" id="ditheringSelect" onchange="drawLego()">
+                                <select id="ditheringSelect" onchange="drawLego()">
                                     <option value="none">None</option>
                                     <option value="floyd-steinberg" selected="true">
                                         Floyd-Steinberg
                                     </option>
                                     <option value="ordered">Ordered</option>
                                 </select>
+                            </div>
+                            <div class="form-td">
+                                <div class="help-icon">
+                                    <p class="help-content">
+                                        Dithering is a technique for alternating two colors to
+                                        simulate a third color.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                         <div class="form-tr" id="paletteContainer">
@@ -316,6 +330,12 @@
                                 value="Auto levels"
                                 onclick="autoLevels(); drawLego()"
                             />
+                            <div class="help-icon">
+                                <p class="help-content">
+                                    The 'levels' controls help adjust the brightness and contrast of
+                                    the image.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -459,8 +479,14 @@
                 <div class="col">
                     <p class="header section-color">Final mosaic</p>
                     <p>
-                        Total cost: <span id="bomTotalCost"></span><br />
-                        Total bricks: <span id="bomTotalBrickCount"></span><br />
+                        Estimated total cost: <span id="bomTotalCost"></span>
+                        <span class="help-icon">
+                            <span class="help-content">
+                                Cost estimates based on LEGO Pick-A-Brick prices as of May 2020
+                            </span>
+                        </span>
+                        <br />
+                        Total bricks required: <span id="bomTotalBrickCount"></span><br />
                         Bricks used:
                     </p>
                 </div>

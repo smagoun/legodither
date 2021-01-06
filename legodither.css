@@ -203,3 +203,55 @@ canvas {
     box-sizing: border-box; /* for compatibility with .palette-checkbox */
     float: left;
 }
+
+.help-icon {
+    border-radius: 50%;
+    background-color: rebeccapurple;
+    text-align: center;
+    height: 1.2em;
+    width: 1.2em;
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 1.2em;
+    margin-left: 0.25em;
+}
+.help-icon::before {
+    content: '?';
+    color: whitesmoke;
+    font-weight: bold;
+}
+.help-icon:hover .help-content{
+    display:block;
+    transform-origin: 100% 0%;
+
+    -webkit-animation: fadeIn 0.3s ease-in-out;
+    animation: fadeIn 0.3s ease-in-out;
+
+}
+.help-content {
+    display: none;
+    position: absolute;
+    background-color: darkslategray;
+    color: whitesmoke;
+    padding: 20px;
+    width: 300px;
+    text-align: left;
+}
+.help-content::before { /* Arrow of tooltip */
+    position: absolute;
+    content: '';
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+    border-bottom-color: darkslategray;
+    left: 0px;
+    top: -16px;
+}
+.help-content:after {
+    width: 100%;
+    height: 40px;
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: 0;
+}
