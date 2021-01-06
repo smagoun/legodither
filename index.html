@@ -32,7 +32,7 @@
 <link rel="stylesheet" type="text/css" href="legodither.css">
 
 </head>
-<body onload="runScalingTests()">
+<body onload="runScalingTests(); drawInitialImage();">
 
     <form>
         <input type="file" accept="image/*" id="inputImg" onchange="loadFile(event, 'original')">

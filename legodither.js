@@ -24,6 +24,16 @@ const pixelStride = 4;
 const MAX_WIDTH = 500;
 
 /**
+ * Initial width of the mosaic, in pixels;
+ */
+const INIT_MOSAIC_WIDTH = 64;
+
+/**
+ * Initial width of the input canvas, in pixels;
+ */
+const INIT_IMG_WIDTH = 320;
+
+/**
  * Load an image file for processing
  * 
  * @param {*} event 
@@ -53,6 +63,44 @@ function imageLoaded(targetImg) {
     canvas.setAttribute("height", height);
     context = canvas.getContext("2d");
     context.drawImage(targetImg, 0, 0, targetImg.width, targetImg.height, 0, 0, width, height);
+    updateSize(0, INIT_MOSAIC_WIDTH, 0);
+    resetLevels();
+    drawLego();
+}
+
+
+/**
+ * Alternate entry point (cf. loadFile) draws an initial image into the canvas. 
+ * 
+ * Uses an emoji rather than an actual file to faciliate development without a server;
+ * images loaded using file:// URLs are tainted and canvas...getImageData() will fail.
+ */
+function drawInitialImage() {
+    let canvas = document.getElementById("originalCanvas");
+
+    let width = INIT_IMG_WIDTH;
+    let height = INIT_IMG_WIDTH;
+    let str = "🐶"; // Dog face emoji, U+1F436
+    
+    canvas.setAttribute("width", width);
+    canvas.setAttribute("height", height);
+    context = canvas.getContext("2d");
+
+    context.font = '256px Sans';
+    context.textBaseline = "middle";
+    context.textAlign = "center";
+
+    // Center text vertically + horizontally
+    let textX = width / 2;
+    // Setting textY = (height / 2) is the obvious choice, but that
+    // results in some emojis looking like they're too high in the frame
+    // Monkey Face (🐵 / U+1F435) is one example
+    let descent = context.measureText(str).fontBoundingBoxDescent;
+    let textY = height - descent;
+
+    context.fillRect(0, 0, width, height);
+    context.fillText(str, textX, textY);
+
     updateSize(0, INIT_MOSAIC_WIDTH, 0);
     resetLevels();
     drawLego();
