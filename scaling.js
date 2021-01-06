@@ -104,7 +104,7 @@ function resizeBox(srcImg, destImg, xscale, yscale) {
             output[0] = output[0] / boxSize;
             output[1] = output[1] / boxSize;
             output[2] = output[2] / boxSize;
-            output[3] = output[3] / boxSize;
+            output[3] = 255;    // Ignore alpha, the rest of the pipeline doesn't handle it well
             destImg.setPixel(dx, dy, output);
         }
     }
