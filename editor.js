@@ -156,7 +156,7 @@ function getBrickCoords(event, scaleFactor) {
  * @param {Palette} palette 
  */
 function drawPenColorChooser(palette) {
-    let outerDiv = document.getElementById("pencolor-wrapper");
+    let outerDiv = document.getElementById("pencolorWrapper");
     let paletteDiv = genPalette(palette, true, "pencolor-radio", "pencolor", setPenColor);
     paletteDiv.setAttribute("class", "pencolor-palette");
     let firstChecked = paletteDiv.querySelector("input[checked]");

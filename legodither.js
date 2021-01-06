@@ -411,7 +411,7 @@ function toggleColor(index) {
  * @param {Palette} palette 
  */
 function drawPalette(palette) {
-    let outerDiv = document.getElementById("palette-wrapper");
+    let outerDiv = document.getElementById("paletteColorsWrapper");
     let paletteDiv = genPalette(palette, false, "palette-checkbox", null, toggleColor);
     outerDiv.replaceChild(paletteDiv, outerDiv.firstChild);
 }
