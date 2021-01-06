@@ -138,6 +138,7 @@ function generateBOM(bom, palette) {
     }
     // Render the brick list
     let bomList = document.createElement("div");
+    bomList.setAttribute("class", "col");
     for (let [bomColor, bomHeights] of Object.entries(bomSimplified)) {
         let elt = document.createElement("div");
         let colorBox = document.createElement("span");

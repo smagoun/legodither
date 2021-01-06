@@ -1064,7 +1064,7 @@ function testGenerateBOM() {
         new Brick(4, 1, 10, TESTBOM_BLUE, 8, 0)
     ];
     // Comparing HTML is not ideal, but far simpler than comparing DOM trees. Good enough for now.
-    expected = "<div>"
+    expected = "<div class=\"col\">"
     + "<div><span class=\"bomcolor-box\" style=\"--color: rgb(255, 0, 0)\"></span>"
     + "Red<ul><li>1 x 2: 1</li><li>1 x 3: 1</li></ul></div>"
     + "<div><span class=\"bomcolor-box\" style=\"--color: rgb(0, 0, 255)\"></span>"
@@ -1088,7 +1088,7 @@ function testGenerateBOM() {
         new Brick(1, 1, 6, TESTBOM_BLUE, 1, 3),
     ];
     // Comparing HTML is not ideal, but far simpler than comparing DOM trees. Good enough for now.
-    expected = "<div>"
+    expected = "<div class=\"col\">"
     + "<div><span class=\"bomcolor-box\" style=\"--color: rgb(255, 0, 0)\"></span>"
     + "Red<ul><li>1 x 1: 2</li><li>1 x 2: 1</li><li>2 x 3: 1</li></ul></div>"
     + "<div><span class=\"bomcolor-box\" style=\"--color: rgb(0, 0, 255)\"></span>"
