@@ -621,3 +621,10 @@ function resetSaturation() {
 function resetContrast() {
     document.getElementById("contrastInput").value = 0;
 }
+
+/**
+ * Reset the sharpen adjustment to the default.
+ */
+function resetSharpen() {
+    document.getElementById("sharpenInput").value = 0.5;
+}
