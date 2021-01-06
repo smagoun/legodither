@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Palette Visualizer</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+        <script src="palette.js"></script>
+        <script src="color.js"></script>
+        <script src="palettes/palette-lego2016.js"></script>
+        <script src="palettes/palette-lego2016grays.js"></script>
+        <script src="palettes/palette-legopickabrickplates.js"></script>
+        <script src="palettes/palette-legopickabrickbricks.js"></script>
+        <script src="palettes/palette-peeron.js"></script>
+        <script src="palettes/palette-mono.js"></script>
+        <script src="palettes/palette-3bitcolor.js"></script>
+        <script src="palettes/palette-2bitgray.js"></script>
+        <script src="palettes/palette-4bitgray.js"></script>
+        <script src="palettes/palette-8bitgray.js"></script>
+        <script src="palettes/palette-4bitcolormac.js"></script>
+        <script src="palettes/palette-websafe.js"></script>
+        <script src="legodither.js"></script>
+        <script src="imageinfo.js"></script>
+        <script src="colorutil.js"></script>
+        <script src="quantization.js"></script>
+        <script>
+            let CANVAS_SIZE = 256;
+
+            function drawCanvases() {
+                drawRGBCanvas();
+                drawPaletteCanvas();
+                drawGrayPlaneCanvas();
+            }
+            function drawRGBCanvas() {
+                let canvas = document.getElementById("rgbCanvas");
+                drawCanvas(canvas, function (img, x, y, pixel) {
+                    img.setPixel(x, y, pixel);
+                });
+            }
+            function drawPaletteCanvas() {
+                let canvas = document.getElementById("paletteCanvas");
+                let palette = getPaletteFromSelect();
+                let nearest = [0, 0, 0, 255];
+                drawCanvas(canvas, function (img, x, y, pixel) {
+                    if (!palette.isColor()) {
+                        // Special case for grayscale: convert to perceptual grayscale
+                        // Algorithm from http://entropymine.com/imageworsener/grayscale/
+                        let gray =
+                            (0.2126 * pixel[0] ** 2.2 +
+                                0.7152 * pixel[1] ** 2.2 +
+                                0.0722 * pixel[2] ** 2.2) **
+                            (1 / 2.2);
+                        pixel = [gray, gray, gray, pixel[3]];
+                    }
+                    findNearestColor(palette, pixel, nearest);
+                    img.setPixel(x, y, nearest);
+                });
+            }
+            function drawGrayPlaneCanvas() {
+                let canvas = document.getElementById("grayPlaneCanvas");
+                canvas.setAttribute("width", CANVAS_SIZE);
+                canvas.setAttribute("height", CANVAS_SIZE);
+                let palette = getPaletteFromSelect();
+                let b = document.getElementById("bInput").value;
+                let ctx = canvas.getContext("2d");
+                let pixel = [b, b, b, 255];
+                let nearest = [0, 0, 0, 255];
+                findNearestColor(palette, pixel, nearest);
+                ctx.fillStyle = `rgb(${nearest[0]}, ${nearest[1]}, ${nearest[2]})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            function drawCanvas(canvas, drawFn) {
+                canvas.setAttribute("width", CANVAS_SIZE);
+                canvas.setAttribute("height", CANVAS_SIZE);
+                let b = document.getElementById("bInput").value;
+                let img = ImageInfo.fromCanvas(rgbCanvas);
+                let pixel = [0, 0, 0, 255];
+                let bvals = document.getElementsByClassName("b-value");
+                for (let i = 0; i < bvals.length; i++) {
+                    bvals[i].textContent = b;
+                }
+                for (let y = 0; y < CANVAS_SIZE; y++) {
+                    for (let x = 0; x < CANVAS_SIZE; x++) {
+                        pixel[0] = x; // R
+                        pixel[1] = y; // G
+                        pixel[2] = b; // B
+                        drawFn(img, x, y, pixel);
+                    }
+                }
+                let ctx = canvas.getContext("2d");
+                ctx.putImageData(img.imageData, 0, 0);
+            }
+        </script>
+        <style>
+            .container {
+                width: max-content;
+                display: inline-block;
+                padding-right: 20px;
+            }
+            .small {
+                font-size: small;
+            }
+            .left {
+                float: left;
+            }
+            .right {
+                float: right;
+            }
+            canvas {
+                border: 1px solid black;
+            }
+        </style>
+    </head>
+    <body onload="drawCanvases()"></body>
+    <p>
+        Canvas shows the palette colors chosen for the input R/G/B.<br /><br />
+        R value is the X axis<br />
+        G value is the Y axis<br />
+        B value is the Z axis, as chosen by the range slider
+    </p>
+    <div class="" id="palette-container">
+        <label class="" for="paletteSelect">Color palette:</label>
+        <select class="" id="paletteSelect" onchange="drawCanvases()">
+            <option value="lego2016">LEGO&reg; 2016 palette</option>
+            <option value="lego2016grays">LEGO&reg; 2016 palette (grays only)</option>
+            <option value="legoPABplates" selected="true">LEGO&reg; Pick A Brick 1x1 plates</option>
+            <option value="legoPABbricks">LEGO&reg; Pick A Brick 1x1 bricks</option>
+            <option value="peeron">LEGO&reg; palette (Peeron)</option>
+            <option value="void" disabled>--------</option>
+            <option value="mono">Black + White</option>
+            <option value="2bitgray">4 grays</option>
+            <option value="4bitgray">16 grays</option>
+            <option value="8bitgray">256 grays</option>
+            <option value="void" disabled>--------</option>
+            <option value="3bitcolor">8 colors</option>
+            <option value="4bitcolormac">16 colors (Mac Palette)</option>
+            <option value="websafe">216 websafe colors</option>
+            <option value="native">Native color (no quantization)</option>
+        </select>
+    </div>
+    <br />
+    <div class="container">
+        <div class="small top left">(R=0, G=0, B=<span class="b-value">128</span>)</div>
+        <div class="small top right">(R=255, G=0, B=<span class="b-value">128</span>)</div>
+        <br />
+        <canvas id="rgbCanvas"></canvas>
+        <br />
+        <div class="small bottom left">(R=0, G=255, B=<span class="b-value">128</span>)</div>
+        <div class="small bottom right">(R=255, G=255, B=<span class="b-value">128</span>)</div>
+    </div>
+    <div class="container">
+        <div class="small top left">(R=0, G=0, B=<span class="b-value">128</span>)</div>
+        <div class="small top right">(R=255, G=0, B=<span class="b-value">128</span>)</div>
+        <br />
+        <canvas id="paletteCanvas"></canvas>
+        <br />
+        <div class="small bottom left">(R=0, G=255, B=<span class="b-value">128</span>)</div>
+        <div class="small bottom right">(R=255, G=255, B=<span class="b-value">128</span>)</div>
+    </div>
+    <div class="container">
+        <div class="small top left">
+            Nearest palette color to gray: (R,G,B=<span class="b-value">128</span>)
+        </div>
+        <br />
+        <canvas id="grayPlaneCanvas"></canvas>
+        <br />
+        <div class="small bottom left"></div>
+    </div>
+    <br /><br />
+    <div>
+        <label for="bInput">Choose B value:</label>
+        <input
+            type="range"
+            id="bInput"
+            min="0"
+            max="255"
+            step="1"
+            value="128"
+            oninput="drawCanvases()"
+        />
+    </div>
+</html>
