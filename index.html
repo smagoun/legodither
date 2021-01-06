@@ -1,220 +1,487 @@
-<html>
-<head>
-<title>Convert a picture to Lego</title>
-<meta charset="utf-8">
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Convert a picture to a brick mosaic</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-<script src="palette.js"></script>
-<script src="color.js"></script>
-<script src="palettes/palette-lego2016.js"></script>
-<script src="palettes/palette-lego2016grays.js"></script>
-<script src="palettes/palette-legopickabrickplates.js"></script>
-<script src="palettes/palette-legopickabrickbricks.js"></script>
-<script src="palettes/palette-peeron.js"></script>
-<script src="palettes/palette-mono.js"></script>
-<script src="palettes/palette-3bitcolor.js"></script>
-<script src="palettes/palette-2bitgray.js"></script>
-<script src="palettes/palette-4bitgray.js"></script>
-<script src="palettes/palette-8bitgray.js"></script>
-<script src="palettes/palette-4bitcolormac.js"></script>
-<script src="palettes/palette-websafe.js"></script>
-<script src="legodither.js"></script>
-<script src="imageinfo.js"></script>
-<script src="imageadjust.js"></script>
-<script src="colorutil.js"></script>
-<script src="quantization.js"></script>
-<script src="scaling.js"></script>
-<script src="bom.js"></script>
-<script src="brick.js"></script>
-<script src="drawbricks.js"></script>
-<script src="editor.js"></script>
-<script src="testbom.js"></script>
-<script src="testscaling.js"></script>
-<link rel="stylesheet" type="text/css" href="legodither.css">
+        <!-- Reboot -->
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+            rel="stylesheet"
+            integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w=="
+            crossorigin="anonymous"
+        />
 
-</head>
-<body onload="runScalingTests(); drawInitialImage();">
+        <script src="palette.js"></script>
+        <script src="color.js"></script>
+        <script src="palettes/palette-lego2016.js"></script>
+        <script src="palettes/palette-lego2016grays.js"></script>
+        <script src="palettes/palette-legopickabrickplates.js"></script>
+        <script src="palettes/palette-legopickabrickbricks.js"></script>
+        <script src="palettes/palette-peeron.js"></script>
+        <script src="palettes/palette-mono.js"></script>
+        <script src="palettes/palette-3bitcolor.js"></script>
+        <script src="palettes/palette-2bitgray.js"></script>
+        <script src="palettes/palette-4bitgray.js"></script>
+        <script src="palettes/palette-8bitgray.js"></script>
+        <script src="palettes/palette-4bitcolormac.js"></script>
+        <script src="palettes/palette-websafe.js"></script>
+        <script src="legodither.js"></script>
+        <script src="imageinfo.js"></script>
+        <script src="imageadjust.js"></script>
+        <script src="colorutil.js"></script>
+        <script src="quantization.js"></script>
+        <script src="scaling.js"></script>
+        <script src="bom.js"></script>
+        <script src="brick.js"></script>
+        <script src="drawbricks.js"></script>
+        <script src="editor.js"></script>
+        <script src="testbom.js"></script>
+        <script src="testscaling.js"></script>
+        <link rel="stylesheet" type="text/css" href="legodither-bootstrap.css" />
+    </head>
+    <body onload="runScalingTests(); drawInitialImage();">
+        <div class="page-header section-color"><h2>Convert an image to a brick mosaic</h2></div>
+        <div class="container">
+            <div class="row" id="fileInputContainer">
+                <fieldset class="col">
+                    <legend>Choose an image file:</legend>
+                    <input
+                        class="form-control-file"
+                        type="file"
+                        accept="image/*"
+                        id="inputImg"
+                        onchange="loadFile(event, 'original')"
+                    />
+                </fieldset>
+                <fieldset class="col" id="outputSizeFields">
+                    <legend>Set the dimensions of the mosaic:</legend>
+                    <div class="form-table>">
+                        <input
+                            type="hidden"
+                            id="scaleInput"
+                            min="1"
+                            max="64"
+                            value="2"
+                            step="0.1"
+                            onchange="updateSize(this.value, 0, 0); drawLego()"
+                        />
+                        <div class="row form-tr">
+                            <label class="form-td" for="outputWidth">Width (in studs):</label>
+                            <input
+                                class="form-td"
+                                type="number"
+                                id="outputWidth"
+                                min="1"
+                                max="500"
+                                value="64"
+                                step="1"
+                                onchange="updateSize(0, this.value, 0); drawLego()"
+                            />
+                        </div>
+                        <div class="row form-tr">
+                            <label class="form-td" for="outputHeight">Height (in studs):</label>
+                            <input
+                                class="form-td"
+                                type="number"
+                                id="outputHeight"
+                                min="1"
+                                max="500"
+                                value="32"
+                                step="1"
+                                onchange="updateSize(0, 0, this.value); drawLego()"
+                            />
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
 
-    <form>
-        <input type="file" accept="image/*" id="inputImg" onchange="loadFile(event, 'original')">
-        <label for="scaleInput">Shrink factor:</label>
-        <input type="number" id="scaleInput" min="1" max="64" value="2" step="0.1" onchange="updateSize(this.value, 0, 0); drawLego()">
+            <div class="row">
+                <div id="srcImg" class="col imgholder">
+                    <p>Original image</p>
+                    <p>
+                        Size in studs: <span id="origWidthBricks"></span> wide x
+                        <span id="origHeightBricks"></span> high (<span id="origTotalBricks"></span>
+                        total)<br />
+                        Size in mm: <span id="origWidthMM"></span>mm wide x
+                        <span id="origHeightMM"></span>mm<br />
+                        Size in inches: <span id="origWidthInch"></span>" wide x
+                        <span id="origHeightInch"></span>" high
+                    </p>
 
-        <input type="number" id="outputWidth" min="1" max="500" value="150" step="1" onchange="updateSize(0, this.value, 0); drawLego()">
-        <input type="number" id="outputHeight" min="1" max="500" value="75"  step="1" onchange="updateSize(0, 0, this.value); drawLego()">
+                    <img id="original" src="#" style="display: none" />
+                    <canvas id="originalCanvas"></canvas>
+                </div>
 
-        <label for="resizeSelect">Resizing Filter:</label>
-        <select id="resizeSelect" onchange="drawLego()">
-            <option value="box" selected="true">Box filter</option>
-            <option value="nearestNeighbor">Nearest neighbor</option>
-            <option value="bilinear">Bilinear</option>
-            <option value="dpid">Detail-preserving (DPID)</option>
-        </select>
+                <div id="destImg" class="col imgholder">
+                    <p>Mosaic image</p>
+                    <p>
+                        Size in studs: <span id="legoWidthBricks"></span> wide x
+                        <span id="legoHeightBricks"></span> high (<span id="legoTotalBricks"></span>
+                        total)<br />
+                        Size in mm: <span id="legoWidthMM"></span>mm wide x
+                        <span id="legoHeightMM"></span>mm high<br />
+                        Size in inches: <span id="legoWidthInch"></span>" wide x
+                        <span id="legoHeightInch"></span>" high
+                    </p>
 
-        <label for="paletteSelect">Palette:</label>
-        <select id="paletteSelect" onchange="drawLego()">
-            <option value="lego2016">LEGO 2016 palette</option>
-            <option value="lego2016grays">LEGO 2016 palette (grays only)</option>
-            <option value="legoPABplates" selected="true">LEGO Pick-A-Brick 1x1 plates</option>
-            <option value="legoPABbricks">LEGO Pick-A-Brick 1x1 bricks</option>
-            <option value="peeron">LEGO palette (Peeron)</option>
-            <option value="void" disabled>--------</option>
-            <option value="mono">Black + White</option>
-            <option value="2bitgray">4 grays</option>
-            <option value="4bitgray">16 grays</option>
-            <option value="8bitgray">256 grays</option>
-            <option value="void" disabled>--------</option>
-            <option value="3bitcolor">8 colors</option>
-            <option value="4bitcolormac">16 colors (Mac Palette)</option>
-            <option value="websafe">216 websafe colors</option>
-            <option value="native">Native color (no quantization)</option>
-        </select>
+                    <canvas id="legoCanvas"></canvas>
+                </div>
+            </div>
 
-        <label for="ditheringSelect">Color dithering:</label>
-        <select id="ditheringSelect" onchange="drawLego()">
-            <option value="none">None</option>
-            <option value="floyd-steinberg" selected="true">Floyd-Steinberg</option>
-            <option value="ordered">Ordered</option>
-        </select>
+            <div class="row grid-3" id="adjustmentContainer">
+                <fieldset class="inputs-section" id="colorFields">
+                    <legend>Choose color options:</legend>
+                    <div class="form-table">
+                        <div class="form-tr" id="resizeContainer">
+                            <div class="form-td">
+                                <label class="" for="resizeSelect">Resizing Filter:</label>
+                            </div>
+                            <div class="form-td">
+                                <select class="" id="resizeSelect" onchange="drawLego()">
+                                    <option value="box" selected="true">Box filter</option>
+                                    <option value="nearestNeighbor">Nearest neighbor</option>
+                                    <option value="bilinear">Bilinear</option>
+                                    <option value="dpid">Detail-preserving (DPID)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-tr" id="ditherContainer">
+                            <div class="form-td">
+                                <label class="" for="ditheringSelect">Dithering technique:</label>
+                            </div>
+                            <div class="form-td">
+                                <select class="" id="ditheringSelect" onchange="drawLego()">
+                                    <option value="none">None</option>
+                                    <option value="floyd-steinberg" selected="true">
+                                        Floyd-Steinberg
+                                    </option>
+                                    <option value="ordered">Ordered</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-tr" id="paletteContainer">
+                            <div class="form-td">
+                                <label class="" for="paletteSelect">Color palette:</label>
+                            </div>
+                            <div class="form-td">
+                                <select class="" id="paletteSelect" onchange="drawLego()">
+                                    <option value="lego2016">LEGO&reg; 2016 palette</option>
+                                    <option value="lego2016grays">
+                                        LEGO&reg; 2016 palette (grays only)
+                                    </option>
+                                    <option value="legoPABplates" selected="true">
+                                        LEGO&reg; Pick A Brick 1x1 plates
+                                    </option>
+                                    <option value="legoPABbricks">
+                                        LEGO&reg; Pick A Brick 1x1 bricks
+                                    </option>
+                                    <option value="peeron">LEGO&reg; palette (Peeron)</option>
+                                    <option value="void" disabled>--------</option>
+                                    <option value="mono">Black + White</option>
+                                    <option value="2bitgray">4 grays</option>
+                                    <option value="4bitgray">16 grays</option>
+                                    <option value="8bitgray">256 grays</option>
+                                    <option value="void" disabled>--------</option>
+                                    <option value="3bitcolor">8 colors</option>
+                                    <option value="4bitcolormac">16 colors (Mac Palette)</option>
+                                    <option value="websafe">216 websafe colors</option>
+                                    <option value="native">Native color (no quantization)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row palette-wrapper">
+                        <span>Click a color to disable it:</span>
+                        <div class="" id="paletteColorsWrapper">
+                            <div id="paletteDummy"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <input
+                            type="button"
+                            name="enableAllPaletteBtn"
+                            value="Enable All Colors"
+                            onclick="enableAllColors()"
+                        />
+                    </div>
+                </fieldset>
+                <fieldset class="inputs-section" id="colorAdjustmentContainer">
+                    <legend>Make adjustments:</legend>
+                    <div id="levelsContainer">
+                        <div class="form-table" id="levelsSlidersContainer">
+                            <div class="form-tr" id="inputLevelsShadowContainer">
+                                <div class="form-td">
+                                    <label for="inputLevelsShadowInput"
+                                        >Input level (shadow):</label
+                                    >
+                                </div>
+                                <div class="form-td">
+                                    <input
+                                        type="range"
+                                        id="inputLevelsShadowInput"
+                                        min="0"
+                                        max="1"
+                                        step="any"
+                                        oninput="drawLego(false)"
+                                        onchange="drawBricksAndBOM()"
+                                    />
+                                </div>
+                            </div>
+                            <div class="form-tr" id="inputLevelsMidpointContainer">
+                                <div class="form-td">
+                                    <label for="inputLevelsMidpointInput"
+                                        >Input level (midpoint):</label
+                                    >
+                                </div>
+                                <div class="form-td">
+                                    <input
+                                        type="range"
+                                        id="inputLevelsMidpointInput"
+                                        min="0"
+                                        max="1"
+                                        step="any"
+                                        oninput="drawLego(false)"
+                                        onchange="drawBricksAndBOM()"
+                                    />
+                                </div>
+                            </div>
+                            <div class="form-tr" id="inputLevelsHighlightContainer">
+                                <div class="form-td">
+                                    <label for="inputLevelsHighlightInput"
+                                        >Input level (highlight):</label
+                                    >
+                                </div>
+                                <div class="form-td">
+                                    <input
+                                        type="range"
+                                        id="inputLevelsHighlightInput"
+                                        min="0"
+                                        max="1"
+                                        step="any"
+                                        oninput="drawLego(false)"
+                                        onchange="drawBricksAndBOM()"
+                                    />
+                                </div>
+                            </div>
+                            <div class="form-tr" id="outputLevelsShadowContainer">
+                                <div class="form-td">
+                                    <label for="outputLevelsShadowInput"
+                                        >Output level (shadow):</label
+                                    >
+                                </div>
+                                <div class="form-td">
+                                    <input
+                                        type="range"
+                                        id="outputLevelsShadowInput"
+                                        min="0"
+                                        max="1"
+                                        step="any"
+                                        oninput="drawLego(false)"
+                                        onchange="drawBricksAndBOM()"
+                                    />
+                                </div>
+                            </div>
+                            <div class="form-tr" id="outputLevelsHighlightContainer">
+                                <div class="form-td">
+                                    <label for="outputLevelsHighlightInput"
+                                        >Output level (highlight):</label
+                                    >
+                                </div>
+                                <div class="form-td">
+                                    <input
+                                        type="range"
+                                        id="outputLevelsHighlightInput"
+                                        min="0"
+                                        max="1"
+                                        step="any"
+                                        oninput="drawLego(false)"
+                                        onchange="drawBricksAndBOM()"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div id="levelsButtonsContainer">
+                            <input
+                                type="button"
+                                id="resetLevelsBtn"
+                                value="Reset levels"
+                                onclick="resetLevels(); drawLego()"
+                            />
+                            <input
+                                type="button"
+                                id="autoLevelsBtn"
+                                value="Auto levels"
+                                onclick="autoLevels(); drawLego()"
+                            />
+                        </div>
+                    </div>
 
-        <br>
+                    <div class="form-table" id="brightSatConSharpContainer">
+                        <div class="form-tr" id="brightnessContainer">
+                            <div class="form-td">
+                                <label for="brightnessInput">Brightness:</label>
+                            </div>
+                            <div class="form-td">
+                                <input
+                                    type="range"
+                                    id="brightnessInput"
+                                    min="-256"
+                                    max="255"
+                                    value="0"
+                                    step="1"
+                                    oninput="drawLego()"
+                                />
+                            </div>
+                            <div class="form-td">
+                                <input
+                                    type="button"
+                                    name="resetBrightnessBtn"
+                                    value="Reset brightness"
+                                    onclick="resetBrightness(); drawLego()"
+                                />
+                            </div>
+                        </div>
 
-        <label for="inputLevelsShadowInput">Input level (shadow):</label>
-        <input type="range" id="inputLevelsShadowInput" min="0" max="1" step="any" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
+                        <div class="form-tr" id="saturationContainer">
+                            <div class="form-td">
+                                <label for="saturationInput">Saturation:</label>
+                            </div>
+                            <div class="form-td">
+                                <input
+                                    type="range"
+                                    id="saturationInput"
+                                    min="0"
+                                    max="8"
+                                    value="1"
+                                    step="any"
+                                    oninput="drawLego(false)"
+                                    onchange="drawBricksAndBOM()"
+                                />
+                            </div>
+                            <div class="form-td">
+                                <input
+                                    type="button"
+                                    name="resetSaturationBtn"
+                                    value="Reset saturation"
+                                    onclick="resetSaturation(); drawLego()"
+                                />
+                            </div>
+                        </div>
 
-        <label for="inputLevelsMidpointInput">Input level (midpoint):</label>
-        <input type="range" id="inputLevelsMidpointInput" min="0" max="1" step="any" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
+                        <div class="form-tr" id="contrastContainer">
+                            <div class="form-td">
+                                <label for="constrastInput">Contrast:</label>
+                            </div>
+                            <div class="form-td">
+                                <input
+                                    type="range"
+                                    id="contrastInput"
+                                    min="-255"
+                                    max="255"
+                                    value="0"
+                                    step="1"
+                                    oninput="drawLego(false)"
+                                    onchange="drawBricksAndBOM()"
+                                />
+                            </div>
+                            <div class="form-td">
+                                <input
+                                    type="button"
+                                    name="resetContrastBtn"
+                                    value="Reset contrast"
+                                    onclick="resetContrast(); drawLego()"
+                                />
+                            </div>
+                        </div>
 
-        <label for="inputLevelsHighlightInput">Input level (highlight):</label>
-        <input type="range" id="inputLevelsHighlightInput" min="0" max="1" step="any" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
+                        <div class="form-tr" id="sharpenContainer">
+                            <div class="form-td">
+                                <label for="sharpInput">Sharpness:</label>
+                            </div>
+                            <div class="form-td">
+                                <input
+                                    type="range"
+                                    id="sharpenInput"
+                                    min="0"
+                                    max="12"
+                                    value="0.5"
+                                    step="0.1"
+                                    oninput="drawLego(false)"
+                                    onchange="drawBricksAndBOM()"
+                                />
+                            </div>
+                            <div class="form-td">
+                                <input
+                                    type="button"
+                                    name="resetSharpenBtn"
+                                    value="Reset sharpness"
+                                    onclick="resetSharpen(); drawLego()"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="inputs-section" id="penContainer">
+                    <legend>Touch up the mosaic:</legend>
+                    <span>Choose pen color:</span>
+                    <div id="pencolorWrapper"><div id="pencolorDummy"></div></div>
+                    <span>Click on the image to draw</span><br />
+                    <span>Hold 'shift' and click for paint bucket (fill)</span>
+                </fieldset>
+                <fieldset class="inputs-section">
+                    <legend>Choose Layout Style:</legend>
+                    <select id="findRectsSelect" onchange="drawBricksAndBOM()">
+                        <option value="singlePixels" selected="true">Only 1x1s</option>
+                        <option value="singleLine">Horizontal lines (1D)</option>
+                        <option value="multiLine">Larger horizontal lines (2D)</option>
+                        <option value="expandingRects">Expanding rectangles (2D)</option>
+                        <option value="lowCPSFirst">Lowest cost-per-stud first (2D)</option>
+                    </select>
+                </fieldset>
+            </div>
 
-        <br>
+            <div class="row" id="coordContainer" style="display: none">
+                x=<span id="outputXCoord"></span> y=<span id="outputYCoord"></span> brick=<span
+                    id="outputBrickCoords"
+                ></span>
+            </div>
 
-        <label for="outputLevelsShadowInput">Output level (shadow):</label>
-        <input type="range" id="outputLevelsShadowInput" min="0" max="1" step="any" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
+            <div class="scratch">
+                <p>Scratch</p>
+                <canvas id="scratchACanvas"></canvas>
+                <canvas id="scratchBCanvas"></canvas>
+            </div>
 
-        <label for="outputLevelsHighlightInput">Output level (highlight):</label>
-        <input type="range" id="outputLevelsHighlightInput" min="0" max="1" step="any" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
+            <div class="row bom">
+                <div class="col">
+                    <p class="header section-color">Final mosaic</p>
+                    <p>
+                        Total cost: <span id="bomTotalCost"></span><br />
+                        Total bricks: <span id="bomTotalBrickCount"></span><br />
+                        Bricks used:
+                    </p>
+                </div>
+            </div>
+            <div class="row" id="brickList"><div class="dummy"></div></div>
 
-        <input type="button" name="resetLevelsBtn" value="Reset levels" onclick="resetLevels(); drawLego()">
-        <input type="button" name="autoLevelsBtn" value="Auto levels" onclick="autoLevels(); drawLego()">
+            <div class="row" id="instructionContainer">
+                <div class="col">
+                    <canvas id="instructionCanvas"></canvas>
+                </div>
+            </div>
 
-        <label for="sharpInput">Sharpen factor:</label>
-        <input type="range" id="sharpenInput" min="0" max="12" value="0.5" step="0.1" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
-        <input type="button" name="resetSharpenBtn" value="Reset sharpness" onclick="resetSharpen(); drawLego()">
-
-        <br>
-
-        <label for="brightnessInput">Brightness:</label>
-        <input type="range" id="brightnessInput" min="-256" max="255" value="0" step="1" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
-        <input type="button" name="resetBrightnessBtn" value="Reset brightness" onclick="resetBrightness(); drawLego()">
-
-        <label for="saturationInput">Saturation:</label>
-        <input type="range" id="saturationInput" min="0" max="8" value="1" step="any" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
-        <input type="button" name="resetSaturationBtn" value="Reset saturation" onclick="resetSaturation(); drawLego()">
-
-        <label for="saturationInput">Contrast:</label>
-        <input type="range" id="contrastInput" min="-255" max="255" value="0" step="1" oninput="drawLego(false)" onchange="drawBricksAndBOM()">
-        <input type="button" name="resetContrastBtn" value="Reset contrast" onclick="resetContrast(); drawLego()">
-
-        <!--
-        <div id="convolutionKernelContainer">
-            <label for="convolution0">Convolution kernel:</label>
-            <select id="convolutionSelect" onchange="updateKernel(); drawLego();">
-                <option value="identity" selected="true">Identity kernel</option>
-                <option value="lowpass">Low-pass</option>
-                <option value="highpass">High-pass</option>
-                <option value="3x3gaussian">3x3 Gaussian</option>
-            </select>
-            <table id="convolutionKernelTable">
-                <tr>
-                    <td><input type="text" id="convolution0" size="8" onchange="drawLego()"></td>
-                    <td><input type="text" id="convolution1" size="8" onchange="drawLego()"></td>
-                    <td><input type="text" id="convolution2" size="8" onchange="drawLego()"></td>
-                </tr>
-                <tr>
-                    <td><input type="text" id="convolution3" size="8" onchange="drawLego()"></td>
-                    <td><input type="text" id="convolution4" size="8" onchange="drawLego()"></td>
-                    <td><input type="text" id="convolution5" size="8" onchange="drawLego()"></td>
-                </tr>
-                <tr>
-                    <td><input type="text" id="convolution6" size="8" onchange="drawLego()"></td>
-                    <td><input type="text" id="convolution7" size="8" onchange="drawLego()"></td>
-                    <td><input type="text" id="convolution8" size="8" onchange="drawLego()"></td>
-                </tr>
-            </table>
+            <div class="row" id="disclaimer"></div>
         </div>
-        -->
-    </form>
-    <div class="container">
-        <div class="imgholder">
-            <p>Original image</p>
-            <p>Size in bricks: <span id="origWidthBricks"></span> wide x 
-                <span id="origHeightBricks"></span> high (<span id="origTotalBricks"></span> total)</p>
-            <p>Size in mm: <span id="origWidthMM"></span> x 
-                <span id="origHeightMM"></span></p>
-            <p>Size in inches: <span id="origWidthInch"></span>" wide x 
-                <span id="origHeightInch"></span>" high</p>
-    
-            <img id="original" src="#" style="display: none">
-            <canvas id="originalCanvas"></canvas>
+        <!-- outermost container -->
+        <div class="page-footer section-color">
+            <p class="footer-top-pad">
+                LEGO&reg; is a trademark of the LEGO Group of companies which does not sponsor,
+                authorize or endorse this site.
+            </p>
+            <p class="footer-bottom-pad">&copy; 2020-2021 Steve Magoun</p>
         </div>
-
-        <div class="imgholder">
-            <p>Transformed image w/ LEGO palette</p>
-            <p>Size in bricks: <span id="legoWidthBricks"></span> wide x 
-                <span id="legoHeightBricks"></span> high (<span id="legoTotalBricks"></span> total)</p>
-            <p>Size in mm: <span id="legoWidthMM"></span>mm wide x 
-                <span id="legoHeightMM"></span>mm high</p>
-            <p>Size in inches: <span id="legoWidthInch"></span>" wide x 
-                <span id="legoHeightInch"></span>" high</p>
-    
-            <canvas id="legoCanvas"></canvas>
-        </div>
-
-        <div class="palette-container">
-            <p>Palette</p>
-            <input type="button" name="enableAllPaletteBtn" value="Enable All Colors" onclick="enableAllColors()">
-            <div id="paletteColorsWrapper"><div id="paletteDummy"></div></div>
-        </div>
-
-        <div class="coord-container">
-            x=<span id="outputXCoord"></span>
-            y=<span id="outputYCoord"></span>
-            brick=<span id="outputBrickCoords"></span>
-        </div>
-
-        <div class="pen-container">
-            <p>Pen color</p>
-            <div id="pencolorWrapper"><div id="pencolorDummy"></div></div>
-        </div>
-
-        <div class="scratch">
-            <p>Scratch</p>
-            <canvas id="scratchACanvas"></canvas>
-            <canvas id="scratchBCanvas"></canvas>
-        </div>
-    </div>
-
-    <div class="bom-container">
-        <label for="findRectsSelect">BOM generation:</label>
-        <select id="findRectsSelect" onchange="drawBricksAndBOM()">
-            <option value="singlePixels" selected="true">Only 1x1s</option>
-            <option value="singleLine">Single-line (1D)</option>
-            <option value="multiLine">Multi-line (2D)</option>
-            <option value="expandingRects">Expanding rectangles (2D)</option>
-            <option value="lowCPSFirst">Lowest cost-per-stud bricks first (2D)</option>
-        </select>
-        <p>Bill of Materials</p>
-        <div class="bom">
-            <p>Total cost: <span id="bomTotalCost"></span></p>
-            <p>Total bricks: <span id="bomTotalBrickCount"></span></p>
-            <p>Bricks: </p>
-            <div id="brickList"><div class="dummy"></div>
-        </div>
-    </div>
-
-    <div class="instruction-container">
-        <canvas id="instructionCanvas"></canvas>
-    </div>
-</body>
+    </body>
 </html>

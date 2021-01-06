@@ -1,13 +1,137 @@
-.container {
-    display: flex;
+html {
+    height: 100%;
+}
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-size: small;
+    font-weight: 400;
+    line-height: 1.5;
+}
+label {
+    padding-right: 1em;
+}
+legend {
+    padding-left: 0.1em;
+    padding-right: 0.1em;
+    font-weight: bold;
+    font-size: large;
+}
+input[type=range],
+select {
+    width: 100%;
+}
+input[type="number"] {
+    min-width: max-content;
+}
+canvas {
+    border: 1px solid black;
 }
 
-.imgcontainer {
-    flex: 33%;
+.container {
+    width: 100%;
+    padding-left: 30px;
+    padding-right: 30px;
+    box-sizing: border-box;
+}
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+.col {
+    margin-left: 15px;
+    margin-right: 15px;
+    flex: 1 0 auto;
+}
+.section-color {
+    background-color: rebeccapurple;
+    color: whitesmoke;
+}
+.header {
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
+    padding-left: 0.1em;
+    padding-right: 0.1em;
+    font-weight: bold;
+    font-size: large;
+}
+.page-footer {
+    padding-left: 45px; /* Matches padding of container + margin of row */
+}
+.page-header > h2 {
+    padding-left: 45px; /* Matches padding of container + margin of row */
+    margin-top: 0px;
+}
+.footer-top-pad {
+    padding-top: 0.25em;
+}
+.footer-bottom-pad {
+    padding-bottom: 0.25em;
+}
+.inputs-section {
+    margin-left: 15px;
+    margin-right: 15px;
+    margin-bottom: 1em;
+}
+.grid-3 {
+    display: grid;
+    /* 30em is arbitrary... */
+    grid-template-columns: repeat(auto-fit, minmax(30em, 1fr));
+}
+
+.form-table {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+}
+.form-tr {
+    display: table-row;
+}
+.form-td {
+    display: table-cell;
+    padding-bottom: 0.25em;
+}
+
+
+
+#brightnessContainer > :last-child,
+#saturationContainer > :last-child,
+#contrastContainer > :last-child,
+#sharpenContainer > :last-child {
+    padding-left: 0.5em;
+}
+#brightnessContainer > :last-child > *,
+#saturationContainer > :last-child > *,
+#contrastContainer > :last-child > *,
+#sharpenContainer > :last-child > * {
+    width: 100%;
+}
+
+#levelsSlidersContainer {
+    padding-bottom: 0.5em;
+}
+
+#levelsButtonsContainer {
+    padding-bottom: 1em;
+}
+#ditherContainer {
+    border-bottom: 1px solid black;
+}
+#ditherContainer > * {
+    padding-bottom: 1em;
+}
+#paletteContainer > * {
+    padding-top: 1em;
 }
 
 .scratch {
     display: none;
+}
+
+.palette-wrapper {
+    padding-top: 0.5em;
+}
+.palette-checkbox {
+    padding-right: 0px; /* Undo padding set for labels */
 }
 
 .palette-checkbox span::before {
@@ -31,18 +155,14 @@
     opacity: 0;
     /*z-index: -1;*/
     position: absolute;
-  }
-
-  .palette-checkbox input[type="checkbox"]:checked + span::before {
-      opacity: 1.0;
-  }
-
-.bom-container {
-    clear: both;
 }
 
-.instruction-container {
-    clear: both;
+.palette-checkbox input[type="checkbox"]:checked + span::before {
+      opacity: 1.0;
+}
+
+.pencolor-radio {
+    padding-right: 0px; /* Undo padding set for labels */
 }
 
 .pencolor-radio span::before {
@@ -64,14 +184,15 @@
     opacity: 0.5;
 }
 
-#bricklist > div {
+#brickList > div {
     display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(150px, 1fr));
+    /* Magic # 13em comes from approx. length of longest color name */
+    grid-template-columns: repeat(auto-fit, minmax(13em, 1fr));
 }
-#bricklist > div > div > ul {
+#brickList > div > div > ul {
     margin-top: 5px;
     padding-inline-start: 50px;
-    margin-block-end: 2em;
+    margin-block-end: 1em;
 }
 .bomcolor-box {
     width: 24px;
