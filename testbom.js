@@ -1103,11 +1103,3 @@ function testGenerateBOM() {
         console.warn(`generateBOM tests failed (${testCnt - errCnt} passed, ${errCnt} failures)`);
     }
 }
-
-testGenerateBOM();
-testFindRectsSinglePixels();
-testFindRectsSingleLine();
-testFindRectsMultiLine();
-testFindRectsExpanding();
-testFindRectsLowCPSFirst();
-testFindBricks();
