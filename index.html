@@ -36,32 +36,6 @@
 
     <form>
         <input type="file" accept="image/*" id="inputImg" onchange="loadFile(event, 'original')">
-        <!-- Adapted from https://stackoverflow.com/questions/4459379/preview-an-image-before-it-is-uploaded -->
-        <script>
-            var maxWidth = 500;
-            var loadFile = function(event, targetID) {
-                var original = document.getElementById(targetID);
-                original.src = URL.createObjectURL(event.target.files[0]);
-                original.onload = function() {
-                    URL.revokeObjectURL(original.src); // free memory
-
-                    let canvas = document.getElementById("originalCanvas");
-
-                    let width = (this.width < maxWidth ? this.width : maxWidth);
-                    let height = this.height * (width / this.width);
-
-                    canvas.setAttribute("width", width);
-                    canvas.setAttribute("height", height);
-                    context = canvas.getContext('2d');
-                    context.drawImage(original, 0, 0, this.width, this.height, 0, 0, width, height);
-                    updateSize(document.getElementById("scaleInput").value, 0, 0);
-
-                    //updateKernel();
-                    resetLevels();
-                    drawLego();
-                }
-            };
-        </script>
         <label for="scaleInput">Shrink factor:</label>
         <input type="number" id="scaleInput" min="1" max="64" value="2" step="0.1" onchange="updateSize(this.value, 0, 0); drawLego()">
 

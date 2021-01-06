@@ -18,6 +18,45 @@ const brickWidth = 8;
  */
 const pixelStride = 4;
 
+/**
+ * Max width of the input in pixels. Value is arbitrary. Performance slows for larger values.
+ */
+const MAX_WIDTH = 500;
+
+/**
+ * Load an image file for processing
+ * 
+ * @param {*} event 
+ * @param {*} targetID id of the <img> element to hold the original
+ */
+function loadFile(event, targetID) {
+    var targetImg = document.getElementById(targetID);
+    targetImg.src = URL.createObjectURL(event.target.files[0]);
+    targetImg.onload = function () {
+        URL.revokeObjectURL(this.src); // free memory
+        imageLoaded(this);
+    };
+};
+
+/**
+ * Callback when an image is loaded into an <img>
+ * 
+ * @param {*} targetImg <img> node containing an image to be turned into a mosaic
+ */
+function imageLoaded(targetImg) {
+    let canvas = document.getElementById("originalCanvas");
+
+    let width = targetImg.width < MAX_WIDTH ? targetImg.width : MAX_WIDTH;
+    let height = targetImg.height * (width / targetImg.width);
+
+    canvas.setAttribute("width", width);
+    canvas.setAttribute("height", height);
+    context = canvas.getContext("2d");
+    context.drawImage(targetImg, 0, 0, targetImg.width, targetImg.height, 0, 0, width, height);
+    updateSize(0, INIT_MOSAIC_WIDTH, 0);
+    resetLevels();
+    drawLego();
+}
 
 /**
  * Reset the level adjustment sliders to their initial values
